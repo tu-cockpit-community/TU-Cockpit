@@ -60,6 +60,11 @@ pub fn portal_go_forward(_portal_id: String) -> Result<bool, String> {
     Ok(true)
 }
 
+#[tauri::command]
+pub fn inject_theme_css(_portal_id: String, _css: String) -> Result<bool, String> {
+    Ok(true)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

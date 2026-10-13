@@ -1,0 +1,39 @@
+/* TUWEL (Moodle 4.x) Cockpit Theme Adapter */
+:root {
+  --moodle-bg: var(--tu-bg-base) !important;
+  --moodle-surface: var(--tu-bg-surface) !important;
+}
+
+body, #page, #page-wrapper, .card, .block, #nav-drawer, .navbar, .header-maxwidth {
+  background-color: var(--tu-bg-base) !important;
+  color: var(--tu-text-primary) !important;
+  font-family: var(--tu-font-sans) !important;
+}
+
+.card, .block, .activity-item, .path-mod-assign [data-region="grade-panel"], .activity-header {
+  background-color: var(--tu-bg-surface) !important;
+  border: 1px solid var(--tu-border) !important;
+  border-radius: var(--tu-radius) !important;
+  color: var(--tu-text-primary) !important;
+}
+
+.btn-primary, .nav-tabs .nav-link.active, .page-item.active .page-link {
+  background-color: var(--tu-accent) !important;
+  border-color: var(--tu-accent) !important;
+  color: var(--tu-accent-contrast) !important;
+}
+
+a {
+  color: var(--tu-text-accent) !important;
+}
+
+table, .generaltable, .table {
+  background-color: var(--tu-bg-surface) !important;
+  color: var(--tu-text-primary) !important;
+  border-color: var(--tu-border) !important;
+}
+
+th {
+  background-color: var(--tu-bg-card) !important;
+  color: var(--tu-text-primary) !important;
+}

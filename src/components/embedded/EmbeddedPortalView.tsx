@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { open } from "@tauri-apps/plugin-shell";
+import { invoke } from "@tauri-apps/api/core";
+import { useThemeStore } from "@/store/useThemeStore";
+import { PortalThemeInjector } from "@/services/portal/PortalThemeInjector";
 import {
   GraduationCap,
   Calendar,
@@ -60,6 +63,20 @@ export const UNIVERSITY_PORTALS: UniversityPortal[] = [
 export const EmbeddedPortalView: React.FC = () => {
   const [activePortalId, setActivePortalId] = useState<string>("tuwel");
   const [refreshKey, setRefreshKey] = useState<number>(0);
+  const { tokens, fontSans, fontMono, uiScale } = useThemeStore();
+
+  useEffect(() => {
+    const css = PortalThemeInjector.generateInjectedCss(
+      activePortalId,
+      tokens,
+      fontSans,
+      fontMono,
+      uiScale
+    );
+    if (typeof (window as any).__TAURI_INTERNALS__ !== "undefined") {
+      invoke("inject_theme_css", { portalId: activePortalId, css }).catch(() => {});
+    }
+  }, [activePortalId, tokens, fontSans, fontMono, uiScale]);
 
   const activePortal = UNIVERSITY_PORTALS.find((p) => p.id === activePortalId) || UNIVERSITY_PORTALS[0];
 

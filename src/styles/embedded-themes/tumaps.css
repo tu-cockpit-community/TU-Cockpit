@@ -1,0 +1,17 @@
+/* TU Maps Campus Navigation Cockpit Theme Adapter */
+/* Dark Mode Tile Inversion for Canvas and Map Layers */
+.leaflet-tile-pane, .map-canvas, .ol-layer {
+  filter: invert(90%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+
+.leaflet-bar, .search-container, .floor-selector, .info-box, .panel {
+  background: var(--tu-bg-surface) !important;
+  border: 1px solid var(--tu-border) !important;
+  border-radius: var(--tu-radius) !important;
+  color: var(--tu-text-primary) !important;
+  box-shadow: var(--tu-shadow) !important;
+}
+
+a {
+  color: var(--tu-text-accent) !important;
+}

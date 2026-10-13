@@ -1,0 +1,23 @@
+/* VoWi MediaWiki Course Wiki Cockpit Theme Adapter */
+#content, body, #mw-page-base, #mw-head-base, #footer {
+  background: var(--tu-bg-base) !important;
+  color: var(--tu-text-primary) !important;
+  font-family: var(--tu-font-sans) !important;
+}
+
+.wikitable, .toc, .catlinks, #mw-panel .portal {
+  background: var(--tu-bg-surface) !important;
+  border: 1px solid var(--tu-border) !important;
+  border-radius: var(--tu-radius) !important;
+  color: var(--tu-text-primary) !important;
+}
+
+pre, code {
+  background: var(--tu-bg-card) !important;
+  color: var(--tu-text-accent) !important;
+  font-family: var(--tu-font-mono) !important;
+}
+
+a {
+  color: var(--tu-text-accent) !important;
+}

@@ -1,0 +1,35 @@
+/* TISS University Portal Cockpit Theme Adapter */
+body, #content, .content, #header, #navigation, #wrapper {
+  background: var(--tu-bg-base) !important;
+  color: var(--tu-text-primary) !important;
+  font-family: var(--tu-font-sans) !important;
+}
+
+table.tissTable, .tissPanel, .box, fieldset, .form-group {
+  background: var(--tu-bg-surface) !important;
+  border: 1px solid var(--tu-border) !important;
+  border-radius: var(--tu-radius) !important;
+  color: var(--tu-text-primary) !important;
+}
+
+table.tissTable th {
+  background: var(--tu-bg-card) !important;
+  color: var(--tu-text-primary) !important;
+  border-bottom: 2px solid var(--tu-accent) !important;
+}
+
+table.tissTable td {
+  border-color: var(--tu-border-subtle) !important;
+  color: var(--tu-text-secondary) !important;
+}
+
+input, select, textarea {
+  background: var(--tu-bg-card) !important;
+  color: var(--tu-text-primary) !important;
+  border: 1px solid var(--tu-border) !important;
+  border-radius: var(--tu-radius-sm) !important;
+}
+
+a {
+  color: var(--tu-text-accent) !important;
+}
