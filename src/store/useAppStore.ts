@@ -44,6 +44,17 @@ export interface InstalledPlugin {
 
 export type SystemView = "marketplace" | "portals" | "developer" | "settings";
 
+export type NavOrientation = "left" | "right" | "bottom" | "top";
+
+export interface PluginCategory {
+  id: string;
+  name: string;
+  icon?: string;
+  isDefault: boolean;
+  isCollapsed: boolean;
+  pluginIds: string[];
+}
+
 export interface AppState {
   activeView: SystemView | "plugin";
   activePluginId: string | null;
@@ -52,6 +63,9 @@ export interface AppState {
   isSyncModalOpen: boolean;
   isGitHubInstallModalOpen: boolean;
   communityOrgName: string;
+  navOrientation: NavOrientation;
+  categories: PluginCategory[];
+  isCategoryModalOpen: boolean;
   
   setActiveView: (view: SystemView | "plugin", pluginId?: string) => void;
   installPlugin: (manifest: PluginManifest, htmlContent: string, sourceType?: "registry" | "github_direct" | "local_dev", installDir?: string) => void;
@@ -62,6 +76,14 @@ export interface AppState {
   setSyncModalOpen: (open: boolean) => void;
   setGitHubInstallModalOpen: (open: boolean) => void;
   setCommunityOrgName: (orgName: string) => void;
+  setNavOrientation: (orientation: NavOrientation) => void;
+  setCategoryModalOpen: (open: boolean) => void;
+  createCategory: (name: string, icon?: string) => void;
+  renameCategory: (id: string, name: string) => void;
+  deleteCategory: (id: string) => void;
+  toggleCategoryCollapse: (id: string) => void;
+  movePluginToCategory: (pluginId: string, targetCatId: string) => void;
+  reorderPluginInCategory: (catId: string, sourceIndex: number, targetIndex: number) => void;
 }
 
 import { OFFICIAL_PLUGINS } from "@/plugins/official/OfficialPlugins";
@@ -79,6 +101,30 @@ const INITIAL_INSTALLED_PLUGINS: Record<string, InstalledPlugin> = Object.entrie
   return acc;
 }, {} as Record<string, InstalledPlugin>);
 
+const INITIAL_CATEGORIES: PluginCategory[] = [
+  {
+    id: "portals",
+    name: "University Portals",
+    icon: "GraduationCap",
+    isDefault: true,
+    isCollapsed: false,
+    pluginIds: [
+      "tuwien.official.tuwel",
+      "tuwien.official.tiss",
+      "tuwien.official.vowi",
+      "tuwien.official.tumaps",
+    ],
+  },
+  {
+    id: "tools",
+    name: "Community Tools",
+    icon: "Puzzle",
+    isDefault: true,
+    isCollapsed: false,
+    pluginIds: [],
+  },
+];
+
 export const useAppStore = create<AppState>((set, get) => ({
   activeView: "marketplace",
   activePluginId: null,
@@ -94,8 +140,82 @@ export const useAppStore = create<AppState>((set, get) => ({
   isSyncModalOpen: false,
   isGitHubInstallModalOpen: false,
   communityOrgName: "tu-cockpit-community",
+  navOrientation: "left",
+  categories: INITIAL_CATEGORIES,
+  isCategoryModalOpen: false,
 
   setCommunityOrgName: (orgName) => set({ communityOrgName: orgName }),
+  setNavOrientation: (orientation) => set({ navOrientation: orientation }),
+  setCategoryModalOpen: (open) => set({ isCategoryModalOpen: open }),
+
+  createCategory: (name, icon) => {
+    const id = `cat_${Date.now()}`;
+    const newCat: PluginCategory = {
+      id,
+      name,
+      icon: icon || "Folder",
+      isDefault: false,
+      isCollapsed: false,
+      pluginIds: [],
+    };
+    set((state) => ({ categories: [...state.categories, newCat] }));
+  },
+
+  renameCategory: (id, name) => {
+    set((state) => ({
+      categories: state.categories.map((c) => (c.id === id ? { ...c, name } : c)),
+    }));
+  },
+
+  deleteCategory: (id) => {
+    set((state) => {
+      const target = state.categories.find((c) => c.id === id);
+      if (!target || target.isDefault) return state;
+      const orphaned = target.pluginIds;
+      const updated = state.categories
+        .filter((c) => c.id !== id)
+        .map((c) =>
+          c.id === "tools"
+            ? { ...c, pluginIds: [...new Set([...c.pluginIds, ...orphaned])] }
+            : c
+        );
+      return { categories: updated };
+    });
+  },
+
+  toggleCategoryCollapse: (id) => {
+    set((state) => ({
+      categories: state.categories.map((c) =>
+        c.id === id ? { ...c, isCollapsed: !c.isCollapsed } : c
+      ),
+    }));
+  },
+
+  movePluginToCategory: (pluginId, targetCatId) => {
+    set((state) => {
+      const updated = state.categories.map((c) => {
+        const withoutPlugin = c.pluginIds.filter((p) => p !== pluginId);
+        if (c.id === targetCatId) {
+          return { ...c, pluginIds: [...withoutPlugin, pluginId] };
+        }
+        return { ...c, pluginIds: withoutPlugin };
+      });
+      return { categories: updated };
+    });
+  },
+
+  reorderPluginInCategory: (catId, sourceIndex, targetIndex) => {
+    set((state) => {
+      const updated = state.categories.map((c) => {
+        if (c.id !== catId) return c;
+        const copy = [...c.pluginIds];
+        const [moved] = copy.splice(sourceIndex, 1);
+        copy.splice(targetIndex, 0, moved);
+        return { ...c, pluginIds: copy };
+      });
+      return { categories: updated };
+    });
+  },
 
   setActiveView: (view, pluginId) => {
     set({
@@ -120,9 +240,19 @@ export const useAppStore = create<AppState>((set, get) => ({
       const dock = state.dockPinnedIds.includes(manifest.id)
         ? state.dockPinnedIds
         : [...state.dockPinnedIds, manifest.id];
+
+      // Add to tools category if not in any category
+      const inAnyCategory = state.categories.some((c) => c.pluginIds.includes(manifest.id));
+      const categories = inAnyCategory
+        ? state.categories
+        : state.categories.map((c) =>
+            c.id === "tools" ? { ...c, pluginIds: [...c.pluginIds, manifest.id] } : c
+          );
+
       return {
         installedPlugins: updated,
         dockPinnedIds: dock,
+        categories,
         activeView: "plugin",
         activePluginId: manifest.id,
       };
@@ -136,9 +266,14 @@ export const useAppStore = create<AppState>((set, get) => ({
       const dock = state.dockPinnedIds.filter((item) => item !== id);
       const activePluginId = state.activePluginId === id ? null : state.activePluginId;
       const activeView = state.activePluginId === id ? "marketplace" : state.activeView;
+      const categories = state.categories.map((c) => ({
+        ...c,
+        pluginIds: c.pluginIds.filter((p) => p !== id),
+      }));
       return {
         installedPlugins: copy,
         dockPinnedIds: dock,
+        categories,
         activePluginId,
         activeView,
       };
