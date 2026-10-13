@@ -9,6 +9,9 @@ import { PluginMarketplace } from "@/components/marketplace/PluginMarketplace";
 import { EmbeddedPortalView } from "@/components/embedded/EmbeddedPortalView";
 import { DeveloperPortal } from "@/components/developer/DeveloperPortal";
 import { GitHubInstallModal } from "@/components/marketplace/GitHubInstallModal";
+import { UserProfileBadge } from "@/components/auth/UserProfileBadge";
+import { LoginModal } from "@/components/auth/LoginModal";
+import { useAuthStore } from "@/store/useAuthStore";
 import {
   GraduationCap,
   Clock,
@@ -31,6 +34,7 @@ export const App: React.FC = () => {
   } = useAppStore();
 
   const { applyToRoot, activeThemeId } = useThemeStore();
+  const { canAccessDeveloperPortal } = useAuthStore();
   const [currentTime, setCurrentTime] = useState<string>("");
   const [settingsTab, setSettingsTab] = useState<"themes" | "sync">("themes");
 
@@ -117,8 +121,10 @@ export const App: React.FC = () => {
           </a>
         </div>
 
-        {/* Right: Theme Badge & Clock */}
+        {/* Right: User Profile, Theme Badge & Clock */}
         <div className="flex items-center gap-3 text-xs text-[var(--tu-text-secondary)]">
+          <UserProfileBadge />
+
           <button
             onClick={() => {
               setActiveView("settings");
@@ -211,7 +217,10 @@ export const App: React.FC = () => {
       </main>
 
       {/* Floating Glassmorphic Dock */}
-      <Dock devMode={true} />
+      <Dock devMode={canAccessDeveloperPortal()} />
+
+      {/* Student Authentication Modal */}
+      <LoginModal />
 
       {/* Direct GitHub Install Modal */}
       <GitHubInstallModal />
