@@ -3,6 +3,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { usePaletteStore } from "@/store/usePaletteStore";
 import { useSplitStore } from "@/store/useSplitStore";
+import { useDeadlineStore } from "@/store/useDeadlineStore";
 import {
   GraduationCap,
   Clock,
@@ -14,6 +15,7 @@ import {
   PanelLeftOpen,
   Search,
   Columns2,
+  Calendar,
 } from "lucide-react";
 
 interface ExecutiveHeaderProps {
@@ -35,7 +37,14 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
   const { currentUser, setLoginModalOpen } = useAuthStore();
   const { openPalette } = usePaletteStore();
   const { isSplitActive, toggleSplit } = useSplitStore();
+  const { setAgendaOpen, getUpcomingCount24h, fetchDeadlines } = useDeadlineStore();
   const [currentTime, setCurrentTime] = useState<string>("");
+
+  useEffect(() => {
+    fetchDeadlines();
+  }, [fetchDeadlines]);
+
+  const upcomingCount = getUpcomingCount24h();
 
   useEffect(() => {
     const update = () => {
@@ -116,6 +125,21 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
 
       {/* Right: Split Screen, Student Profile Pill, Live Clock & Settings Gear */}
       <div className="flex items-center gap-2.5 text-xs">
+        {/* Deadlines Agenda Button & <24h Badge */}
+        <button
+          onClick={() => setAgendaOpen(true)}
+          className="relative flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-card)] border border-[var(--tu-border)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] text-[11px] font-medium transition-all cursor-pointer text-[var(--tu-text-secondary)] shadow-xs"
+          title="Open Academic Deadlines & Agenda"
+        >
+          <Calendar className="w-3.5 h-3.5 text-[var(--tu-accent)]" />
+          <span className="hidden lg:inline">Deadlines</span>
+          {upcomingCount > 0 && (
+            <span className="flex items-center justify-center px-1.5 py-0.2 rounded-full bg-amber-500 text-black font-extrabold text-[10px] leading-tight animate-pulse shadow-xs">
+              {upcomingCount}
+            </span>
+          )}
+        </button>
+
         {/* Split Screen Workstation Toggle */}
         <button
           onClick={toggleSplit}

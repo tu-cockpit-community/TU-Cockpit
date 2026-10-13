@@ -32,3 +32,6 @@ totp-lite = "2.0.1"
 base32 = "0.5.1"
 keyring = "4.2.0"
 url = "2.5.8"
+icalendar = "0.16"
+chrono = { version = "0.4", features = ["serde"] }
+rusqlite = { version = "0.31", features = ["bundled"] }

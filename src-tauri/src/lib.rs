@@ -4,6 +4,7 @@ pub mod embedded_portals;
 pub mod portal_proxy;
 pub mod totp_vault;
 pub mod native_webview;
+pub mod deadline_aggregator;
 
 use plugin_gateway::execute_plugin_network_request;
 use plugin_downloader::install_plugin_from_github;
@@ -19,6 +20,10 @@ use native_webview::{
     create_or_show_native_portal, hide_native_portal, resize_native_portal, navigate_native_portal,
     orchestrate_split_portals, detach_portal_window,
 };
+use deadline_aggregator::{
+    sync_tuwel_deadlines, get_student_deadlines, toggle_deadline_completed,
+    add_student_deadline, export_local_ics_feed, check_deadline_notifications,
+};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -27,6 +32,16 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_sql::Builder::default().build())
+        .setup(|app| {
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                loop {
+                    let _ = check_deadline_notifications(&handle);
+                    tokio::time::sleep(tokio::time::Duration::from_secs(300)).await;
+                }
+            });
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             execute_plugin_network_request,
             install_plugin_from_github,
@@ -48,7 +63,12 @@ pub fn run() {
             resize_native_portal,
             navigate_native_portal,
             orchestrate_split_portals,
-            detach_portal_window
+            detach_portal_window,
+            sync_tuwel_deadlines,
+            get_student_deadlines,
+            toggle_deadline_completed,
+            add_student_deadline,
+            export_local_ics_feed
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
