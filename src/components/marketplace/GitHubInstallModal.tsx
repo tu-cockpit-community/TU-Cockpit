@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAppStore, PluginManifest } from "@/store/useAppStore";
+import { GitHubPluginService } from "@/services/marketplace/GitHubPluginService";
 import {
   Github,
   X,
@@ -82,30 +83,23 @@ export const GitHubInstallModal: React.FC = () => {
     setIsInstalling(true);
 
     try {
-      const sampleHtml = `<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    body { font-family: var(--tu-font-sans); background: var(--tu-bg-base); color: var(--tu-text-primary); padding: 20px; }
-    .card { background: var(--tu-bg-surface); border: 1px solid var(--tu-border); border-radius: var(--tu-radius); padding: 16px; }
-    h2 { color: var(--tu-accent); font-size: 16px; margin-bottom: 8px; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h2>${inspectedManifest.name}</h2>
-    <p style="font-size: 12px; color: var(--tu-text-secondary);">${inspectedManifest.description}</p>
-    <div style="margin-top: 12px; font-size: 11px; color: var(--tu-success);">✓ Live Sandboxed & Verified from GitHub</div>
-  </div>
-</body>
-</html>`;
+      const installed = await GitHubPluginService.installFromGitHub(
+        repoUrl,
+        releaseTag || undefined
+      );
 
-      installPlugin(inspectedManifest, sampleHtml, "github_direct");
+      installPlugin(
+        installed.manifest,
+        installed.htmlContent,
+        "github_direct",
+        installed.installDir
+      );
+
       setGitHubInstallModalOpen(false);
       setInspectedManifest(null);
       setRepoUrl("");
     } catch (err: any) {
-      setErrorMsg(err.message || "Failed to install plugin");
+      setErrorMsg(err.message || "Failed to install plugin from GitHub");
     } finally {
       setIsInstalling(false);
     }
