@@ -65,6 +65,7 @@ export const App: React.FC = () => {
             {activePlugin.manifest.id.startsWith("tuwien.official.") &&
             activePlugin.manifest.homepage ? (
               <NativePortalContainer
+                key={activePlugin.manifest.id}
                 portalId={activePlugin.manifest.id}
                 url={activePlugin.manifest.homepage}
                 title={activePlugin.manifest.name}

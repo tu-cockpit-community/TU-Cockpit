@@ -2650,7 +2650,7 @@ The repository `README.md` includes:
   * University credentials vault with TOTP MFA autofill.
 * **Development Quickstart:**
   ```bash
-  git clone https://github.com/OliverKnapp/Tuwel-Tools.git
+  git clone https://github.com/tu-cockpit-community/TU-Cockpit.git
   npm install
   npm run tauri dev
   ```
@@ -3083,7 +3083,7 @@ When travelling via train or sitting in basement lecture halls with congested ed
 ### 37.1 Cryptographically Signed Update Mechanism
 * **Public Key Infrastructure:** Ed25519 Minisign public key embedded in `src-tauri/tauri.conf.json`.
 * **Update Manifest Endpoint:** Hosted directly in GitHub Releases:
-  `https://github.com/OliverKnapp/Tuwel-Tools/releases/latest/download/latest.json`
+  `https://github.com/tu-cockpit-community/TU-Cockpit/releases/latest/download/latest.json`
 * **Update Manifest Structure:**
   ```json
   {
@@ -3093,11 +3093,11 @@ When travelling via train or sitting in basement lecture halls with congested ed
     "platforms": {
       "darwin-aarch64": {
         "signature": "...",
-        "url": "https://github.com/OliverKnapp/Tuwel-Tools/releases/download/v1.2.0/TU-Cockpit_aarch64.app.tar.gz"
+        "url": "https://github.com/tu-cockpit-community/TU-Cockpit/releases/download/v1.2.0/TU-Cockpit_aarch64.app.tar.gz"
       },
       "windows-x86_64": {
         "signature": "...",
-        "url": "https://github.com/OliverKnapp/Tuwel-Tools/releases/download/v1.2.0/TU-Cockpit_x64-setup.nsis.zip"
+        "url": "https://github.com/tu-cockpit-community/TU-Cockpit/releases/download/v1.2.0/TU-Cockpit_x64-setup.nsis.zip"
       }
     }
   }

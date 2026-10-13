@@ -37,8 +37,11 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
         width: Math.round(rect.width),
         height: Math.round(rect.height),
       });
+      setIsNative(true);
     } catch (err) {
-      // In web browser fallback mode
+      if (typeof (window as any).__TAURI_INTERNALS__ !== "undefined") {
+        console.error("create_or_show_native_portal failed:", err);
+      }
       setIsNative(false);
     }
   }, [portalId, url]);
