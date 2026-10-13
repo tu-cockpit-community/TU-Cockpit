@@ -5,7 +5,8 @@
 > **Current Project Status:**
 > - 🟢 **PHASE 1 (COMPLETED):** Foundational Desktop Runtime, Sandboxed Engine, Dynamic Theme Engine, E2EE Sync, Starter Widget Proof-of-Concept, Multi-Platform CI/CD (Milestones 0–7)  
 > - 🟢 **PHASE 2 (COMPLETED):** Marketplace-First Workstation, GitHub Dynamic Plugin Engine, Embedded University Webviews, Student Auth & RBAC (Milestones 8–13)  
-> - 🟡 **PHASE 3 (PLANNED / TO DO):** GitHub Community Org Auto-Discovery, Uninstallable Portals Plugins, Configurable Multi-Orientation Sidebar & Custom Categories, Redesigned Header, GitHub Author Attribution, and SSO/MFA Autofill Vault (Milestones 14–19)
+> - 🟢 **PHASE 3 (COMPLETED):** GitHub Community Org Auto-Discovery, Uninstallable Portals Plugins, Configurable Multi-Orientation Sidebar & Custom Categories, Redesigned Header, GitHub Author Attribution, and SSO/MFA Autofill Vault (Milestones 14–19)  
+> - 🟡 **PHASE 4 (PLANNED / TO DO):** Native Child-Webviews (`tauri::Webview`) for TUWEL/TISS, Exploit Prevention (Marketplace-Only Policy), Community Store Developer Guide Tab, Living GitHub `README.md` (Milestones 20–23)
 
 ---
 
@@ -34,7 +35,7 @@
 
 ---
 
-### 🟡 PART III: PHASE 3 — GITHUB COMMUNITY ORG, CONFIGURABLE SIDEBAR & AUTOFILL VAULT (PLANNED / TO DO)
+### 🟢 PART III: PHASE 3 — GITHUB COMMUNITY ORG, CONFIGURABLE SIDEBAR & AUTOFILL VAULT (COMPLETED)
 * [16. Phase 3 Architecture: The GitHub Community Organization & Modular Workstation Paradigm](#16-phase-3-architecture-the-github-community-organization--modular-workstation-paradigm)
 * [17. GitHub Community Organization Automated Discovery Engine](#17-github-community-organization-automated-discovery-engine)
 * [18. Native Webview Engine & Institutional Portals as Uninstallable Plugins](#18-native-webview-engine--institutional-portals-as-uninstallable-plugins)
@@ -43,7 +44,18 @@
 * [21. Student Identity, GitHub Community Attribution & Profile Association](#21-student-identity-github-community-attribution--profile-association)
 * [22. Secure Credential Vault, TOTP Engine & In-Webview SSO/MFA Autofill Daemon](#22-secure-credential-vault-totp-engine--in-webview-ssomfa-autofill-daemon)
 * [23. Phase 3 Target File Hierarchy & Dependencies](#23-phase-3-target-file-hierarchy--dependencies)
-* [24. Phase 3 AI Worker Agent Prompts & Step-by-Step Implementation Milestones (Milestones 14–19 [STATUS: READY TO EXECUTE])](#24-phase-3-ai-worker-agent-prompts--step-by-step-implementation-milestones-milestones-1419-status-ready-to-execute)
+* [24. Phase 3 Completed Execution Schedule & Commits (Milestones 14–19 [STATUS: COMPLETED])](#24-phase-3-ai-worker-agent-prompts--step-by-step-implementation-milestones)
+
+---
+
+### 🟡 PART IV: PHASE 4 — NATIVE CHILD-WEBVIEWS, HARDENED STORE & DEVELOPER GUIDE MATRIX (PLANNED / TO DO)
+* [25. Phase 4 Architecture: Native Child-Webviews & Hardened Community Ecosystem](#25-phase-4-architecture-native-child-webviews--hardened-community-ecosystem)
+* [26. Tauri v2 Native Child-Webview (`tauri::Webview`) Engine for TUWEL & TISS](#26-tauri-v2-native-child-webview-tauriwebview-engine-for-tuwel--tiss)
+* [27. Security Hardening: Strict Marketplace-Only Plugin Policy (Exploit Prevention)](#27-security-hardening-strict-marketplace-only-plugin-policy-exploit-prevention)
+* [28. Community Store Developer Guidelines Tab & Technology Visual Matrix](#28-community-store-developer-guidelines-tab--technology-visual-matrix)
+* [29. Project Documentation Standards & Living GitHub README.md](#29-project-documentation-standards--living-github-readmemd)
+* [30. Phase 4 Target File Hierarchy & Dependencies](#30-phase-4-target-file-hierarchy--dependencies)
+* [31. Phase 4 AI Worker Agent Prompts & Step-by-Step Implementation Milestones (Milestones 20–23 [STATUS: READY TO EXECUTE])](#31-phase-4-ai-worker-agent-prompts--step-by-step-implementation-milestones-milestones-2023-status-ready-to-execute)
 
 ---
 
@@ -1886,11 +1898,11 @@ Commit message:
 ---
 
 # ==============================================================================
-# 🟡 PART III: PHASE 3 — GITHUB COMMUNITY ORG, CONFIGURABLE SIDEBAR & AUTOFILL VAULT (PLANNED / TO DO)
+# 🟢 PART III: PHASE 3 — GITHUB COMMUNITY ORG, CONFIGURABLE SIDEBAR & AUTOFILL VAULT (COMPLETED)
 # ==============================================================================
 
-> **Phase 3 Summary & Status:** ⏳ SPECIFIED & READY FOR AGENT EXECUTION (Milestones 14–19)  
-> **Core Architectural Paradigms:**
+> **Phase 3 Summary & Status:** ✅ COMPLETED & VERIFIED IN GIT (Commits `83344fa` through `d2362b2`)  
+> **Delivered Capabilities (Milestones 14–19):**
 > 1. **GitHub Community Organization:** The Marketplace discovers plugins directly and automatically from a GitHub Organization (e.g., `tu-cockpit-community`). No in-app review queues or approval portals: adding a repository to the Community Organization automatically lists it in the Cockpit Marketplace for all students.
 > 2. **Decoupled University Portals as Plugins:** TUWEL, TISS, VoWi, and TU Maps are refactored into first-class plugins (`tuwien.official.*`) that can be customized, reordered, categorized, and uninstalled completely.
 > 3. **Header-Stripping & Cookie-Enabled Webviews:** Fixes the blank-screen issue on TUWEL/TISS caused by `X-Frame-Options: SAMEORIGIN` and cookie-blocking on VoWi Wiki using native Tauri v2 child webviews and a local Rust header-stripping proxy.
@@ -2360,10 +2372,446 @@ Implement a secure university credentials vault (email, password, optional TOTP 
 - Add a test TOTP secret key and verify the generated code matches standard Google Authenticator / 1Password codes.
 - Test on university login pages to verify smooth autofill without user typing.
 
-### Git Hygiene:
 Commit message:
 `feat(autofill): implement university credentials vault with totp mfa auto-input daemon`
 ```
+
+---
+
+# ==============================================================================
+# 🟡 PART IV: PHASE 4 — NATIVE CHILD-WEBVIEWS, HARDENED STORE & DEVELOPER GUIDE MATRIX (PLANNED / TO DO)
+# ==============================================================================
+
+> **Phase 4 Summary & Status:** ⏳ SPECIFIED & READY FOR AGENT EXECUTION (Milestones 20–23)  
+> **Core Architectural Paradigms:**
+> 1. **Native Child-Webviews (`tauri::Webview`):** Elimination of HTML `<iframe>` for institutional portals. Native child webviews operate as top-level browsing viewports attached to the parent window, bypassing `X-Frame-Options` and CSP frame-ancestors while providing persistent first-party cookie isolation for TUWEL and TISS.
+> 2. **Exploit Prevention via Marketplace-Only Policy:** Disabling and removing arbitrary direct GitHub URL installation. Plugins must originate from the verified Community Organization to prevent phishing, unauthorized code execution, or unvetted privilege escalation.
+> 3. **Community Store Developer Guide & Visual Tech Matrix:** A dedicated "Developers" tab in the Community Store featuring a graphical technology support matrix on top and a comprehensive development guide on formatting, permitted APIs, `--tu-*` tokens, and sandbox boundaries.
+> 4. **Living GitHub `README.md` & Continuous Documentation Protocol:** Establishing a production-grade root `README.md` that is systematically maintained and updated by AI worker agents alongside codebase evolutions.
+
+---
+
+## 25. Phase 4 Architecture: Native Child-Webviews & Hardened Community Ecosystem
+
+### 25.1 Technical Paradigm Shift: Native Child-Webviews vs. Iframes
+In Phase 3, institutional portals (TUWEL, TISS, VoWi, TU Maps) were decoupled into plugins, but still rendered inside standard HTML `<iframe>` containers within the DOM. This triggered browser security blocks:
+* `X-Frame-Options: SAMEORIGIN` and `Content-Security-Policy: frame-ancestors 'self'` aborted rendering for TUWEL and TISS, resulting in a blank viewport.
+* Cross-site third-party cookie restrictions in iframes broke authentication and session cookies on VoWi Wiki and Moodle.
+
+**Phase 4 Architecture:**
+Tauri v2 natively supports attaching **Child Webviews** (`tauri::Webview`) directly to an existing window. A native Child Webview:
+1. Is an independent, top-level OS Webview viewport (WebKit on macOS, WebView2 on Windows, WebKitGTK on Linux).
+2. Completely ignores `X-Frame-Options` and CSP frame-ancestors because it is not an iframe.
+3. Possesses dedicated first-party cookie and local storage pools (`~/Library/WebKit/...` or WebView2 User Data).
+4. Synchronizes physical bounds, visibility, and resize events dynamically with the React UI viewport.
+
+```
++---------------------------------------------------------------------------------------------------+
+|                                 TAURI V2 WINDOW LAYOUT (PHASE 4)                                  |
+|                                                                                                   |
+|  +---------------------------------------------------------------------------------------------+  |
+|  |                             Executive Header (React DOM Viewport)                           |  |
+|  +---------------------------------------------------------------------------------------------+  |
+|  |  Categorized Sidebar |                     Main Workstation Viewport                         |  |
+|  |  (React DOM)         |                                                                       |  |
+|  |                      |  [React Anchor Div]                                                   |  |
+|  |  - Marketplace       |  +-----------------------------------------------------------------+  |  |
+|  |  - TUWEL (Portal)    |  |     Native Child-Webview (tauri::Webview)                       |  |  |
+|  |  - TISS (Portal)     |  |     - Bypasses X-Frame-Options & CSP                            |  |  |
+|  |  - Custom Categories |  |     - First-Party Cookie Isolation (TUWEL/TISS Session Saved)   |  |  |
+|  |                      |  |     - Native WebKit / WebView2 top-level context                |  |  |
+|  |                      |  +-----------------------------------------------------------------+  |  |
+|  +---------------------------------------------------------------------------------------------+  |
++---------------------------------------------------------------------------------------------------+
+```
+
+### 25.2 Exploit Prevention: Strict Marketplace-Only Policy
+Allowing students or developers to paste arbitrary GitHub repository URLs introduces significant attack vectors:
+* Malicious forks can bundle credential harvest scripts or unauthorized RPC requests.
+* Unvetted repositories could declare broad network capabilities (e.g. `*://*`).
+
+**Security Mandate:**
+1. Direct arbitrary GitHub URL installation (`GitHubInstallModal.tsx` and URL inputs) is **permanently removed**.
+2. Only repositories indexed in the official **GitHub Community Organization** (`tu-cockpit-community`) or signed store registry can be downloaded and installed.
+3. Rust backend enforcement: `plugin_downloader.rs` verifies that any download target strictly matches the official community organization repository namespace.
+
+---
+
+## 26. Tauri v2 Native Child-Webview (`tauri::Webview`) Engine for TUWEL & TISS
+
+### 26.1 Rust Child-Webview Management Module (`src-tauri/src/native_webview.rs`)
+```rust
+use tauri::{AppHandle, Manager, WebviewBuilder, WebviewUrl, LogicalPosition, LogicalSize};
+
+#[tauri::command]
+pub async fn create_or_show_native_portal(
+    app: AppHandle,
+    portal_id: String,
+    url: String,
+    x: f64,
+    y: f64,
+    width: f64,
+    height: f64,
+) -> Result<(), String> {
+    let window = app.get_webview_window("main").ok_or("Main window not found")?;
+
+    // If webview already exists, reposition, resize and show
+    if let Some(existing) = app.get_webview(&portal_id) {
+        existing.set_position(LogicalPosition::new(x, y)).map_err(|e| e.to_string())?;
+        existing.set_size(LogicalSize::new(width, height)).map_err(|e| e.to_string())?;
+        existing.show().map_err(|e| e.to_string())?;
+        return Ok(());
+    }
+
+    // Build native child webview attached to the main window
+    let webview_url = WebviewUrl::External(url.parse().map_err(|e| e.to_string())?);
+    let webview = WebviewBuilder::new(&portal_id, webview_url)
+        .auto_resize()
+        .build(&window)
+        .map_err(|e| e.to_string())?;
+
+    webview.set_position(LogicalPosition::new(x, y)).map_err(|e| e.to_string())?;
+    webview.set_size(LogicalSize::new(width, height)).map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn hide_native_portal(app: AppHandle, portal_id: String) -> Result<(), String> {
+    if let Some(existing) = app.get_webview(&portal_id) {
+        existing.hide().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn resize_native_portal(
+    app: AppHandle,
+    portal_id: String,
+    x: f64,
+    y: f64,
+    width: f64,
+    height: f64,
+) -> Result<(), String> {
+    if let Some(existing) = app.get_webview(&portal_id) {
+        existing.set_position(LogicalPosition::new(x, y)).map_err(|e| e.to_string())?;
+        existing.set_size(LogicalSize::new(width, height)).map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn navigate_native_portal(app: AppHandle, portal_id: String, url: String) -> Result<(), String> {
+    if let Some(existing) = app.get_webview(&portal_id) {
+        existing.navigate(url.parse().map_err(|e| e.to_string())?).map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+```
+
+### 26.2 React Anchor Component (`src/components/plugin-host/NativePortalContainer.tsx`)
+A dedicated React container that tracks its exact screen bounds using `ResizeObserver` and synchronizes position with the native webview:
+```tsx
+import React, { useEffect, useRef } from "react";
+import { invoke } from "@tauri-apps/api/core";
+
+interface NativePortalContainerProps {
+  portalId: string;
+  url: string;
+}
+
+export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({ portalId, url }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const updateBounds = async () => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      await invoke("create_or_show_native_portal", {
+        portalId,
+        url,
+        x: rect.left,
+        y: rect.top,
+        width: rect.width,
+        height: rect.height,
+      });
+    };
+
+    updateBounds();
+
+    const observer = new ResizeObserver(() => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      invoke("resize_native_portal", {
+        portalId,
+        x: rect.left,
+        y: rect.top,
+        width: rect.width,
+        height: rect.height,
+      });
+    });
+
+    if (containerRef.current) observer.observe(containerRef.current);
+
+    return () => {
+      observer.disconnect();
+      invoke("hide_native_portal", { portalId });
+    };
+  }, [portalId, url]);
+
+  return <div ref={containerRef} className="w-full h-full bg-transparent min-h-[500px]" />;
+};
+```
+
+---
+
+## 27. Security Hardening: Strict Marketplace-Only Plugin Policy (Exploit Prevention)
+
+### 27.1 Vulnerability Elimination
+* **Threat Model:** Arbitrary GitHub URLs permit unverified third parties to inject malicious JavaScript, exploit RPC channels, or craft phishing UI widgets.
+* **Hardening Strategy:**
+  1. Remove `GitHubInstallModal.tsx` and all arbitrary repo URL inputs from the UI.
+  2. The Marketplace only installs plugins that have been discovered via `CommunityOrgService.ts` from `https://api.github.com/orgs/tu-cockpit-community/repos`.
+  3. The Rust command `install_plugin_from_github` verifies that the target repository belongs to `tu-cockpit-community`:
+     ```rust
+     if !repo_url.starts_with("https://github.com/tu-cockpit-community/") {
+         return Err("Exploit Prevention: Direct unverified GitHub installs are disabled. Plugins must be published in the official Community Organization.".into());
+     }
+     ```
+
+---
+
+## 28. Community Store Developer Guidelines Tab & Technology Visual Matrix
+
+### 28.1 UI Architecture: "Developers" Tab in Community Store
+Inside `PluginMarketplace.tsx`, a dedicated top tab **"Developer Guide"** is introduced alongside "Community Plugins".
+
+### 28.2 Visual Graphical Technology Matrix (Top Section)
+The top section renders a clean badge row of supported technologies with visual status indicators:
+
+| Technology / Tool | Icon Badge | Support Status | Notes |
+| :--- | :---: | :---: | :--- |
+| **JavaScript (ES2022+)** | `JS` (Yellow Badge) | ✅ Full Support | Standard web scripting in sandbox |
+| **TypeScript** | `TS` (Blue Badge) | 🌟 Recommended | Compile to standard JS before bundling |
+| **HTML5 & Vanilla CSS** | `HTML5` (Orange Badge) | ✅ Full Support | Native styling with `--tu-*` tokens |
+| **Tailwind CSS (v4)** | `TW` (Cyan Badge) | ✅ Full Support | Pre-compiled Tailwind classes |
+| **React 19 / Vue / Svelte** | `⚛️` (Purple Badge) | ✅ Full Support | Bundled static SPAs via Vite/Webpack |
+| **Lucide Icons** | `Icons` (Slate Badge) | ✅ Recommended | Standard aesthetic icon library |
+| **Native Binaries (.exe/.so)** | `⚠️` (Red Badge) | ❌ FORBIDDEN | Desktop sandbox violation |
+| **Remote `<script>` Tags** | `🚫` (Red Badge) | ❌ FORBIDDEN | Must bundle all dependencies locally |
+| **Wildcard Network (`*://*`)** | `🛡️` (Red Badge) | ❌ FORBIDDEN | Must declare explicit university domains |
+
+### 28.3 Structured Developer Guide (Bottom Section)
+1. **Repository Structure:**
+   * `manifest.json`: Required reverse-DNS `id` (`tuwien.<category>.<name>`), semantic `version`, `entrypoint`, and declared `capabilities`.
+   * `index.html`: Entrypoint file with relative asset paths.
+   * `assets/`: Static styles, images, and bundles.
+2. **Design Token Conformance:**
+   * Plugins must style backgrounds with `var(--tu-bg-base)`, cards with `var(--tu-bg-surface)`, text with `var(--tu-text-primary)`, and accents with `var(--tu-accent)`.
+3. **Sandbox Guidelines & Prohibitions:**
+   * No `eval()` on remote strings.
+   * No tracking, telemetry, or external analytics scripts.
+   * Storage is scoped to `quotaBytes` and isolated per plugin ID.
+4. **Publishing Instructions:**
+   * Transfer or create your repository inside `github.com/tu-cockpit-community`.
+   * Add a tagged GitHub Release with `bundle.zip`.
+   * The plugin automatically appears in all student Cockpits worldwide!
+
+---
+
+## 29. Project Documentation Standards & Living GitHub README.md
+
+### 29.1 The Living Documentation Protocol
+* To maintain transparency for new contributors, student developers, and future AI worker agents, the root `README.md` must accurately reflect the production capabilities of TU Cockpit.
+* **Agent Mandate:** Any AI worker agent implementing core features, modifying configurations, or refactoring layouts **MUST** review and update `README.md` to reflect the updated state.
+
+### 29.2 Root `README.md` Specification
+The repository `README.md` includes:
+* **Project Banner & Badges:** Tauri v2, React 19, TypeScript, Rust, Tailwind CSS v4, SQLite WAL, E2EE.
+* **Introduction & Vision:** The student workstation client for TU Wien.
+* **Core Capabilities:**
+  * Native TUWEL (Moodle) & TISS integration via native child-webviews.
+  * Community-driven marketplace with auto-discovery from GitHub Organization.
+  * Real-time CSS theme customization.
+  * Multi-orientation sidebar (Left, Right, Bottom, Top) and custom categories.
+  * University credentials vault with TOTP MFA autofill.
+* **Development Quickstart:**
+  ```bash
+  git clone https://github.com/OliverKnapp/Tuwel-Tools.git
+  npm install
+  npm run tauri dev
+  ```
+* **Contributing & Creating Plugins:** Direct link to the Community Developer Guide.
+
+---
+
+## 30. Phase 4 Target File Hierarchy & Dependencies
+
+### 30.1 Target Directory Tree
+```
+tu-cockpit/
+├── README.md                               # NEW: Comprehensive living documentation
+├── src-tauri/
+│   ├── Cargo.toml
+│   └── src/
+│       ├── lib.rs                          # Registration of native webview handlers
+│       ├── native_webview.rs               # NEW: Tauri v2 Child Webview manager (TUWEL/TISS)
+│       └── plugin_downloader.rs            # Hardened: Verifies tu-cockpit-community namespace
+├── src/
+│   ├── components/
+│   │   ├── marketplace/
+│   │   │   ├── PluginMarketplace.tsx       # Added "Developers" tab alongside Store
+│   │   │   └── DeveloperGuideTab.tsx       # NEW: Visual tech matrix & project creation guide
+│   │   └── plugin-host/
+│   │       ├── PluginFrame.tsx             # Sandboxed iframe for standard tools
+│   │       └── NativePortalContainer.tsx   # NEW: Native child-webview anchor for TUWEL/TISS
+│   └── services/
+│       └── marketplace/
+│           └── CommunityOrgService.ts      # Strict community org query & cache
+```
+
+---
+
+## 31. Phase 4 AI Worker Agent Prompts & Step-by-Step Implementation Milestones
+
+---
+
+### Milestone 20 Prompt: Tauri v2 Native Child-Webview (`tauri::Webview`) Engine for TUWEL & TISS `[STATUS: PENDING ⏳]`
+
+```markdown
+You are a senior Tauri v2 and Rust systems engineer.
+
+### Objective:
+Replace HTML <iframe> containers with native Tauri v2 Child-Webviews (`tauri::Webview`) for institutional portals (TUWEL, TISS, VoWi, TU Maps). Native child-webviews operate as top-level browsing viewports that bypass `X-Frame-Options: SAMEORIGIN` and CSP frame-ancestors, while preserving cookies.
+
+### Tasks:
+1. In `src-tauri/src/native_webview.rs`:
+   - Implement Tauri commands:
+     - `create_or_show_native_portal(app, portal_id, url, x, y, width, height)`:
+       - Uses `WebviewBuilder::new(&portal_id, WebviewUrl::External(...)).build(&window)`.
+       - Sets position and size in logical coordinates.
+     - `hide_native_portal(app, portal_id)`:
+       - Hides the native webview when the user navigates away.
+     - `resize_native_portal(app, portal_id, x, y, width, height)`:
+       - Updates position and size when window or container resizes.
+2. Register the handlers in `src-tauri/src/lib.rs`.
+3. In `src/components/plugin-host/NativePortalContainer.tsx`:
+   - Create a container component that uses `ResizeObserver` on a placeholder `div` to synchronize screen bounds with `create_or_show_native_portal` and `resize_native_portal`.
+4. In `src/App.tsx`:
+   - When an active plugin is an official portal (`tuwien.official.tuwel`, `tuwien.official.tiss`, etc.), render `NativePortalContainer` instead of `<iframe>`.
+
+### Verification:
+- Launch `npm run tauri dev`.
+- Navigate to TUWEL and TISS: verify that pages render fully (no blank screen) and authentication cookies persist across navigation.
+
+### Git Hygiene:
+Commit message:
+`feat(portals): implement native tauri child-webviews for tuwel and tiss`
+```
+
+---
+
+### Milestone 21 Prompt: Security Hardening: Restrict Plugin Installation to Verified Community Org Only `[STATUS: PENDING ⏳]`
+
+```markdown
+You are a desktop security engineer working on TU Cockpit.
+
+### Objective:
+Prevent exploits and malicious plugin injections by disabling arbitrary direct GitHub URL installation. Plugins can strictly only be installed from the official GitHub Community Organization (`tu-cockpit-community`).
+
+### Tasks:
+1. Delete `GitHubInstallModal.tsx` and remove any "Install from GitHub URL" buttons or freeform text inputs from the Marketplace and Settings.
+2. In `src-tauri/src/plugin_downloader.rs`:
+   - Add verification to `install_plugin_from_github`:
+     - Validate that `repo_url` strictly belongs to the verified community organization:
+       `if !repo_url.starts_with("https://github.com/tu-cockpit-community/") { return Err("Exploit Prevention: Direct unverified GitHub installs are disabled."); }`
+3. In `src/components/marketplace/PluginMarketplace.tsx`:
+   - Ensure the Marketplace UI only exposes "Install" buttons on cards fetched directly from `CommunityOrgService`.
+
+### Verification:
+- Run `npm run build` with zero TypeScript errors.
+- Confirm there is no way for a user to install an unverified arbitrary GitHub repository.
+
+### Git Hygiene:
+Commit message:
+`feat(security): enforce strict community-only plugin installation policy`
+```
+
+---
+
+### Milestone 22 Prompt: Community Store Developers Tab with Visual Tech Matrix & Project Guide `[STATUS: PENDING ⏳]`
+
+```markdown
+You are an expert React UI developer and technical documentation specialist.
+
+### Objective:
+Add a dedicated "Developers" tab in the Community Store featuring a visual technology support matrix on top and a comprehensive project formatting guide on the bottom.
+
+### Tasks:
+1. Create `src/components/marketplace/DeveloperGuideTab.tsx`:
+   - **Top Section (Visual Tech Matrix):**
+     - Render clean tech badges for:
+       - `JavaScript` (Full Support)
+       - `TypeScript` (Recommended)
+       - `HTML5 & CSS3` (Full Support)
+       - `Tailwind CSS v4` (Full Support)
+       - `React 19 / Vue / Svelte` (Full Support)
+       - `Lucide Icons` (Recommended)
+       - `Native Binaries / Eval Remote Code` (FORBIDDEN ❌)
+       - `Wildcard Network (*://*)` (FORBIDDEN ❌)
+   - **Bottom Section (Developer Guide):**
+     - Detailed project formatting guide:
+       - `manifest.json` schema example (`id`, `name`, `version`, `entrypoint`, `capabilities`).
+       - Supported build tools (Vite, Webpack, static).
+       - Universal `--tu-*` CSS design token usage.
+       - Security & privacy rules (zero telemetry, explicit domain globs).
+       - How to get added to `tu-cockpit-community` to publish.
+2. In `src/components/marketplace/PluginMarketplace.tsx`:
+   - Add tab switcher at the top: `[Community Plugins]` and `[Developers Guide]`.
+   - Render `DeveloperGuideTab` when the Developers tab is selected.
+
+### Verification:
+- Run `npm run build`.
+- Click on the "Developers" tab in the Marketplace: verify visual icon badges render neatly and guide text is clear and readable.
+
+### Git Hygiene:
+Commit message:
+`feat(marketplace): implement developer guide tab with graphical technology matrix`
+```
+
+---
+
+### Milestone 23 Prompt: Living GitHub `README.md` & Automated Documentation Maintenance `[STATUS: PENDING ⏳]`
+
+```markdown
+You are a technical lead and open-source documentation architect.
+
+### Objective:
+Create a comprehensive, production-grade root `README.md` for the TU Cockpit repository, and establish a protocol for keeping it updated as the project evolves.
+
+### Tasks:
+1. Create `README.md` in the project root:
+   - Modern project header with badges (Tauri v2, React 19, TypeScript, Rust, Tailwind CSS v4, SQLite WAL).
+   - Project Overview: The extensible desktop workstation client for TU Wien students.
+   - Key Features:
+     - Native Child-Webviews for TUWEL & TISS (No iframe blocks, persistent cookies).
+     - Exploit-free Community Marketplace powered by GitHub Organization auto-discovery.
+     - Centralized Theming Engine with `--tu-*` tokens and dynamic fonts.
+     - Multi-Orientation Sidebar (Left, Right, Bottom, Top) and custom categories.
+     - SSO & MFA Autofill Vault with RFC 6238 TOTP computation.
+   - Quickstart / Local Development instructions (`npm install`, `npm run tauri dev`).
+   - Developer Guide reference for community plugin authors.
+   - Open source license and contributing section.
+2. Ensure that any future architectural modifications maintain synchronization with `README.md`.
+
+### Verification:
+- Check that `README.md` renders cleanly on GitHub and markdown previewers with valid formatting and links.
+
+### Git Hygiene:
+Commit message:
+`docs(readme): create living project readme and development guide`
+```
+
 
 
 
