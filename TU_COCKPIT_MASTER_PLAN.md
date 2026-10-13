@@ -2164,7 +2164,7 @@ tu-cockpit/
 
 ---
 
-### Milestone 14 Prompt: GitHub Community Organization Auto-Discovery Engine `[STATUS: PENDING ⏳]`
+### Milestone 14 Prompt: GitHub Community Organization Auto-Discovery Engine `[STATUS: COMPLETED ✅] (Commit 83344fa)`
 
 ```markdown
 You are an expert full-stack engineer working on TU Cockpit.
@@ -2196,7 +2196,7 @@ Commit message:
 
 ---
 
-### Milestone 15 Prompt: Decouple Portals into Uninstallable Official Plugins & Fix Cookies/Headers `[STATUS: PENDING ⏳]`
+### Milestone 15 Prompt: Decouple Portals into Uninstallable Official Plugins & Fix Cookies/Headers `[STATUS: COMPLETED ✅] (Commit 8e0d8b9)`
 
 ```markdown
 You are a senior Tauri v2 systems engineer and web security specialist.
@@ -2232,7 +2232,7 @@ Commit message:
 
 ---
 
-### Milestone 16 Prompt: Configurable Sidebar/Dock Orientation & Custom Plugin Categories `[STATUS: PENDING ⏳]`
+### Milestone 16 Prompt: Configurable Sidebar/Dock Orientation & Custom Plugin Categories `[STATUS: COMPLETED ✅] (Commit 10b01d2)`
 
 ```markdown
 You are an expert React UI architect working on TU Cockpit.
@@ -2265,7 +2265,7 @@ Commit message:
 
 ---
 
-### Milestone 17 Prompt: Executive Header Redesign & Settings Cog Relocation `[STATUS: PENDING ⏳]`
+### Milestone 17 Prompt: Executive Header Redesign & Settings Cog Relocation `[STATUS: COMPLETED ✅] (Commit 4a00a26)`
 
 ```markdown
 You are a senior frontend developer working on TU Cockpit.
@@ -2297,7 +2297,7 @@ Commit message:
 
 ---
 
-### Milestone 18 Prompt: Remove Developer Portal & Implement GitHub Community Author Attribution `[STATUS: PENDING ⏳]`
+### Milestone 18 Prompt: Remove Developer Portal & Implement GitHub Community Author Attribution `[STATUS: COMPLETED ✅] (Commit 0749216)`
 
 ```markdown
 You are a full-stack engineer working on TU Cockpit.
@@ -2331,7 +2331,7 @@ Commit message:
 
 ---
 
-### Milestone 19 Prompt: University Credentials Vault & In-Webview SSO/MFA Autofill Daemon `[STATUS: PENDING ⏳]`
+### Milestone 19 Prompt: University Credentials Vault & In-Webview SSO/MFA Autofill Daemon `[STATUS: COMPLETED ✅] (Commit d2362b2)`
 
 ```markdown
 You are a security engineer and desktop automation specialist working on TU Cockpit.
