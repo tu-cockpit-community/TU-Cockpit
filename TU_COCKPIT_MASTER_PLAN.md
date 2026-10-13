@@ -6,7 +6,8 @@
 > - 🟢 **PHASE 1 (COMPLETED):** Foundational Desktop Runtime, Sandboxed Engine, Dynamic Theme Engine, E2EE Sync, Starter Widget Proof-of-Concept, Multi-Platform CI/CD (Milestones 0–7)  
 > - 🟢 **PHASE 2 (COMPLETED):** Marketplace-First Workstation, GitHub Dynamic Plugin Engine, Embedded University Webviews, Student Auth & RBAC (Milestones 8–13)  
 > - 🟢 **PHASE 3 (COMPLETED):** GitHub Community Org Auto-Discovery, Uninstallable Portals Plugins, Configurable Multi-Orientation Sidebar & Custom Categories, Redesigned Header, GitHub Author Attribution, and SSO/MFA Autofill Vault (Milestones 14–19)  
-> - 🟡 **PHASE 4 (PLANNED / TO DO):** Native Child-Webviews (`tauri::Webview`) for TUWEL/TISS, Exploit Prevention (Marketplace-Only Policy), Community Store Developer Guide Tab, Living GitHub `README.md` (Milestones 20–23)
+> - 🟡 **PHASE 4 (PLANNED / TO DO):** Native Child-Webviews (`tauri::Webview`) for TUWEL/TISS, Exploit Prevention (Marketplace-Only Policy), Community Store Developer Guide Tab, Living GitHub `README.md` (Milestones 20–23)  
+> - 🔵 **PHASE 5 (PLANNED / UPCOMING):** Global Command Palette (`Cmd+K`), Split-View Multitasking & Detachable Windows, Deadline Aggregator & Calendar Sync, Offline Slide Caching, and In-App Auto-Updater (Milestones 24–28)
 
 ---
 
@@ -56,6 +57,18 @@
 * [29. Project Documentation Standards & Living GitHub README.md](#29-project-documentation-standards--living-github-readmemd)
 * [30. Phase 4 Target File Hierarchy & Dependencies](#30-phase-4-target-file-hierarchy--dependencies)
 * [31. Phase 4 AI Worker Agent Prompts & Step-by-Step Implementation Milestones (Milestones 20–23 [STATUS: READY TO EXECUTE])](#31-phase-4-ai-worker-agent-prompts--step-by-step-implementation-milestones-milestones-2023-status-ready-to-execute)
+
+---
+
+### 🔵 PART V: PHASE 5 — PRODUCTIVITY WORKSTATION, OFFLINE VAULT & AUTO-UPDATER (PLANNED / UPCOMING)
+* [32. Phase 5 Architecture: Workstation Productivity, Offline Resilience & Global Navigation](#32-phase-5-architecture-workstation-productivity-offline-resilience--global-navigation)
+* [33. Global Command Palette (`Cmd+K`) & Campus-Wide Fuzzy Search](#33-global-command-palette-cmdk--campus-wide-fuzzy-search)
+* [34. Split-View Multitasking & Multi-Window Detachable Workspace](#34-split-view-multitasking--multi-window-detachable-workspace)
+* [35. Deadline Aggregator, System Notification Daemon & Calendar Sync (iCal)](#35-deadline-aggregator-system-notification-daemon--calendar-sync-ical)
+* [36. Offline Course Materials Syncer & Local PDF Slide Caching](#36-offline-course-materials-syncer--local-pdf-slide-caching)
+* [37. Tauri v2 In-App Auto-Updater (`@tauri-apps/plugin-updater`) & GitHub Release Pipeline](#37-tauri-v2-in-app-auto-updater-tauri-appsplugin-updater--github-release-pipeline)
+* [38. Phase 5 Target File Hierarchy & Dependencies](#38-phase-5-target-file-hierarchy--dependencies)
+* [39. Phase 5 AI Worker Agent Prompts & Step-by-Step Implementation Milestones (Milestones 24–28 [STATUS: READY TO EXECUTE])](#39-phase-5-ai-worker-agent-prompts--step-by-step-implementation-milestones-milestones-2428-status-ready-to-execute)
 
 ---
 
@@ -2804,13 +2817,536 @@ Create a comprehensive, production-grade root `README.md` for the TU Cockpit rep
    - Open source license and contributing section.
 2. Ensure that any future architectural modifications maintain synchronization with `README.md`.
 
-### Verification:
-- Check that `README.md` renders cleanly on GitHub and markdown previewers with valid formatting and links.
-
 ### Git Hygiene:
 Commit message:
 `docs(readme): create living project readme and development guide`
 ```
+
+---
+
+# ==============================================================================
+# 🔵 PART V: PHASE 5 — PRODUCTIVITY WORKSTATION, OFFLINE VAULT & AUTO-UPDATER (PLANNED / UPCOMING)
+# ==============================================================================
+
+> **Phase 5 Summary & Status:** 📋 SPECIFIED & READY FOR AGENT EXECUTION (Milestones 24–28)  
+> **Core Architectural Paradigms:**
+> 1. **Global Command Palette (`Cmd+K` / `Ctrl+K`):** Universal keyboard-first spotlight overlay indexing installed plugins, TU Maps lecture halls & rooms, TISS course codes, quick settings toggles, and offline materials.
+> 2. **Split-View Multitasking & Detachable Windows:** Dual-viewport workspace allowing side-by-side (50/50, 70/30) and vertical split of university portals and plugins, with floating window pop-out for multi-monitor setups.
+> 3. **Intelligent Deadline Aggregator & System Calendar Sync:** Background synchronization of TUWEL assignment deadlines and TISS exam dates, native OS notification daemon (24h/2h alerts), and dynamic `.ics` calendar feed export for Apple Calendar, Google Calendar, and Outlook.
+> 4. **Offline Lecture Material Vault & SQLite FTS5 Indexer:** Automated offline caching of course slides and PDFs into `$APPDATA/offline_vault/`, with full-text search across downloaded lecture slides and an integrated PDF reader.
+> 5. **Tauri v2 In-App Self-Updater (`@tauri-apps/plugin-updater`):** Cryptographically signed automatic update delivery via GitHub Releases, with one-click seamless background install and relaunch.
+
+---
+
+## 32. Phase 5 Architecture: Workstation Productivity, Offline Resilience & Global Navigation
+
+### 32.1 Executive Architectural Evolution
+While Phases 1 through 4 established the foundational runtime, marketplace, child-webviews, security hardening, and university authentication, **Phase 5 transforms TU Cockpit from an integrated viewer into an indispensable daily academic workstation.**
+
+Students face several recurring friction points in their daily university life:
+1. **Context Switching:** Moving between TUWEL for assignments, TISS for schedules, VoWi for notes, and TU Maps for room locations requires tedious clicking.
+2. **Room Navigation Panic:** Locating rooms like *"EI 7"* or *"Freihaus Hörsaal 1"* 5 minutes before a lecture starts requires deep navigation in TU Maps.
+3. **Missed Deadlines:** Deadlines are buried inside separate course folders in Moodle without unified OS reminders.
+4. **Offline Connectivity Gaps:** Commuting on trains (ÖBB/Westbahn) or studying in basement lecture halls often results in zero internet access, locking students out of lecture slides.
+5. **App Version Fragmentation:** Manual updates lead to bugs and missing security patches.
+
+Phase 5 resolves these friction points with an integrated desktop productivity suite.
+
+### 32.2 Phase 5 System Architecture Topology
+```
++---------------------------------------------------------------------------------------------------+
+|                                      TU COCKPIT SHELL (PHASE 5)                                   |
+|                                                                                                   |
+|  +---------------------------------------------------------------------------------------------+  |
+|  |             Executive Header: Command Palette Trigger [Cmd+K] | Update Toast | User Vault    |  |
+|  +---------------------------------------------------------------------------------------------+  |
+|  |  Categorized Sidebar |                               Workstation Viewport                   |  |
+|  |  (Configurable:      |                                                                      |  |
+|  |   L/R/B/T)           |  +-------------------------------+  +-------------------------------+ |  |
+|  |                      |  | Viewport A (Child-Webview A)  |  | Viewport B (Child-Webview B)  | |  |
+|  |  - Marketplace       |  | - TUWEL Lecture / Slides      |  | - VoWi Notes / Plugin Tool    | |  |
+|  |  - Official Portals  |  | - Synchronized OS Bounds      |  | - Draggable Split Divider     | |  |
+|  |  - Custom Categories |  +-------------------------------+  +-------------------------------+ |  |
+|  |  - Offline Vault     |                                                                      |  |
+|  |  - Deadlines Agenda  |  [ Detach to Floating Window ]       [ Pop-Out Secondary Screen ]     |  |
+|  +---------------------------------------------------------------------------------------------+  |
++---------------------------------------------------------------------------------------------------+
+                                                  |
+                        +-------------------------+-------------------------+
+                        v                                                   v
++-----------------------------------------------+   +-----------------------------------------------+
+|             Rust Backend Daemons              |   |          Local Storage & Offline Vault        |
+|  - Global Shortcut Listener (Cmd+K)           |   |  - SQLite WAL (student_deadlines)             |
+|  - Dual Webview Bounds Orchestrator           |   |  - SQLite FTS5 (offline_slide_fts)            |
+|  - Deadline Aggregator (TUWEL iCal / TISS)    |   |  - Local .ics Calendar Feed Export            |
+|  - Native OS Notification Daemon (24h/2h)     |   |  - $APPDATA/offline_vault/{course_id}/*.pdf   |
+|  - Background Slide Downloader & PDF Extractor|   |  - Tauri Keyring (SSO & Minisign Public Key)  |
+|  - Tauri v2 Auto-Updater (@plugin-updater)    |   |                                               |
++-----------------------------------------------+   +-----------------------------------------------+
+```
+
+---
+
+## 33. Global Command Palette (`Cmd+K`) & Campus-Wide Fuzzy Search
+
+### 33.1 Interaction Design & Universal Trigger
+* **Keyboard Shortcut:** `Cmd+K` (macOS) / `Ctrl+K` (Windows/Linux), or clicking the search bar in the Executive Header.
+* **Modal Overlay:** Centered backdrop blur modal (`bg-black/40 backdrop-blur-md`) with responsive keyboard navigation (`↑`/`↓` to highlight, `Enter` to execute, `Esc` to dismiss).
+* **Instant Fuzzy Filtering:** Zero-latency client-side scoring combining prefix match, acronym matching, and substring distance.
+
+### 33.2 Four Search Domains
+
+```
++---------------------------------------------------------------------------------------------------+
+|  🔍 Type a command, room (e.g. "EI 7"), course, or plugin...                           [Esc]      |
++---------------------------------------------------------------------------------------------------+
+|  CAMPUS ROOM NAVIGATION (TU MAPS)                                                                 |
+|  📍 EI 7 (Elektrotechnische Institute, Gußhausstraße 25-29, Ground Floor)             -> Jump Map |
+|  📍 Freihaus Hörsaal 1 (Wiedner Hauptstraße 8-10, Tower A, 2nd Floor)                 -> Jump Map |
+|                                                                                                   |
+|  INSTALLED PLUGINS & UNIVERSITY PORTALS                                                           |
+|  🎓 TUWEL (Moodle LMS)                                                                -> Open Tab |
+|  📋 TISS (Course Catalog & Exam Registration)                                         -> Open Tab |
+|  📚 VoWi Wiki (Course Summary & Old Exams)                                             -> Open Tab |
+|                                                                                                   |
+|  ACADEMIC COURSES (ACTIVE SEMESTER)                                                               |
+|  📖 188.956 Algorithmen und Datenstrukturen (VU 4.0)                                  -> View LVA |
+|  📖 104.261 Analysis 1 für Informatik (VO 3.0)                                       -> View LVA |
+|                                                                                                   |
+|  QUICK SYSTEM ACTIONS                                                                             |
+|  ⚙️ Toggle Dark / Light Theme                                                         -> Action   |
+|  🔐 Autofill University Credentials into Active Portal                                -> Action   |
+|  📥 Open Offline Materials Vault                                                      -> View     |
+|  🔄 Check for Application Updates                                                     -> Action   |
++---------------------------------------------------------------------------------------------------+
+```
+
+### 33.3 Campus Room Indexing Schema (`src/data/tu_rooms_index.json`)
+Pre-indexed campus locations for instant offline matching:
+```json
+[
+  {
+    "id": "ei7",
+    "name": "EI 7",
+    "building": "Elektrotechnische Institute",
+    "address": "Gußhausstraße 25-29",
+    "code": "CG0109",
+    "floor": "EG",
+    "coordinates": { "lat": 48.1963, "lng": 16.3698 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=EI%207"
+  },
+  {
+    "id": "fh-hs1",
+    "name": "Freihaus Hörsaal 1",
+    "building": "Freihaus",
+    "address": "Wiedner Hauptstraße 8-10",
+    "code": "FH01A",
+    "floor": "1. OG",
+    "coordinates": { "lat": 48.1988, "lng": 16.3672 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=Freihaus%20H%C3%B6rsaal%201"
+  }
+]
+```
+
+When a user selects a room result, TU Cockpit immediately:
+1. Switches the active view to `tuwien.official.tumaps`.
+2. Navigates the child-webview directly to the room's deep-link pin URL.
+
+---
+
+## 34. Split-View Multitasking & Multi-Window Detachable Workspace
+
+### 34.1 Multi-Webview Layout Architecture
+Students frequently need two tools open side-by-side:
+* **TUWEL (Left)** + **VoWi Wiki / Markdown Notes (Right)**
+* **TU Maps (Left)** + **TISS Schedule (Right)**
+
+In Phase 4, a single `NativePortalContainer` bounds one child-webview. In Phase 5, the host supports a **Dual Viewport Container** with a draggable divider (`SplitViewContainer.tsx`).
+
+### 34.2 Rust Multi-Webview Bounds Orchestrator (`src-tauri/src/native_webview.rs`)
+```rust
+#[tauri::command]
+pub async fn orchestrate_split_portals(
+    app: AppHandle,
+    portal_left: String,
+    portal_right: String,
+    split_ratio: f64, // e.g., 0.5 for 50/50, 0.7 for 70/30
+    total_x: f64,
+    total_y: f64,
+    total_width: f64,
+    total_height: f64,
+) -> Result<(), String> {
+    let left_width = total_width * split_ratio;
+    let right_width = total_width * (1.0 - split_ratio);
+    let right_x = total_x + left_width;
+
+    // Reposition Left Portal
+    if let Some(left) = app.get_webview(&portal_left) {
+        left.set_position(LogicalPosition::new(total_x, total_y)).map_err(|e| e.to_string())?;
+        left.set_size(LogicalSize::new(left_width, total_height)).map_err(|e| e.to_string())?;
+        left.show().map_err(|e| e.to_string())?;
+    }
+
+    // Reposition Right Portal
+    if let Some(right) = app.get_webview(&portal_right) {
+        right.set_position(LogicalPosition::new(right_x, total_y)).map_err(|e| e.to_string())?;
+        right.set_size(LogicalSize::new(right_width, total_height)).map_err(|e| e.to_string())?;
+        right.show().map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
+}
+```
+
+### 34.3 Detachable Floating Windows
+* Each portal header includes a `[⧉ Detach Window]` button.
+* When clicked, Rust invokes `tauri::WebviewWindowBuilder::new(&app, format!("detached_{}", portal_id), WebviewUrl::External(url))` to create an independent OS window.
+* Ideal for multi-monitor workstations (e.g., placing TU Maps or TUWEL slides on an external monitor while coding on the primary display).
+
+---
+
+## 35. Deadline Aggregator, System Notification Daemon & Calendar Sync (iCal)
+
+### 35.1 Automated Deadline Synchronization
+TUWEL exposes an authenticated iCal calendar feed (`https://tuwel.tuwien.ac.at/calendar/export_execute.php?...`), and TISS exposes exam registration windows.
+
+Phase 5 introduces a background synchronizer that:
+1. Periodically polls deadlines in the background (every 60 minutes or on demand).
+2. Parses `.ics` entries using the Rust `icalendar` crate.
+3. Persists records in local SQLite:
+   ```sql
+   CREATE TABLE IF NOT EXISTS student_deadlines (
+       id TEXT PRIMARY KEY,
+       course_id TEXT NOT NULL,
+       course_name TEXT NOT NULL,
+       title TEXT NOT NULL,
+       due_date TEXT NOT NULL, -- ISO-8601
+       url TEXT NOT NULL,
+       source TEXT NOT NULL,   -- 'tuwel' | 'tiss' | 'manual'
+       completed INTEGER NOT NULL DEFAULT 0,
+       notified_24h INTEGER NOT NULL DEFAULT 0,
+       notified_2h INTEGER NOT NULL DEFAULT 0,
+       created_at TEXT NOT NULL
+   );
+   ```
+
+### 35.2 Native OS Notification Daemon
+A lightweight Rust background task checks `student_deadlines` every 5 minutes:
+* **T-24 Hours Alert:** Fires native desktop notification:
+  > *"⏰ Abgabe morgen: [188.956] Aufgabe 2 in 24 Stunden fällig!"*
+* **T-2 Hours Alert:** Fires high-priority desktop notification:
+  > *"🚨 Dringend: [188.956] Aufgabe 2 Abgabe schließt in 2 Stunden!"*
+* Clicking the notification brings TU Cockpit to focus and navigates directly to the submission dropzone in TUWEL.
+
+### 35.3 System Calendar Sync (.ics Feed)
+* Cockpit maintains a synchronized local iCal file at `$APPDATA/tu_cockpit_schedule.ics`.
+* Students can subscribe to this file or URL in **Apple Calendar**, **Google Calendar**, or **Microsoft Outlook**, keeping mobile devices synchronized automatically.
+
+---
+
+## 36. Offline Course Materials Syncer & Local PDF Slide Caching
+
+### 36.1 Problem Statement
+When travelling via train or sitting in basement lecture halls with congested eduroam Wi-Fi, students lose access to lecture slides.
+
+### 36.2 Offline Slide Vault Architecture
+1. **Background Cache Daemon:** When a student browses a course in TUWEL, the Rust backend detects linked PDF resources (`.pdf`, `.zip`).
+2. **Local Storage Hierarchy:**
+   ```
+   $APPDATA/offline_vault/
+   ├── 188.956_algodat/
+   │   ├── vo_slide_01_sorting.pdf
+   │   ├── vo_slide_02_trees.pdf
+   │   └── uebung_01_aufgaben.pdf
+   └── 104.261_analysis/
+       └── skriptum_kapitel_1.pdf
+   ```
+3. **SQLite FTS5 Full-Text Search Engine:**
+   ```sql
+   CREATE VIRTUAL TABLE IF NOT EXISTS offline_slide_fts USING fts5(
+       course_id,
+       file_name,
+       page_number,
+       extracted_text,
+       file_path
+   );
+   ```
+4. **Built-in PDF Viewer Component (`PDFViewerModal.tsx`):**
+   * Instant viewing of cached PDFs inside the Cockpit.
+   * Full zoom, bookmarking, and dark mode tile inversion filter (`invert(90%) hue-rotate(180deg)`).
+   * Searching keywords in the Command Palette instantly highlights matching slide pages.
+
+---
+
+## 37. Tauri v2 In-App Auto-Updater (`@tauri-apps/plugin-updater`) & GitHub Release Pipeline
+
+### 37.1 Cryptographically Signed Update Mechanism
+* **Public Key Infrastructure:** Ed25519 Minisign public key embedded in `src-tauri/tauri.conf.json`.
+* **Update Manifest Endpoint:** Hosted directly in GitHub Releases:
+  `https://github.com/OliverKnapp/Tuwel-Tools/releases/latest/download/latest.json`
+* **Update Manifest Structure:**
+  ```json
+  {
+    "version": "1.2.0",
+    "notes": "Phase 5: Global Command Palette (Cmd+K), Split-View Multitasking, and Offline Slide Caching.",
+    "pub_date": "2026-10-14T10:00:00Z",
+    "platforms": {
+      "darwin-aarch64": {
+        "signature": "...",
+        "url": "https://github.com/OliverKnapp/Tuwel-Tools/releases/download/v1.2.0/TU-Cockpit_aarch64.app.tar.gz"
+      },
+      "windows-x86_64": {
+        "signature": "...",
+        "url": "https://github.com/OliverKnapp/Tuwel-Tools/releases/download/v1.2.0/TU-Cockpit_x64-setup.nsis.zip"
+      }
+    }
+  }
+  ```
+
+### 37.2 Non-Intrusive In-App Update Experience (`UpdaterToast.tsx`)
+1. On startup or when triggered via Command Palette, the background updater checks for newer versions.
+2. If an update is detected, an elegant pill toast appears in the Executive Header:
+   `[🚀 Update Available: v1.2.0 | Restart to Apply]`
+3. Clicking the toast silently downloads the update, verifies the Ed25519 signature, applies the delta patch, and seamlessly relaunches the workstation.
+
+---
+
+## 38. Phase 5 Target File Hierarchy & Dependencies
+
+### 38.1 Target Directory Tree
+```
+tu-cockpit/
+├── src-tauri/
+│   ├── Cargo.toml                          # Added tauri-plugin-updater, icalendar, chrono, pdf-extract
+│   └── src/
+│       ├── lib.rs                          # Handler registration for split view, updater & vault
+│       ├── command_palette.rs              # NEW: Global shortcut listener & campus search
+│       ├── split_view.rs                   # NEW: Dual-webview bounds orchestrator
+│       ├── deadline_aggregator.rs          # NEW: iCal parser & OS notification daemon
+│       ├── offline_vault.rs                # NEW: Background PDF downloader & FTS5 search
+│       └── updater_service.rs              # NEW: Tauri v2 update check & install wrapper
+├── src/
+│   ├── components/
+│   │   ├── palette/
+│   │   │   ├── CommandPalette.tsx          # Cmd+K Spotlight overlay modal
+│   │   │   └── SearchResultItem.tsx        # Categorized result pill
+│   │   ├── split/
+│   │   │   ├── SplitViewContainer.tsx      # Dual viewport host with draggable divider
+│   │   │   └── SplitControlsHeader.tsx     # Split orientation and ratio presets
+│   │   ├── deadlines/
+│   │   │   ├── DeadlineAgendaView.tsx      # Unified calendar and deadlines agenda
+│   │   │   └── DeadlineCard.tsx            # Countdown badge with 1-click TUWEL dropzone jump
+│   │   ├── offline/
+│   │   │   ├── OfflineVaultView.tsx        # Cached course files explorer
+│   │   │   └── PDFViewerModal.tsx          # Embedded dark-mode PDF reader
+│   │   └── updater/
+│   │       └── UpdaterToast.tsx            # Header update pill with 1-click restart
+│   ├── data/
+│   │   └── tu_rooms_index.json             # Pre-indexed TU Wien lecture halls and room codes
+│   ├── services/
+│   │   ├── palette/
+│   │   │   └── FuzzySearchService.ts       # Unified multi-realm search scoring
+│   │   └── deadlines/
+│   │       └── CalendarSyncService.ts      # iCal feed generator and poll trigger
+│   └── store/
+│       ├── usePaletteStore.ts              # Command palette visibility & query state
+│       ├── useSplitStore.ts                # Split view active pairs and divider ratio
+│       └── useDeadlineStore.ts             # Aggregated deadlines & notification status
+```
+
+### 38.2 Rust Cargo Dependencies Update (`src-tauri/Cargo.toml`)
+```toml
+[dependencies]
+# Phase 5 Additions
+tauri-plugin-updater = "2.0.0"
+tauri-plugin-global-shortcut = "2.0.0"
+icalendar = "0.16"
+chrono = { version = "0.4", features = ["serde"] }
+pdf-extract = "0.7"
+```
+
+---
+
+## 39. Phase 5 AI Worker Agent Prompts & Step-by-Step Implementation Milestones (Milestones 24–28 [STATUS: READY TO EXECUTE])
+
+---
+
+### Milestone 24 Prompt: Global Spotlight / Command Palette (`Cmd+K`) with Campus Room & Plugin Search `[STATUS: PENDING ⏳]`
+
+```markdown
+You are a senior full-stack desktop software engineer working on TU Cockpit.
+
+### Objective:
+Implement a global Spotlight / Command Palette overlay triggered via `Cmd+K` (macOS) or `Ctrl+K` (Windows/Linux) and the Executive Header, providing instant fuzzy search across installed plugins, university portals, TU Maps lecture halls & rooms, active courses, and quick actions.
+
+### Tasks:
+1. In `src-tauri/Cargo.toml`, ensure `tauri-plugin-global-shortcut = "2.0.0"` is enabled and registered in `lib.rs`.
+2. Create `src/data/tu_rooms_index.json` indexing major TU Wien lecture halls and rooms (e.g. EI 7, Freihaus Hörsaal 1-8, Informatikhörsaal Treitlstraße, Prechtlsaal, Radinger Hörsaal) with room codes, floor, and TU Maps deep-link query URLs.
+3. In `src/services/palette/FuzzySearchService.ts`:
+   - Implement fuzzy search across 4 domains:
+     - Installed plugins and official portals.
+     - TU Wien campus rooms (linking to TU Maps).
+     - Student courses and LVAs.
+     - Quick system actions (Toggle Theme, Autofill Login, Open Settings, Check Updates).
+4. Create `src/components/palette/CommandPalette.tsx`:
+   - Backdrop-blurred modal overlay (`bg-black/40 backdrop-blur-md`).
+   - Keyboard listener for `Cmd+K` / `Ctrl+K` to toggle open.
+   - Up/Down arrow selection, Enter to execute action, Escape to close.
+   - When a room result is selected, switch active view to `tuwien.official.tumaps` and navigate to the room's pin URL.
+5. In `src/components/header/ExecutiveHeader.tsx`, add a clickable search input trigger displaying `Search rooms, plugins, actions... [⌘K]`.
+
+### Verification:
+- Run `npm run build` with zero TypeScript errors.
+- Press `Cmd+K`: verify the modal opens instantly, typing "EI 7" displays the lecture hall, and pressing Enter deep-links to TU Maps.
+
+### Git Hygiene:
+Commit message:
+`feat(palette): implement global spotlight command palette with campus room search`
+```
+
+---
+
+### Milestone 25 Prompt: Multi-Webview Split-Screen & Detachable Floating Windows `[STATUS: PENDING ⏳]`
+
+```markdown
+You are a senior Tauri v2 and Rust systems engineer working on TU Cockpit.
+
+### Objective:
+Implement a dual-viewport split-screen workspace allowing students to multitask (e.g. viewing TUWEL lecture slides on the left and VoWi notes on the right) with a draggable divider, plus a floating window detachment mechanism for multi-monitor setups.
+
+### Tasks:
+1. In `src-tauri/src/native_webview.rs`:
+   - Implement `orchestrate_split_portals(app: AppHandle, portal_left: String, portal_right: String, split_ratio: f64, total_x: f64, total_y: f64, total_width: f64, total_height: f64) -> Result<(), String>`.
+   - Repositions and resizes both native child-webviews simultaneously based on `split_ratio` (e.g. 0.5 for 50/50, 0.7 for 70/30).
+   - Implement `detach_portal_window(app: AppHandle, portal_id: String, url: String) -> Result<(), String>` using `tauri::WebviewWindowBuilder` to pop out a standalone OS window.
+2. In `src/store/useSplitStore.ts`:
+   - Manage state for `isSplitActive: boolean`, `leftPortalId: string`, `rightPortalId: string`, and `splitRatio: number`.
+3. In `src/components/split/SplitViewContainer.tsx`:
+   - Render dual container div with draggable center divider bar.
+   - Uses `ResizeObserver` to push updated dimensions to `orchestrate_split_portals`.
+4. Add split presets in the portal header: `[1:1 Split]`, `[7:3 Split]`, and `[⧉ Pop-Out Window]`.
+
+### Verification:
+- Launch `npm run tauri dev`.
+- Activate Split View with TUWEL on the left and VoWi on the right: verify both webviews render side-by-side cleanly and the divider drags smoothly.
+- Click `Pop-Out Window`: verify a separate OS window opens with the target portal.
+
+### Git Hygiene:
+Commit message:
+`feat(workspace): implement multi-webview split-screen and detachable floating windows`
+```
+
+---
+
+### Milestone 26 Prompt: University Deadline Aggregator, System Notification Daemon & Calendar Sync `[STATUS: PENDING ⏳]`
+
+```markdown
+You are a full-stack engineer and desktop systems specialist working on TU Cockpit.
+
+### Objective:
+Implement an automated deadline aggregator that syncs TUWEL course deadlines and TISS exam dates, fires native OS notifications (24 hours and 2 hours prior to deadlines), and generates a local `.ics` calendar feed for Apple Calendar, Google Calendar, and Outlook.
+
+### Tasks:
+1. In `src-tauri/Cargo.toml`, add `icalendar = "0.16"` and `chrono = { version = "0.4", features = ["serde"] }`.
+2. Create `src-tauri/src/deadline_aggregator.rs`:
+   - Database table: `student_deadlines` (`id`, `course_id`, `course_name`, `title`, `due_date`, `url`, `source`, `completed`, `notified_24h`, `notified_2h`).
+   - Implement `sync_tuwel_deadlines(app: AppHandle, ical_feed_url: String) -> Result<Vec<DeadlineItem>, String>` to parse events and store deadlines in SQLite.
+   - Background Notification Daemon:
+     - Periodically checks deadlines: fires desktop notification via `@tauri-apps/plugin-notification` at T-24h and T-2h.
+   - Implement `export_local_ics_feed(app: AppHandle) -> Result<String, String>`:
+     - Writes `$APPDATA/tu_cockpit_schedule.ics` containing all active course deadlines and exams.
+3. In `src/components/deadlines/DeadlineAgendaView.tsx`:
+   - Build a clean deadline timeline view with countdown badges (e.g. `In 3 hours`, `Tomorrow`).
+   - Clicking a deadline card opens TUWEL and jumps directly to the assignment submission URL.
+   - Button: `[📅 Export to System Calendar]` allowing 1-click import into macOS Calendar / Outlook.
+4. Add an indicator badge to the Executive Header showing count of upcoming deadlines due in < 24h.
+
+### Verification:
+- Add a sample deadline set for 1 hour in the future: verify the desktop notification daemon triggers the alert.
+- Export `.ics` and verify the file opens cleanly in Apple Calendar or Google Calendar.
+
+### Git Hygiene:
+Commit message:
+`feat(deadlines): implement automated deadline aggregator with os notifications and ical sync`
+```
+
+---
+
+### Milestone 27 Prompt: Offline Lecture Material Vault & Slide Caching Engine with SQLite FTS5 `[STATUS: PENDING ⏳]`
+
+```markdown
+You are a systems engineer and search specialist working on TU Cockpit.
+
+### Objective:
+Implement an offline slide vault and lecture material cache so students can access lecture slides and search their contents even when internet connectivity is lost on trains (ÖBB) or in basement lecture halls.
+
+### Tasks:
+1. In `src-tauri/Cargo.toml`, add `pdf-extract = "0.7"`.
+2. Create `src-tauri/src/offline_vault.rs`:
+   - Manages directory: `$APPDATA/offline_vault/{course_id}/`.
+   - SQLite FTS5 Virtual Table:
+     `CREATE VIRTUAL TABLE IF NOT EXISTS offline_slide_fts USING fts5(course_id, file_name, page_number, extracted_text, file_path);`
+   - Implement `cache_course_pdf(app: AppHandle, course_id: String, file_url: String, filename: String) -> Result<(), String>`:
+     - Downloads PDF to `$APPDATA/offline_vault/{course_id}/{filename}`.
+     - Extracts text per page using `pdf-extract` and indexes it in `offline_slide_fts`.
+   - Implement `search_offline_slides(app: AppHandle, query: String) -> Result<Vec<SlideSearchResult>, String>`.
+3. In `src/components/offline/OfflineVaultView.tsx`:
+   - Clean file explorer showing cached courses, slides, and exercise sheets.
+   - Search bar querying `search_offline_slides` with snippet highlighting.
+4. Create `src/components/offline/PDFViewerModal.tsx`:
+   - Built-in PDF reader with page navigation, zoom, and dark mode tile inversion filter.
+
+### Verification:
+- Cache a sample lecture slide PDF.
+- Search for a keyword from the slide inside the Command Palette or Offline Vault: verify the search returns the exact page and opens the PDF reader.
+
+### Git Hygiene:
+Commit message:
+`feat(offline): implement course material slide vault with sqlite fts5 search`
+```
+
+---
+
+### Milestone 28 Prompt: Tauri v2 In-App Self-Updater (`@tauri-apps/plugin-updater`) & GitHub Release Pipeline `[STATUS: PENDING ⏳]`
+
+```markdown
+You are a DevOps and desktop release engineer working on TU Cockpit.
+
+### Objective:
+Implement a seamless, cryptographically signed in-app auto-updater using `@tauri-apps/plugin-updater` and GitHub Releases, allowing students to update their installation with a single click.
+
+### Tasks:
+1. In `src-tauri/Cargo.toml`, add `tauri-plugin-updater = "2.0.0"`.
+2. In `src-tauri/src/lib.rs`, register `.plugin(tauri_plugin_updater::Builder::new().build())`.
+3. In `src-tauri/tauri.conf.json`:
+   - Configure the updater block:
+     ```json
+     "plugins": {
+       "updater": {
+         "endpoints": [
+           "https://github.com/OliverKnapp/Tuwel-Tools/releases/latest/download/latest.json"
+         ],
+         "pubkey": "YOUR_MINISIGN_ED25519_PUBLIC_KEY"
+       }
+     }
+     ```
+4. Create `src/components/updater/UpdaterToast.tsx`:
+   - Checks for updates silently on startup and periodically (every 4 hours).
+   - If an update is detected, displays a subtle, modern notification pill in the Executive Header:
+     `[🚀 Update v1.2.0 Available | Install & Restart]`
+   - Clicking the pill downloads the delta update, verifies the signature, and restarts the application seamlessly.
+5. In `.github/workflows/release.yml`:
+   - Ensure the build step signs release artifacts with the secret updater private key and publishes `latest.json` alongside release binaries.
+
+### Verification:
+- Run `npm run build` and `cargo check --manifest-path src-tauri/Cargo.toml`.
+- Trigger the update check manually in Settings: verify it contacts the release endpoint properly.
+
+### Git Hygiene:
+Commit message:
+`feat(updater): implement cryptographically signed in-app auto-updater via github releases`
+```
+
 
 
 
