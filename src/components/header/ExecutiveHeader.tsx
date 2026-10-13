@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { usePaletteStore } from "@/store/usePaletteStore";
 import {
   GraduationCap,
   Clock,
@@ -10,6 +11,7 @@ import {
   User,
   PanelLeftClose,
   PanelLeftOpen,
+  Search,
 } from "lucide-react";
 
 interface ExecutiveHeaderProps {
@@ -29,6 +31,7 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
     toggleSidebar,
   } = useAppStore();
   const { currentUser, setLoginModalOpen } = useAuthStore();
+  const { openPalette } = usePaletteStore();
   const [currentTime, setCurrentTime] = useState<string>("");
 
   useEffect(() => {
@@ -86,10 +89,26 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
         )}
       </div>
 
-      {/* Center: Academic Semester Indicator */}
-      <div className="hidden md:flex items-center gap-1.5 text-xs text-[var(--tu-text-secondary)] px-3 py-1 rounded-full bg-[var(--tu-bg-card)] border border-[var(--tu-border)]">
-        <GraduationCap className="w-3.5 h-3.5 text-[var(--tu-accent)]" />
-        <span className="font-medium">Wintersemester 2026/27</span>
+      {/* Center: Search Trigger (Cmd+K) & Academic Semester */}
+      <div className="flex items-center gap-2.5">
+        <button
+          onClick={openPalette}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--tu-bg-card)] border border-[var(--tu-border)] hover:border-[var(--tu-accent)]/50 text-xs text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] transition-all cursor-pointer shadow-sm group w-44 sm:w-60 md:w-72 justify-between"
+          title="Search rooms, plugins, actions... (Cmd+K)"
+        >
+          <div className="flex items-center gap-2 truncate">
+            <Search className="w-3.5 h-3.5 text-[var(--tu-text-muted)] group-hover:text-[var(--tu-accent)] transition-colors shrink-0" />
+            <span className="truncate">Search rooms, plugins, actions...</span>
+          </div>
+          <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono text-[var(--tu-text-muted)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] rounded shadow-xs">
+            ⌘K
+          </kbd>
+        </button>
+
+        <div className="hidden lg:flex items-center gap-1.5 text-xs text-[var(--tu-text-secondary)] px-3 py-1 rounded-full bg-[var(--tu-bg-card)] border border-[var(--tu-border)]">
+          <GraduationCap className="w-3.5 h-3.5 text-[var(--tu-accent)]" />
+          <span className="font-medium">WS 2026/27</span>
+        </div>
       </div>
 
       {/* Right: Student Profile Pill, Live Clock & Settings Gear */}

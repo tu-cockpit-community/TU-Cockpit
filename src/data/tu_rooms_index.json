@@ -1,0 +1,212 @@
+[
+  {
+    "id": "ei7",
+    "name": "EI 7",
+    "building": "Elektrotechnische Institute",
+    "address": "Gußhausstraße 25-29",
+    "code": "CG0109",
+    "floor": "EG",
+    "coordinates": { "lat": 48.1963, "lng": 16.3698 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=EI%207"
+  },
+  {
+    "id": "ei1",
+    "name": "EI 1",
+    "building": "Elektrotechnische Institute",
+    "address": "Gußhausstraße 25-29",
+    "code": "CG0102",
+    "floor": "EG",
+    "coordinates": { "lat": 48.1963, "lng": 16.3698 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=EI%201"
+  },
+  {
+    "id": "ei2",
+    "name": "EI 2",
+    "building": "Elektrotechnische Institute",
+    "address": "Gußhausstraße 25-29",
+    "code": "CG0104",
+    "floor": "EG",
+    "coordinates": { "lat": 48.1963, "lng": 16.3698 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=EI%202"
+  },
+  {
+    "id": "ei3",
+    "name": "EI 3",
+    "building": "Elektrotechnische Institute",
+    "address": "Gußhausstraße 25-29",
+    "code": "CG0106",
+    "floor": "EG",
+    "coordinates": { "lat": 48.1963, "lng": 16.3698 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=EI%203"
+  },
+  {
+    "id": "fh-hs1",
+    "name": "Freihaus Hörsaal 1",
+    "building": "Freihaus",
+    "address": "Wiedner Hauptstraße 8-10",
+    "code": "FH01A",
+    "floor": "1. OG",
+    "coordinates": { "lat": 48.1988, "lng": 16.3672 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=Freihaus%20H%C3%B6rsaal%201"
+  },
+  {
+    "id": "fh-hs2",
+    "name": "Freihaus Hörsaal 2",
+    "building": "Freihaus",
+    "address": "Wiedner Hauptstraße 8-10",
+    "code": "FH02A",
+    "floor": "2. OG",
+    "coordinates": { "lat": 48.1988, "lng": 16.3672 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=Freihaus%20H%C3%B6rsaal%202"
+  },
+  {
+    "id": "fh-hs3",
+    "name": "Freihaus Hörsaal 3",
+    "building": "Freihaus",
+    "address": "Wiedner Hauptstraße 8-10",
+    "code": "FH03A",
+    "floor": "2. OG",
+    "coordinates": { "lat": 48.1988, "lng": 16.3672 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=Freihaus%20H%C3%B6rsaal%203"
+  },
+  {
+    "id": "fh-hs4",
+    "name": "Freihaus Hörsaal 4",
+    "building": "Freihaus",
+    "address": "Wiedner Hauptstraße 8-10",
+    "code": "FH04A",
+    "floor": "2. OG",
+    "coordinates": { "lat": 48.1988, "lng": 16.3672 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=Freihaus%20H%C3%B6rsaal%204"
+  },
+  {
+    "id": "fh-hs5",
+    "name": "Freihaus Hörsaal 5",
+    "building": "Freihaus",
+    "address": "Wiedner Hauptstraße 8-10",
+    "code": "FH05A",
+    "floor": "2. OG",
+    "coordinates": { "lat": 48.1988, "lng": 16.3672 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=Freihaus%20H%C3%B6rsaal%205"
+  },
+  {
+    "id": "fh-hs6",
+    "name": "Freihaus Hörsaal 6",
+    "building": "Freihaus",
+    "address": "Wiedner Hauptstraße 8-10",
+    "code": "FH06A",
+    "floor": "2. OG",
+    "coordinates": { "lat": 48.1988, "lng": 16.3672 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=Freihaus%20H%C3%B6rsaal%206"
+  },
+  {
+    "id": "fh-hs7",
+    "name": "Freihaus Hörsaal 7",
+    "building": "Freihaus",
+    "address": "Wiedner Hauptstraße 8-10",
+    "code": "FH07A",
+    "floor": "2. OG",
+    "coordinates": { "lat": 48.1988, "lng": 16.3672 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=Freihaus%20H%C3%B6rsaal%207"
+  },
+  {
+    "id": "fh-hs8",
+    "name": "Freihaus Hörsaal 8",
+    "building": "Freihaus",
+    "address": "Wiedner Hauptstraße 8-10",
+    "code": "FH08A",
+    "floor": "2. OG",
+    "coordinates": { "lat": 48.1988, "lng": 16.3672 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=Freihaus%20H%C3%B6rsaal%208"
+  },
+  {
+    "id": "treitl-inf",
+    "name": "Informatikhörsaal Treitlstraße",
+    "building": "Treitlstraße",
+    "address": "Treitlstraße 3",
+    "code": "TR01",
+    "floor": "EG",
+    "coordinates": { "lat": 48.1993, "lng": 16.3678 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=Informatikh%C3%B6rsaal%20Treitlstra%C3%9Fe"
+  },
+  {
+    "id": "prechtlsaal",
+    "name": "Prechtlsaal",
+    "building": "Hauptgebäude",
+    "address": "Karlsplatz 13",
+    "code": "HG01P",
+    "floor": "EG",
+    "coordinates": { "lat": 48.1989, "lng": 16.3699 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=Prechtlsaal"
+  },
+  {
+    "id": "radinger",
+    "name": "Radinger Hörsaal",
+    "building": "Hauptgebäude",
+    "address": "Karlsplatz 13",
+    "code": "HG02R",
+    "floor": "EG",
+    "coordinates": { "lat": 48.1989, "lng": 16.3699 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=Radinger%20H%C3%B6rsaal"
+  },
+  {
+    "id": "kuppelsaal",
+    "name": "Kuppelsaal",
+    "building": "Hauptgebäude",
+    "address": "Karlsplatz 13",
+    "code": "HG04K",
+    "floor": "4. OG",
+    "coordinates": { "lat": 48.1989, "lng": 16.3699 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=Kuppelsaal"
+  },
+  {
+    "id": "boecklsaal",
+    "name": "Boecklsaal",
+    "building": "Hauptgebäude",
+    "address": "Karlsplatz 13",
+    "code": "HG01B",
+    "floor": "1. OG",
+    "coordinates": { "lat": 48.1989, "lng": 16.3699 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=Boecklsaal"
+  },
+  {
+    "id": "festsaal",
+    "name": "Festsaal",
+    "building": "Hauptgebäude",
+    "address": "Karlsplatz 13",
+    "code": "HG01F",
+    "floor": "1. OG",
+    "coordinates": { "lat": 48.1989, "lng": 16.3699 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=Festsaal"
+  },
+  {
+    "id": "audimax",
+    "name": "AudiMax",
+    "building": "Plus-Energie-Bürohochhaus / Getreidemarkt",
+    "address": "Getreidemarkt 9",
+    "code": "GM01A",
+    "floor": "EG",
+    "coordinates": { "lat": 48.2001, "lng": 16.3638 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=AudiMax"
+  },
+  {
+    "id": "zemanek",
+    "name": "Zemanek Hörsaal",
+    "building": "Informatik Hauptgebäude",
+    "address": "Favoritenstraße 9-11",
+    "code": "HE01Z",
+    "floor": "EG",
+    "coordinates": { "lat": 48.1952, "lng": 16.3695 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=Zemanek%20H%C3%B6rsaal"
+  },
+  {
+    "id": "goedel",
+    "name": "Gödel Hörsaal",
+    "building": "Informatik Hauptgebäude",
+    "address": "Favoritenstraße 9-11",
+    "code": "HE01G",
+    "floor": "EG",
+    "coordinates": { "lat": 48.1952, "lng": 16.3695 },
+    "mapUrl": "https://maps.tuwien.ac.at/?q=G%C3%B6del%20H%C3%B6rsaal"
+  }
+]

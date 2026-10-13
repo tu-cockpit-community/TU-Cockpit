@@ -10,6 +10,7 @@ import { SettingsModal } from "@/components/settings/SettingsModal";
 import { PluginMarketplace } from "@/components/marketplace/PluginMarketplace";
 import { EmbeddedPortalView } from "@/components/embedded/EmbeddedPortalView";
 import { LoginModal } from "@/components/auth/LoginModal";
+import { CommandPalette } from "@/components/palette/CommandPalette";
 import { SyncSettings } from "@/components/settings/SyncSettings";
 import { X } from "lucide-react";
 
@@ -116,6 +117,7 @@ export const App: React.FC = () => {
       )}
 
       {/* Modals & Dialogs */}
+      <CommandPalette onOpenSettings={() => setIsSettingsModalOpen(true)} />
       <LoginModal />
       <CategoryManagerModal />
       <SettingsModal
