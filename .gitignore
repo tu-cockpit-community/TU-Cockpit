@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+target/
+src-tauri/target/
+src-tauri/gen/
+
+# Build artifacts & distribution
+dist/
+dist-ssr/
+*.dmg
+*.app
+*.exe
+*.msi
+*.AppImage
+*.deb
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+
+# Logs & System
+*.log
+.DS_Store
+Thumbs.db
