@@ -8,9 +8,11 @@ export interface PluginManifest {
     name: string;
     email?: string;
     url?: string;
+    github?: string;
   };
   description?: string;
   homepage?: string;
+  githubRepo?: string;
   entrypoint: string;
   icon?: string;
   type?: "widget" | "view" | "tool";
@@ -36,9 +38,11 @@ export interface InstalledPlugin {
   htmlContent: string;
   enabled: boolean;
   installedAt: string;
+  sourceType?: "registry" | "github_direct" | "local_dev";
+  installDir?: string;
 }
 
-export type SystemView = "dashboard" | "marketplace" | "settings";
+export type SystemView = "marketplace" | "portals" | "developer" | "settings";
 
 export interface AppState {
   activeView: SystemView | "plugin";
@@ -46,22 +50,25 @@ export interface AppState {
   installedPlugins: Record<string, InstalledPlugin>;
   dockPinnedIds: string[];
   isSyncModalOpen: boolean;
+  isGitHubInstallModalOpen: boolean;
   
   setActiveView: (view: SystemView | "plugin", pluginId?: string) => void;
-  installPlugin: (manifest: PluginManifest, htmlContent: string) => void;
+  installPlugin: (manifest: PluginManifest, htmlContent: string, sourceType?: "registry" | "github_direct" | "local_dev", installDir?: string) => void;
   uninstallPlugin: (id: string) => void;
   togglePlugin: (id: string, enabled: boolean) => void;
   pinToDock: (id: string) => void;
   unpinFromDock: (id: string) => void;
   setSyncModalOpen: (open: boolean) => void;
+  setGitHubInstallModalOpen: (open: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-  activeView: "dashboard",
-  activePluginId: "tuwien.tuwel.deadlines",
+  activeView: "marketplace",
+  activePluginId: null,
   installedPlugins: {},
-  dockPinnedIds: ["dashboard", "tuwien.tuwel.deadlines", "marketplace", "settings"],
+  dockPinnedIds: ["marketplace", "portals", "settings"],
   isSyncModalOpen: false,
+  isGitHubInstallModalOpen: false,
 
   setActiveView: (view, pluginId) => {
     set({
@@ -70,7 +77,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
   },
 
-  installPlugin: (manifest, htmlContent) => {
+  installPlugin: (manifest, htmlContent, sourceType = "registry", installDir) => {
     set((state) => {
       const updated = {
         ...state.installedPlugins,
@@ -79,6 +86,8 @@ export const useAppStore = create<AppState>((set, get) => ({
           htmlContent,
           enabled: true,
           installedAt: new Date().toISOString(),
+          sourceType,
+          installDir,
         },
       };
       const dock = state.dockPinnedIds.includes(manifest.id)
@@ -99,7 +108,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       delete copy[id];
       const dock = state.dockPinnedIds.filter((item) => item !== id);
       const activePluginId = state.activePluginId === id ? null : state.activePluginId;
-      const activeView = state.activePluginId === id ? "dashboard" : state.activeView;
+      const activeView = state.activePluginId === id ? "marketplace" : state.activeView;
       return {
         installedPlugins: copy,
         dockPinnedIds: dock,
@@ -136,4 +145,5 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   setSyncModalOpen: (open) => set({ isSyncModalOpen: open }),
+  setGitHubInstallModalOpen: (open) => set({ isGitHubInstallModalOpen: open }),
 }));
