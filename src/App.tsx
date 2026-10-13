@@ -11,6 +11,8 @@ import { PluginMarketplace } from "@/components/marketplace/PluginMarketplace";
 import { EmbeddedPortalView } from "@/components/embedded/EmbeddedPortalView";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { CommandPalette } from "@/components/palette/CommandPalette";
+import { useSplitStore } from "@/store/useSplitStore";
+import { SplitViewContainer } from "@/components/split/SplitViewContainer";
 import { SyncSettings } from "@/components/settings/SyncSettings";
 import { X } from "lucide-react";
 
@@ -26,6 +28,7 @@ export const App: React.FC = () => {
   } = useAppStore();
 
   const { applyToRoot } = useThemeStore();
+  const { isSplitActive } = useSplitStore();
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false);
 
   // Ensure DOM has CSS custom properties on mount
@@ -50,6 +53,13 @@ export const App: React.FC = () => {
   const activePlugin = activePluginId ? installedPlugins[activePluginId] : null;
 
   const renderMainContent = () => {
+    if (isSplitActive) {
+      return (
+        <main className="flex-1 w-full h-full relative overflow-hidden p-0 m-0">
+          <SplitViewContainer />
+        </main>
+      );
+    }
     if (activeView === "plugin" && activePlugin) {
       return (
         <main className="flex-1 w-full h-full relative overflow-hidden p-0 m-0">

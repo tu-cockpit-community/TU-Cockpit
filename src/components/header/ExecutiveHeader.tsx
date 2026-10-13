@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { usePaletteStore } from "@/store/usePaletteStore";
+import { useSplitStore } from "@/store/useSplitStore";
 import {
   GraduationCap,
   Clock,
@@ -12,6 +13,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Search,
+  Columns2,
 } from "lucide-react";
 
 interface ExecutiveHeaderProps {
@@ -32,6 +34,7 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
   } = useAppStore();
   const { currentUser, setLoginModalOpen } = useAuthStore();
   const { openPalette } = usePaletteStore();
+  const { isSplitActive, toggleSplit } = useSplitStore();
   const [currentTime, setCurrentTime] = useState<string>("");
 
   useEffect(() => {
@@ -111,8 +114,22 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
         </div>
       </div>
 
-      {/* Right: Student Profile Pill, Live Clock & Settings Gear */}
-      <div className="flex items-center gap-3 text-xs">
+      {/* Right: Split Screen, Student Profile Pill, Live Clock & Settings Gear */}
+      <div className="flex items-center gap-2.5 text-xs">
+        {/* Split Screen Workstation Toggle */}
+        <button
+          onClick={toggleSplit}
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--tu-radius-sm)] border text-[11px] font-medium transition-all cursor-pointer ${
+            isSplitActive
+              ? "bg-[var(--tu-accent)] text-[var(--tu-accent-contrast)] border-[var(--tu-accent)] shadow-sm"
+              : "bg-[var(--tu-bg-card)] text-[var(--tu-text-secondary)] border-[var(--tu-border)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)]"
+          }`}
+          title="Toggle Multi-Webview Split Workstation"
+        >
+          <Columns2 className="w-3.5 h-3.5" />
+          <span className="hidden md:inline">{isSplitActive ? "Exit Split" : "Split View"}</span>
+        </button>
+
         {/* Student Profile Pill */}
         <button
           onClick={() => setLoginModalOpen(true)}

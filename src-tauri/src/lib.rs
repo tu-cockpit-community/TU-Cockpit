@@ -17,6 +17,7 @@ use totp_vault::{
 };
 use native_webview::{
     create_or_show_native_portal, hide_native_portal, resize_native_portal, navigate_native_portal,
+    orchestrate_split_portals, detach_portal_window,
 };
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -45,7 +46,9 @@ pub fn run() {
             create_or_show_native_portal,
             hide_native_portal,
             resize_native_portal,
-            navigate_native_portal
+            navigate_native_portal,
+            orchestrate_split_portals,
+            detach_portal_window
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

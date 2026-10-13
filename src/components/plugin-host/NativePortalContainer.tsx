@@ -7,7 +7,10 @@ import {
   ShieldCheck,
   Sparkles,
   Lock,
+  Maximize2,
+  Columns2,
 } from "lucide-react";
+import { useSplitStore } from "@/store/useSplitStore";
 
 interface NativePortalContainerProps {
   portalId: string;
@@ -75,6 +78,22 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
     };
   }, [portalId, updateBounds]);
 
+  const { setLeftPortalId, setSplitActive } = useSplitStore();
+
+  const handleDetachWindow = async () => {
+    try {
+      await invoke("detach_portal_window", { portalId, url });
+    } catch (err) {
+      console.error("detach_portal_window failed:", err);
+      window.open(url, "_blank", "width=1024,height=768");
+    }
+  };
+
+  const handleSplitMode = () => {
+    setLeftPortalId(portalId);
+    setSplitActive(true);
+  };
+
   const handleReload = async () => {
     try {
       await invoke("navigate_native_portal", { portalId, url });
@@ -116,7 +135,25 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
         </div>
 
         {/* Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={handleSplitMode}
+            className="flex items-center gap-1 px-2 py-1 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] hover:bg-[var(--tu-bg-hover)] text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] transition-colors cursor-pointer text-[11px]"
+            title="Split screen with another portal"
+          >
+            <Columns2 className="w-3 h-3 text-[var(--tu-accent)]" />
+            <span className="hidden sm:inline">Split</span>
+          </button>
+
+          <button
+            onClick={handleDetachWindow}
+            className="flex items-center gap-1 px-2 py-1 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] hover:bg-[var(--tu-bg-hover)] text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] transition-colors cursor-pointer text-[11px]"
+            title="Pop out into a detached floating OS window"
+          >
+            <Maximize2 className="w-3 h-3" />
+            <span className="hidden sm:inline">Pop-Out</span>
+          </button>
+
           <button
             onClick={handleReload}
             className="p-1 rounded text-[var(--tu-text-muted)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] transition-colors cursor-pointer"
