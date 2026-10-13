@@ -52,6 +52,32 @@ Instead of juggling dozens of browser tabs, fighting cookie timeouts, getting bl
 - **Hardware-Isolated Storage:** Student credentials and MFA seeds encrypted and securely persisted in local application storage.
 - **One-Click Autofill:** Injects credentials into TU Wien Shibboleth authentication screens without exposing keys to web content.
 
+### ⚡ 6. Full-Bleed Canvas & Collapsible Sidebar
+- **Zero-Gutter Workstation:** Elimination of artificial `max-w-6xl` containers and redundant faux-browser header banners. University portals render edge-to-edge taking up 100% of the viewport.
+- **Orientation-Aware Collapse (`Cmd+B`):** Lateral sidebars (Left/Right) instantly toggle into a space-saving 56px icon rail or expand to full width.
+
+### 🔍 7. Global Spotlight / Command Palette (`Cmd+K`)
+- **Campus Room Index:** Instant fuzzy matching for TU Wien lecture halls (e.g. *EI 7*, *Freihaus Hörsaal 1*, *Informatikhörsaal*) with direct TU Maps jumping.
+- **Unified 4-Domain Search:** Query across campus rooms, installed community plugins, official university portals, active semester courses, and system actions in milliseconds.
+
+### 🪟 8. Multi-Webview Split-Screen & Detachable Windows
+- **Side-by-Side Multitasking:** Split the workstation canvas between two active webviews with presets (`1:1`, `7:3`, `3:7`) and interactive drag-to-resize dividers.
+- **Detachable Floating Windows:** Pop portals out into dedicated OS windows for multi-monitor lecture setups.
+
+### 📅 9. University Deadline Aggregator & Calendar Sync
+- **Automated Synchronization:** Ingests TUWEL assignment deadlines and TISS exam dates into a local SQLite table (`student_deadlines`).
+- **Native OS Daemon Alerts:** Background notification daemon alerts students 24 hours and 2 hours prior to assignment submissions.
+- **Dynamic `.ics` Feed Export:** One-click calendar export compatible with Apple Calendar, Google Calendar, and Microsoft Outlook.
+
+### 📚 10. Offline Lecture Material Vault (SQLite FTS5)
+- **Train & Subway Resilience:** Download course slides and PDFs into a local vault for offline study without Wi-Fi.
+- **Per-Page Full-Text Search:** High-performance SQLite FTS5 search across slide contents with highlighted search snippets.
+- **OLED Dark-Mode Reader:** Integrated PDF viewer with zoom controls, page jumping, and inverted canvas rendering for late-night studying.
+
+### 🚀 11. Cryptographically Signed In-App Auto-Updater
+- **Tauri v2 Auto-Updater:** Seamless background update delivery powered by `@tauri-apps/plugin-updater` and GitHub Releases.
+- **Minisign Ed25519 Signatures:** Delta packages verified cryptographically before installation with one-click restart.
+
 ---
 
 ## 🏗️ Architecture
@@ -60,9 +86,12 @@ Instead of juggling dozens of browser tabs, fighting cookie timeouts, getting bl
 graph TD
     subgraph Frontend ["Frontend (React 19 + TypeScript + Tailwind v4)"]
         UI[Executive Header & Configurable Nav]
-        Store[Zustand State Store]
-        Host[NativePortalContainer & PluginHost]
-        Marketplace[Community Store & Developer Guide]
+        Palette[Spotlight Command Palette Cmd+K]
+        Split[Multi-Webview SplitViewContainer]
+        Deadlines[Deadline Agenda & iCal Export]
+        VaultUI[Offline Vault & Dark PDF Viewer]
+        UpdaterUI[Updater Toast & Settings]
+        Store[Zustand Stores]
     end
 
     subgraph IPC ["Tauri v2 IPC Bridge"]
@@ -70,26 +99,35 @@ graph TD
     end
 
     subgraph Backend ["Backend (Rust + Tauri v2)"]
-        ChildWebviews[Native Webview Manager]
+        ChildWebviews[Native Webview & Split Orchestrator]
         PluginSecurity[Exploit Prevention & Sanitizer]
         Vault[RFC 6238 TOTP & Credential Vault]
+        DeadlinesDaemon[Deadline Aggregator & OS Notification Daemon]
+        OfflineFTS[Offline Slide Vault & SQLite FTS5]
+        AutoUpdater[Tauri v2 Plugin Updater]
         Storage[SQLite WAL Database]
     end
 
     subgraph Portals ["Child Webviews (Hardware Accelerated)"]
-        TUWEL[TUWEL Child Webview]
-        TISS[TISS Child Webview]
+        TUWEL[TUWEL Webview]
+        TISS[TISS Webview]
+        SecondaryPortal[Split / Detached Webview]
     end
 
     UI --> Store
-    Host --> Invoke
-    Marketplace --> Invoke
+    Palette --> Store
+    Split --> Store
+    Store --> Invoke
     Invoke --> ChildWebviews
     Invoke --> PluginSecurity
     Invoke --> Vault
+    Invoke --> DeadlinesDaemon
+    Invoke --> OfflineFTS
+    Invoke --> AutoUpdater
     Invoke --> Storage
     ChildWebviews --> TUWEL
     ChildWebviews --> TISS
+    ChildWebviews --> SecondaryPortal
 ```
 
 ---
