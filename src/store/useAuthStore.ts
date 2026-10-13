@@ -24,6 +24,7 @@ export interface AuthState {
   setDevMode: (enabled: boolean) => void;
   setRole: (role: UserRole) => void;
   setLoginModalOpen: (open: boolean) => void;
+  updateProfile: (profile: Partial<UserProfile>) => void;
   canInstallUnvettedGitHub: () => boolean;
   canAccessDeveloperPortal: () => boolean;
 }
@@ -40,6 +41,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: true,
   devModeEnabled: true,
   isLoginModalOpen: false,
+
+  updateProfile: (profile) => {
+    const current = get().currentUser;
+    if (current) {
+      set({
+        currentUser: {
+          ...current,
+          ...profile,
+        },
+      });
+    }
+  },
 
   login: (profile) => {
     const role = profile.role || "student";
