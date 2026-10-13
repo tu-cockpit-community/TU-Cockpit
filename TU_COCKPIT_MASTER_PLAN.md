@@ -4,7 +4,8 @@
 > **Core Technologies:** Tauri v2, Rust (2021+), React 19, TypeScript 5.5+, Tailwind CSS v4, SQLite (WAL mode), WebCrypto E2EE  
 > **Current Project Status:**
 > - 🟢 **PHASE 1 (COMPLETED):** Foundational Desktop Runtime, Sandboxed Engine, Dynamic Theme Engine, E2EE Sync, Starter Widget Proof-of-Concept, Multi-Platform CI/CD (Milestones 0–7)  
-> - 🟡 **PHASE 2 (PLANNED / TO DO):** Marketplace-First Workstation, GitHub Dynamic Plugin Engine, Embedded University Webviews (TUWEL, TISS, VoWi, Maps), Real-Time Web Theme Injection, Student Auth & Developer RBAC (Milestones 8–13)
+> - 🟢 **PHASE 2 (COMPLETED):** Marketplace-First Workstation, GitHub Dynamic Plugin Engine, Embedded University Webviews, Student Auth & RBAC (Milestones 8–13)  
+> - 🟡 **PHASE 3 (PLANNED / TO DO):** GitHub Community Org Auto-Discovery, Uninstallable Portals Plugins, Configurable Multi-Orientation Sidebar & Custom Categories, Redesigned Header, GitHub Author Attribution, and SSO/MFA Autofill Vault (Milestones 14–19)
 
 ---
 
@@ -21,7 +22,7 @@
 
 ---
 
-### 🟡 PART II: PHASE 2 — CLEAN-SLATE WORKSTATION, EMBEDDED PORTALS & RBAC (PLANNED / TO DO)
+### 🟢 PART II: PHASE 2 — CLEAN-SLATE WORKSTATION, EMBEDDED PORTALS & RBAC (COMPLETED)
 * [8. Phase 2 Architecture: The Marketplace-First Paradigm & Clean-Slate Purge](#8-phase-2-architecture-the-marketplace-first-paradigm--clean-slate-purge)
 * [9. Dynamic GitHub Plugin Distribution & Verification Engine](#9-dynamic-github-plugin-distribution--verification-engine)
 * [10. In-App Embedded Institutional Portals Architecture (TUWEL, TISS, VoWi, TU Maps)](#10-in-app-embedded-institutional-portals-architecture)
@@ -30,6 +31,19 @@
 * [13. Developer Registration & Marketplace Publishing Application Flow](#13-developer-registration--marketplace-publishing-application-flow)
 * [14. Phase 2 Target File Hierarchy & Dependencies](#14-phase-2-target-file-hierarchy--dependencies)
 * [15. Phase 2 Completed Execution Schedule & Commits (Milestones 8–13 [STATUS: COMPLETED])](#15-phase-2-completed-execution-schedule--commits-milestones-813-status-completed)
+
+---
+
+### 🟡 PART III: PHASE 3 — GITHUB COMMUNITY ORG, CONFIGURABLE SIDEBAR & AUTOFILL VAULT (PLANNED / TO DO)
+* [16. Phase 3 Architecture: The GitHub Community Organization & Modular Workstation Paradigm](#16-phase-3-architecture-the-github-community-organization--modular-workstation-paradigm)
+* [17. GitHub Community Organization Automated Discovery Engine](#17-github-community-organization-automated-discovery-engine)
+* [18. Native Webview Engine & Institutional Portals as Uninstallable Plugins](#18-native-webview-engine--institutional-portals-as-uninstallable-plugins)
+* [19. Dynamic Sidebar & Dock Orientation Engine with Custom User Categories & Sorting](#19-dynamic-sidebar--dock-orientation-engine-with-custom-user-categories--sorting)
+* [20. Redesigned Executive Header & Quick-Access Settings Architecture](#20-redesigned-executive-header--quick-access-settings-architecture)
+* [21. Student Identity, GitHub Community Attribution & Profile Association](#21-student-identity-github-community-attribution--profile-association)
+* [22. Secure Credential Vault, TOTP Engine & In-Webview SSO/MFA Autofill Daemon](#22-secure-credential-vault-totp-engine--in-webview-ssomfa-autofill-daemon)
+* [23. Phase 3 Target File Hierarchy & Dependencies](#23-phase-3-target-file-hierarchy--dependencies)
+* [24. Phase 3 AI Worker Agent Prompts & Step-by-Step Implementation Milestones (Milestones 14–19 [STATUS: READY TO EXECUTE])](#24-phase-3-ai-worker-agent-prompts--step-by-step-implementation-milestones-milestones-1419-status-ready-to-execute)
 
 ---
 
@@ -1868,6 +1882,489 @@ Implement the Developer Registration flow and the Marketplace Publishing Applica
 Commit message:
 `feat(developer): implement developer registration and marketplace publishing application workflow`
 ```
+
+---
+
+# ==============================================================================
+# 🟡 PART III: PHASE 3 — GITHUB COMMUNITY ORG, CONFIGURABLE SIDEBAR & AUTOFILL VAULT (PLANNED / TO DO)
+# ==============================================================================
+
+> **Phase 3 Summary & Status:** ⏳ SPECIFIED & READY FOR AGENT EXECUTION (Milestones 14–19)  
+> **Core Architectural Paradigms:**
+> 1. **GitHub Community Organization:** The Marketplace discovers plugins directly and automatically from a GitHub Organization (e.g., `tu-cockpit-community`). No in-app review queues or approval portals: adding a repository to the Community Organization automatically lists it in the Cockpit Marketplace for all students.
+> 2. **Decoupled University Portals as Plugins:** TUWEL, TISS, VoWi, and TU Maps are refactored into first-class plugins (`tuwien.official.*`) that can be customized, reordered, categorized, and uninstalled completely.
+> 3. **Header-Stripping & Cookie-Enabled Webviews:** Fixes the blank-screen issue on TUWEL/TISS caused by `X-Frame-Options: SAMEORIGIN` and cookie-blocking on VoWi Wiki using native Tauri v2 child webviews and a local Rust header-stripping proxy.
+> 4. **Configurable Navigation Bar Orientation:** Dock/sidebar can be pinned to `left`, `right`, `bottom`, or `top` via Settings.
+> 5. **Custom User Categories & Sorting:** Students can create, rename, and delete custom categories, and reorder plugins freely within categories.
+> 6. **Executive Header Redesign:** Settings cog relocated to the top-right header, freeing the navigation bar. Clean student status bar.
+> 7. **Developer Portal Removal & Author Attribution:** In-app developer forms removed; linking a GitHub account automatically displays the student's verified Name and Matrikelnummer under their published community plugins.
+> 8. **TU Wien SSO & MFA Autofill Vault:** Secure OS Keyring credentials vault storing student email, password, and optional TOTP secret key with automatic login and MFA input into TUWEL and TISS.
+
+---
+
+## 16. Phase 3 Architecture: The GitHub Community Organization & Modular Workstation Paradigm
+
+### 16.1 Feasibility Analysis: GitHub Organization ("Community") Architecture
+* **Can a personal repository or project be converted to a Community?**
+  **YES.** GitHub natively supports **GitHub Organizations** (e.g. `github.com/tu-cockpit-community`). Organizations provide:
+  * Public community presence with member roles, teams, and access control.
+  * Free unlimited public repositories and releases.
+  * Direct REST API for automated repository discovery: `GET https://api.github.com/orgs/{org}/repos`.
+* **The "Community As Marketplace" Rule:**
+  * Only projects hosted under or transferred into the official GitHub Community Organization will appear in the Cockpit Marketplace.
+  * There is **no in-app approval queue** or custom publishing backend. Adding or transferring a repository to the GitHub Organization automatically makes it discoverable and installable inside the Cockpit.
+  * Anyone with repository creation or transfer rights in the organization is inherently an authorized developer.
+
+### 16.2 Institutional Portals Refactored into First-Class Uninstallable Plugins
+In Phase 2, TUWEL, TISS, VoWi, and TU Maps were treated as a monolithic hardcoded system view. In Phase 3, they are decoupled into standard, modular plugins:
+* `tuwien.official.tuwel` (TUWEL Moodle LMS)
+* `tuwien.official.tiss` (TISS Course & Exam Portal)
+* `tuwien.official.vowi` (VoWi Student Wiki)
+* `tuwien.official.tumaps` (TU Maps Campus Navigator)
+
+**User Experience:**
+* Seeded on initial startup in the "Official Portals" category.
+* Students who do not need VoWi Wiki or TU Maps can click **Uninstall**, removing them completely from their sidebar.
+* Uninstalled official plugins remain installable at any time from the Marketplace.
+
+---
+
+## 17. GitHub Community Organization Automated Discovery Engine
+
+### 17.1 GitHub Organization API Discovery Protocol
+```
++---------------------------------------------------------------------------------------------------+
+|                                 MARKETPLACE AUTO-DISCOVERY FLOW                                   |
+|                                                                                                   |
+|  Cockpit Marketplace -> GET https://api.github.com/orgs/tu-cockpit-community/repos?type=public    |
+|                                                     |                                             |
+|                                                     v                                             |
+|                           For each repo: GET raw manifest.json / release assets                   |
+|                                                     |                                             |
+|                                                     v                                             |
+|                             Parse capabilities, icon, author & release .zip                       |
+|                                                     |                                             |
+|                                                     v                                             |
+|                             Store in SQLite cache (community_org_cache)                           |
+|                                                     |                                             |
+|                                                     v                                             |
+|                             Live Render in Marketplace Catalog with 1-Click Install               |
++---------------------------------------------------------------------------------------------------+
+```
+
+### 17.2 Caching & Rate-Limit Strategy
+* Unauthenticated GitHub API calls are capped at 60 requests/hour per IP.
+* **SQLite Cache Table:**
+  ```sql
+  CREATE TABLE IF NOT EXISTS community_org_cache (
+      repo_name TEXT PRIMARY KEY,
+      manifest_json TEXT NOT NULL,
+      latest_tag TEXT NOT NULL,
+      download_url TEXT NOT NULL,
+      author_github TEXT NOT NULL,
+      stars INTEGER DEFAULT 0,
+      updated_at TEXT NOT NULL,
+      etag TEXT
+  );
+  ```
+* Requests send `If-None-Match: <etag>`. A `304 Not Modified` skips re-downloading manifests.
+* If user links a GitHub token in Account Settings, rate limit increases to 5,000 requests/hour.
+
+---
+
+## 18. Native Webview Engine & Institutional Portals as Uninstallable Plugins
+
+### 18.1 Root Cause Analysis of Phase 2 Webview Failures
+1. **TUWEL & TISS Blank Screen:**
+   * Both university servers emit `X-Frame-Options: SAMEORIGIN` and `Content-Security-Policy: frame-ancestors 'self'`.
+   * Standard browser `<iframe>` elements strictly enforce these headers and abort rendering.
+2. **VoWi Wiki Cookie Errors:**
+   * MediaWiki requires session cookies.
+   * Modern browser engines treat `<iframe>` elements loaded from `localhost` as third-party, rejecting cross-origin cookies.
+3. **TU Maps Inversion Failure:**
+   * Cross-Origin security policies prevent injecting CSS or reading DOM properties in cross-domain iframes.
+
+### 18.2 Phase 3 Native Solution Architecture
+TU Cockpit implements a hybrid dual-engine approach:
+
+#### Option A: Native Tauri v2 Child Webviews
+* Using `tauri::webview::WebviewBuilder::new(...)` in Rust to attach a child Webview directly to the main window.
+* Child Webviews are **top-level browsing contexts** (not iframes). They completely ignore `X-Frame-Options` and have full native first-party cookie persistence.
+
+#### Option B: Local Rust Header-Stripping & Cookie Partitioning Proxy (`portal_proxy.rs`)
+* A built-in local streaming HTTP reverse proxy runs inside the Rust core on `127.0.0.1:<random-port>`.
+* The frontend loads portals via the proxy: `http://127.0.0.1:<port>/proxy/tuwel/...`.
+* The Rust proxy:
+  1. Strips `X-Frame-Options` and `Content-Security-Policy: frame-ancestors`.
+  2. Modifies `Set-Cookie` headers to `SameSite=None; Secure; Partitioned`.
+  3. Automatically injects `--tu-*` CSS design tokens and custom CSS overrides into the HTML `<head>` before streaming to the client.
+
+---
+
+## 19. Dynamic Sidebar & Dock Orientation Engine with Custom User Categories & Sorting
+
+### 19.1 Orientation Engine Specification
+The navigation bar can be dynamically pinned to any screen edge, configured in Settings:
+* **`left` (Default):** Vertical collapsible sidebar on the left side of the screen.
+* **`right`:** Vertical sidebar pinned to the right side of the screen.
+* **`bottom`:** Floating horizontal dock at the bottom of the screen.
+* **`top`:** Horizontal navigation bar at the top of the screen.
+
+### 19.2 Custom Categories & Reordering Data Model
+```typescript
+export interface PluginCategory {
+  id: string;               // e.g. "portals", "study-tools", "custom-1"
+  name: string;             // e.g. "University Portals", "Exam Prep"
+  icon?: string;            // Lucide icon name
+  isDefault: boolean;       // System default vs user-created
+  isCollapsed: boolean;     // Accordion collapse state
+  pluginIds: string[];      // Ordered array of installed plugin IDs
+}
+
+export interface NavigationLayoutState {
+  orientation: "left" | "right" | "bottom" | "top";
+  categories: PluginCategory[];
+  reorderPlugin: (pluginId: string, sourceCatId: string, targetCatId: string, targetIndex: number) => void;
+  createCategory: (name: string, icon?: string) => void;
+  renameCategory: (id: string, name: string) => void;
+  deleteCategory: (id: string) => void;
+  toggleCategoryCollapse: (id: string) => void;
+}
+```
+
+### 19.3 User Interaction Model
+* **Drag-and-Drop / Move:** Users can reorder plugins within categories or drag them into different categories.
+* **Add Custom Category:** Button `+ New Category` lets users create categories (e.g. "VU Algodat", "Daily Routine").
+* **Category Actions:** Right-click or options menu allows renaming, setting icons, or deleting (plugins inside move to "General").
+* **Marketplace Access:** The Marketplace icon is prominently anchored at the top/front of the navigation bar.
+
+---
+
+## 20. Redesigned Executive Header & Quick-Access Settings Architecture
+
+### 20.1 Header Layout Architecture
+The top application header is streamlined into an executive workstation bar:
+
+```
++-------------------------------------------------------------------------------------------------------+
+| [TU Badge] TU Cockpit  |  [Active Plugin Title]  |  [WS 2026/27]  |  [Name (Matrikelnr) @gh] [Time] [⚙] |
++-------------------------------------------------------------------------------------------------------+
+```
+
+1. **Left:** Minimalist TU Cockpit branding badge + active plugin title / breadcrumb.
+2. **Center:** Academic semester badge (e.g. *Wintersemester 2026/27*).
+3. **Right:**
+   * **Student Identity Pill:** Displays Student Name and Matrikelnummer, plus a GitHub icon if linked.
+   * **Live Clock:** HH:MM clock.
+   * **Settings Gear Button (`⚙`):** Opens the Settings modal (Theming, Sync, Layout Orientation, Account & Autofill).
+   * **Settings Relocation:** Settings is completely removed from the bottom bar and lives permanently in the header.
+
+---
+
+## 21. Student Identity, GitHub Community Attribution & Profile Association
+
+### 21.1 Removal of In-App Developer Portal
+* In Phase 2, the in-app Developer Portal (`DeveloperPortal.tsx`) and publishing wizard modals were intermediate placeholders.
+* In Phase 3, these are **completely removed**.
+* Publishing is handled externally through the **GitHub Community Organization**: anyone who is a member or has a repo in the Organization has publishing rights.
+
+### 21.2 Linked GitHub Profile & Author Attribution
+* Under Settings > Account, students can link their **GitHub Username** (e.g. `github.com/alice`).
+* In the Marketplace:
+  * If a plugin's repository author matches the student's linked GitHub account:
+    * The card displays a prominent badge:
+      `"Created by You: Max Mustermann (Matrikelnr: 01234567)"`
+  * For other community plugins:
+    * The card displays the author's verified Student Name, Matrikelnummer, and GitHub handle.
+
+---
+
+## 22. Secure Credential Vault, TOTP Engine & In-Webview SSO/MFA Autofill Daemon
+
+### 22.1 Account Credentials Vault Schema
+Stored securely via OS Keyring (Apple Keychain / Windows Credential Manager / Linux Secret Service):
+
+```typescript
+export interface UniversityCredentials {
+  studentEmail: string;       // e.g. "e01234567@student.tuwien.ac.at"
+  matriculationNumber: string;// e.g. "01234567"
+  passwordEncrypted: string;  // Master-key protected password
+  totpSecret?: string;        // Optional Base32 TOTP secret key for MFA
+  autoFillEnabled: boolean;
+  autoSubmitEnabled: boolean;
+}
+```
+
+### 22.2 RFC 6238 TOTP Engine
+When a student saves their TU Wien 2FA authenticator secret key (Base32), the Cockpit generates rolling 6-digit MFA codes in real time:
+
+$$\text{TimeStep} = \left\lfloor \frac{\text{UnixTime}}{30} \right\rfloor$$
+$$\text{TOTP} = \text{Truncate}(\text{HMAC-SHA1}(\text{Secret}, \text{TimeStep})) \pmod{10^6}$$
+
+### 22.3 In-Webview Autofill Daemon
+When TUWEL or TISS webviews navigate to university login forms (`login.tuwien.ac.at`, Shibboleth SAML):
+1. **Detection:** Webview content script detects input selectors:
+   * Username: `#username`, `input[name="j_username"]`, `input[name="username"]`
+   * Password: `#password`, `input[type="password"]`
+   * MFA / Token: `input[name="otp"]`, `input[name="token"]`, `input[name="mfa"]`
+2. **Autofill:** Injects stored student username and password.
+3. **MFA Token Calculation:** Computes current 6-digit TOTP code and fills the MFA input.
+4. **Visual Confirmation:** Displays a discreet badge `[🔐 TU Cockpit Autofill Complete]`.
+
+---
+
+## 23. Phase 3 Target File Hierarchy & Dependencies
+
+### 23.1 Target Directory Tree
+```
+tu-cockpit/
+├── src-tauri/
+│   ├── Cargo.toml                          # Added totp-lite, base32 dependencies
+│   └── src/
+│       ├── lib.rs
+│       ├── plugin_downloader.rs
+│       ├── portal_proxy.rs                 # NEW: Local Rust reverse proxy (strips headers & handles cookies)
+│       └── totp_vault.rs                   # NEW: TOTP computation & secure credential vault
+├── src/
+│   ├── App.tsx                             # Refactored: Multi-orientation layout & executive header
+│   ├── components/
+│   │   ├── header/
+│   │   │   └── ExecutiveHeader.tsx         # NEW: Redesigned header with Settings cog & student pill
+│   │   ├── navigation/
+│   │   │   ├── ConfigurableNav.tsx         # NEW: Multi-orientation bar (left, right, bottom, top)
+│   │   │   ├── PluginCategorySection.tsx   # Collapsible categories with reordering
+│   │   │   └── CategoryManagerModal.tsx    # Create/rename/delete custom categories
+│   │   ├── marketplace/
+│   │   │   ├── PluginMarketplace.tsx       # Auto-fetches repos from GitHub Community Org
+│   │   │   └── CommunityAuthorBadge.tsx    # Author attribution with Name & Matrikelnummer
+│   │   ├── settings/
+│   │   │   ├── SettingsModal.tsx           # Unified settings dialog (Theming, Sync, Layout, Account)
+│   │   │   ├── LayoutSettings.tsx          # Orientation picker (Left, Right, Bottom, Top)
+│   │   │   └── AccountAutofillSettings.tsx # Credentials vault & MFA TOTP setup
+│   │   └── plugins/
+│   │       └── official/                   # Standard uninstallable plugin manifests
+│   │           ├── tuwel/manifest.json
+│   │           ├── tiss/manifest.json
+│   │           ├── vowi/manifest.json
+│   │           └── tumaps/manifest.json
+│   ├── services/
+│   │   ├── marketplace/
+│   │   │   └── CommunityOrgService.ts      # Queries GitHub Org repos API & caches in SQLite
+│   │   └── auth/
+│   │       ├── AutofillDaemon.ts           # Injects credentials & MFA into TUWEL/TISS forms
+│   │       └── TotpGenerator.ts            # RFC 6238 TOTP calculator
+│   └── store/
+│       ├── useAppStore.ts                  # Updated with categorized plugins & orientation state
+│       └── useVaultStore.ts                # Credentials & MFA autofill settings
+```
+
+---
+
+## 24. Phase 3 AI Worker Agent Prompts & Step-by-Step Implementation Milestones
+
+---
+
+### Milestone 14 Prompt: GitHub Community Organization Auto-Discovery Engine `[STATUS: PENDING ⏳]`
+
+```markdown
+You are an expert full-stack engineer working on TU Cockpit.
+
+### Objective:
+Replace the central store registry with the automated GitHub Community Organization discovery engine. Any project added to the configured GitHub Organization will be automatically discovered and listed in the Marketplace.
+
+### Tasks:
+1. In `src/services/marketplace/CommunityOrgService.ts`:
+   - Implement `fetchCommunityPlugins(orgName: string = "tu-cockpit-community")`:
+     - Queries `https://api.github.com/orgs/${orgName}/repos?type=public&per_page=100`.
+     - For each repository, checks for `manifest.json` on the default branch (`https://raw.githubusercontent.com/${orgName}/${repo.name}/main/manifest.json`) or in release assets.
+     - Parses `manifest.json` and builds a verified `MarketplacePlugin` object.
+     - Caches results in SQLite (`community_org_cache`) with ETag headers and a 15-minute TTL.
+2. In `src/components/marketplace/PluginMarketplace.tsx`:
+   - Call `CommunityOrgService.fetchCommunityPlugins()` on mount.
+   - Display a community badge: "Sourced from GitHub Organization: tu-cockpit-community".
+   - Each card features: Name, Version, Description, Categories, GitHub link, Author, and 1-Click "Install" button.
+3. Allow the GitHub Community Organization name to be configurable in Settings (default: `tu-cockpit-community`).
+
+### Verification:
+- Run `npm run build` with zero TypeScript errors.
+- Test against public GitHub Organizations to ensure repositories with `manifest.json` populate dynamically.
+
+### Git Hygiene:
+Commit message:
+`feat(marketplace): implement automated github community organization discovery engine`
+```
+
+---
+
+### Milestone 15 Prompt: Decouple Portals into Uninstallable Official Plugins & Fix Cookies/Headers `[STATUS: PENDING ⏳]`
+
+```markdown
+You are a senior Tauri v2 systems engineer and web security specialist.
+
+### Objective:
+Decouple TUWEL, TISS, VoWi Wiki, and TU Maps from hardcoded system views into first-class uninstallable plugins (`tuwien.official.*`), and solve the `X-Frame-Options` blank screen and cookie-blocking issues using native child webviews or a local Rust header-stripping proxy.
+
+### Tasks:
+1. Create official plugin manifests in `src/plugins/official/`:
+   - `tuwel/manifest.json` (`tuwien.official.tuwel`, "TUWEL Moodle", URL: `https://tuwel.tuwien.ac.at`)
+   - `tiss/manifest.json` (`tuwien.official.tiss`, "TISS Portal", URL: `https://tiss.tuwien.ac.at`)
+   - `vowi/manifest.json` (`tuwien.official.vowi`, "VoWi Wiki", URL: `https://vowi.fsinf.at`)
+   - `tumaps/manifest.json` (`tuwien.official.tumaps`, "TU Maps", URL: `https://maps.tuwien.ac.at`)
+2. In `src-tauri/src/portal_proxy.rs`:
+   - Implement a lightweight local Rust proxy (or Tauri custom protocol) that:
+     - Strips `X-Frame-Options: SAMEORIGIN` and `Content-Security-Policy: frame-ancestors` from upstream responses.
+     - Rewrites `Set-Cookie` headers to `SameSite=None; Secure; Partitioned` so VoWi Wiki and TUWEL accept cookies.
+     - Automatically injects `--tu-*` design tokens into the HTML head before returning.
+3. In `src/store/useAppStore.ts`:
+   - Pre-install the 4 official plugins on first startup.
+   - Allow any official plugin to be uninstalled just like community plugins.
+   - Remove the hardcoded `activeView === "portals"` view.
+
+### Verification:
+- Launch `npm run tauri dev`.
+- Verify TUWEL and TISS render properly (not blank) and VoWi Wiki does not complain about inactive cookies.
+- Verify that clicking "Uninstall" on VoWi removes it from the sidebar, and it can be reinstalled from the Marketplace.
+
+### Git Hygiene:
+Commit message:
+`feat(portals): decouple institutional services into uninstallable plugins and fix cookies and headers`
+```
+
+---
+
+### Milestone 16 Prompt: Configurable Sidebar/Dock Orientation & Custom Plugin Categories `[STATUS: PENDING ⏳]`
+
+```markdown
+You are an expert React UI architect working on TU Cockpit.
+
+### Objective:
+Implement a dynamic, configurable navigation bar that can be oriented to Left, Right, Bottom, or Top, and support custom user categories with plugin reordering.
+
+### Tasks:
+1. In `src/store/useAppStore.ts`:
+   - Add state: `navOrientation: "left" | "right" | "bottom" | "top"` (defaults to `"left"`).
+   - Add state: `categories: PluginCategory[]` where each category has `id`, `name`, `icon`, `isDefault`, `pluginIds`.
+   - Provide actions: `setNavOrientation`, `createCategory`, `renameCategory`, `deleteCategory`, `reorderPluginInCategory`, `movePluginToCategory`.
+2. Create `src/components/navigation/ConfigurableNav.tsx`:
+   - Renders on the specified screen edge (`left`, `right`, `bottom`, `top`).
+   - When oriented to `left` or `right`: Renders as a vertical sidebar with collapsible category accordions, search bar, and "+ Add Category" button.
+   - When oriented to `bottom` or `top`: Renders as a floating dock with category popover menus.
+   - Includes the **Marketplace** icon prominently at the top/front.
+3. Create `src/components/navigation/CategoryManagerModal.tsx`:
+   - Modal to create, rename, or delete categories and manage plugin assignments.
+4. In Settings, add a Layout section allowing students to switch between Left, Right, Bottom, and Top.
+
+### Verification:
+- Test switching orientation in Settings: verify smooth transition between Left sidebar and Bottom dock.
+- Test creating a category "Exams", moving TUWEL into it, and verifying state persists.
+
+### Git Hygiene:
+Commit message:
+`feat(navigation): implement configurable multi-orientation nav bar and custom plugin categories`
+```
+
+---
+
+### Milestone 17 Prompt: Executive Header Redesign & Settings Cog Relocation `[STATUS: PENDING ⏳]`
+
+```markdown
+You are a senior frontend developer working on TU Cockpit.
+
+### Objective:
+Redesign the application header into a clean executive student workstation bar, relocate the Settings button away from the bottom bar into a top-right gear icon, and eliminate clutter.
+
+### Tasks:
+1. Create `src/components/header/ExecutiveHeader.tsx`:
+   - Left: Minimalist TU Wien Cockpit badge (`TU`) + active plugin breadcrumb.
+   - Center: Current semester indicator ("Wintersemester 2026/27").
+   - Right:
+     - Student Profile Pill: Name + Matrikelnummer with linked GitHub indicator.
+     - Live Clock: HH:MM.
+     - **Settings Button (`<Settings className="w-4 h-4" />`)**: opens Settings dialog.
+2. In `src/App.tsx`:
+   - Replace the legacy header with `ExecutiveHeader`.
+   - Remove the Settings icon from the bottom/navigation dock.
+3. Ensure the Settings dialog opens cleanly as a modal over the active workstation.
+
+### Verification:
+- Run `npm run build`.
+- Verify the header renders neatly on all window sizes with no awkward empty spaces, and clicking the gear icon opens Settings.
+
+### Git Hygiene:
+Commit message:
+`feat(header): redesign executive student header and relocate settings to top-right gear`
+```
+
+---
+
+### Milestone 18 Prompt: Remove Developer Portal & Implement GitHub Community Author Attribution `[STATUS: PENDING ⏳]`
+
+```markdown
+You are a full-stack engineer working on TU Cockpit.
+
+### Objective:
+Remove the in-app Developer Portal completely (shifting developer governance to the GitHub Community Organization) and implement GitHub profile linking with verified student author attribution on published plugins.
+
+### Tasks:
+1. Delete unused developer components:
+   - Remove `DeveloperPortal.tsx`, `DeveloperRegistration.tsx`, `PublishPluginModal.tsx`.
+   - Remove `activeView === "developer"` from `useAppStore.ts` and `App.tsx`.
+2. In `src/components/settings/AccountSettings.tsx`:
+   - Add a field: "Linked GitHub Username" (e.g. `alice`).
+   - Saves `githubUsername` to user profile in SQLite / store.
+3. In `src/components/marketplace/CommunityAuthorBadge.tsx`:
+   - When rendering a community plugin card:
+     - Check if `manifest.author.github === user.githubUsername`.
+     - If true, display prominent badge:
+       `"Published by You: [Student Name] (Matrikelnr: [Matrikelnummer])"`.
+     - If false, display:
+       `"Author: [Name] (Matrikelnr: [Matrikelnummer]) • @[github]"` if available.
+
+### Verification:
+- Run `npm run build` and ensure all deleted developer imports are cleanly resolved.
+- Link a GitHub username in Settings and verify the matching marketplace plugin displays the personalized author badge.
+
+### Git Hygiene:
+Commit message:
+`feat(community): remove in-app dev portal and implement github author attribution with matrikelnummer`
+```
+
+---
+
+### Milestone 19 Prompt: University Credentials Vault & In-Webview SSO/MFA Autofill Daemon `[STATUS: PENDING ⏳]`
+
+```markdown
+You are a security engineer and desktop automation specialist working on TU Cockpit.
+
+### Objective:
+Implement a secure university credentials vault (email, password, optional TOTP MFA secret key) and an in-webview autofill daemon that auto-inputs credentials and rolling MFA tokens into TUWEL and TISS login forms.
+
+### Tasks:
+1. In `src-tauri/Cargo.toml`, add `totp-lite = "2.0"` and `base32 = "0.4"`.
+2. Create `src-tauri/src/totp_vault.rs`:
+   - Implement `generate_totp_code(secret_base32: String) -> Result<String, String>` using RFC 6238 standard (6 digits, 30s step).
+   - Implement secure keyring storage commands for student email, encrypted password, and optional TOTP secret.
+3. In `src/components/settings/AccountAutofillSettings.tsx`:
+   - Build credentials setup form:
+     - Student Email / Username (`eXXXXXXX` or `@student.tuwien.ac.at`)
+     - Password (masked, stored in OS Keyring)
+     - Optional MFA Authenticator Secret Key (Base32)
+     - Toggle: "Auto-fill credentials on TU Wien login forms"
+4. In `src/services/auth/AutofillDaemon.ts`:
+   - Script that detects TU Wien login pages (`login.tuwien.ac.at`, Moodle login):
+     - Auto-inputs username and password into target fields.
+     - When the MFA / Authenticator token input is detected, calls `generate_totp_code` and fills the 6-digit code automatically.
+     - Displays an overlay badge: `[🔐 Autofilled by TU Cockpit]`.
+
+### Verification:
+- Add a test TOTP secret key and verify the generated code matches standard Google Authenticator / 1Password codes.
+- Test on university login pages to verify smooth autofill without user typing.
+
+### Git Hygiene:
+Commit message:
+`feat(autofill): implement university credentials vault with totp mfa auto-input daemon`
+```
+
 
 
 
