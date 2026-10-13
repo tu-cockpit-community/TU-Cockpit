@@ -1,8 +1,12 @@
 pub mod plugin_gateway;
 pub mod plugin_downloader;
+pub mod embedded_portals;
 
 use plugin_gateway::execute_plugin_network_request;
 use plugin_downloader::install_plugin_from_github;
+use embedded_portals::{
+    get_portal_url, navigate_portal, reload_portal, portal_go_back, portal_go_forward,
+};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -12,7 +16,12 @@ pub fn run() {
         .plugin(tauri_plugin_sql::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             execute_plugin_network_request,
-            install_plugin_from_github
+            install_plugin_from_github,
+            get_portal_url,
+            navigate_portal,
+            reload_portal,
+            portal_go_back,
+            portal_go_forward
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
