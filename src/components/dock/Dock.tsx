@@ -3,6 +3,9 @@ import { useAppStore } from "@/store/useAppStore";
 import {
   Store,
   GraduationCap,
+  Layers,
+  BookOpen,
+  MapPin,
   Code,
   Palette,
   Cloud,
@@ -26,6 +29,14 @@ export const Dock: React.FC<DockProps> = ({ devMode = false }) => {
 
   const installedList = Object.values(installedPlugins);
 
+  const getPluginIcon = (id: string) => {
+    if (id.includes("tuwel")) return <GraduationCap className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />;
+    if (id.includes("tiss")) return <Layers className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />;
+    if (id.includes("vowi")) return <BookOpen className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />;
+    if (id.includes("tumaps") || id.includes("map")) return <MapPin className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />;
+    return <Puzzle className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />;
+  };
+
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
       <div className="flex items-center gap-1.5 px-3 py-2 bg-[var(--tu-bg-surface)]/85 backdrop-blur-md border border-[var(--tu-border)] rounded-2xl shadow-2xl transition-all duration-300 hover:scale-[1.01]">
@@ -48,26 +59,7 @@ export const Dock: React.FC<DockProps> = ({ devMode = false }) => {
           </span>
         </button>
 
-        {/* Embedded University Portals */}
-        <button
-          onClick={() => setActiveView("portals")}
-          title="TU Wien University Portals"
-          className={`relative group flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-all duration-200 ${
-            activeView === "portals"
-              ? "bg-[var(--tu-accent)] text-[var(--tu-accent-contrast)] shadow-lg shadow-[var(--tu-accent)]/20"
-              : "text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)]"
-          }`}
-        >
-          <GraduationCap className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
-          {activeView === "portals" && (
-            <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[var(--tu-accent-contrast)]" />
-          )}
-          <span className="pointer-events-none absolute -top-9 px-2.5 py-1 text-[11px] font-medium rounded-md whitespace-nowrap bg-[var(--tu-bg-card)] text-[var(--tu-text-primary)] border border-[var(--tu-border)] opacity-0 -translate-y-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-y-0 shadow-md">
-            University Portals
-          </span>
-        </button>
-
-        {/* Dynamic Installed Plugins */}
+        {/* Dynamic Installed Plugins (Portals & Tools) */}
         {installedList.length > 0 && (
           <>
             <div className="w-[1px] h-6 bg-[var(--tu-border)] mx-1" />
@@ -84,7 +76,7 @@ export const Dock: React.FC<DockProps> = ({ devMode = false }) => {
                       : "text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)]"
                   }`}
                 >
-                  <Puzzle className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
+                  {getPluginIcon(p.manifest.id)}
                   {isPluginActive && (
                     <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[var(--tu-accent-contrast)]" />
                   )}

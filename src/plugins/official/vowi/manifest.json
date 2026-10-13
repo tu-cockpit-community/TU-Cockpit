@@ -1,0 +1,23 @@
+{
+  "id": "tuwien.official.vowi",
+  "name": "VoWi Student Wiki",
+  "version": "1.0.0",
+  "author": {
+    "name": "FSInf Student Union",
+    "url": "https://vowi.fsinf.at"
+  },
+  "description": "Student-maintained course wiki with lecture notes, exam reviews, professor feedback, and study tips.",
+  "category": "Academic",
+  "entrypoint": "index.html",
+  "homepage": "https://vowi.fsinf.at",
+  "type": "view",
+  "capabilities": {
+    "network": [
+      "https://vowi.fsinf.at/*"
+    ],
+    "storage": {
+      "quotaBytes": 5242880
+    },
+    "notifications": false
+  }
+}

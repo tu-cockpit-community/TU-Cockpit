@@ -1,12 +1,14 @@
 pub mod plugin_gateway;
 pub mod plugin_downloader;
 pub mod embedded_portals;
+pub mod portal_proxy;
 
 use plugin_gateway::execute_plugin_network_request;
 use plugin_downloader::install_plugin_from_github;
 use embedded_portals::{
     get_portal_url, navigate_portal, reload_portal, portal_go_back, portal_go_forward, inject_theme_css,
 };
+use portal_proxy::fetch_portal_page;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -22,7 +24,8 @@ pub fn run() {
             reload_portal,
             portal_go_back,
             portal_go_forward,
-            inject_theme_css
+            inject_theme_css,
+            fetch_portal_page
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

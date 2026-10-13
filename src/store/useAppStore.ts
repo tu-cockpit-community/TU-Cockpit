@@ -64,11 +64,33 @@ export interface AppState {
   setCommunityOrgName: (orgName: string) => void;
 }
 
+import { OFFICIAL_PLUGINS } from "@/plugins/official/OfficialPlugins";
+
+const INITIAL_INSTALLED_PLUGINS: Record<string, InstalledPlugin> = Object.entries(
+  OFFICIAL_PLUGINS
+).reduce((acc, [id, def]) => {
+  acc[id] = {
+    manifest: def.manifest,
+    htmlContent: def.htmlContent,
+    enabled: true,
+    installedAt: "2026-10-13T00:00:00.000Z",
+    sourceType: "registry",
+  };
+  return acc;
+}, {} as Record<string, InstalledPlugin>);
+
 export const useAppStore = create<AppState>((set, get) => ({
   activeView: "marketplace",
   activePluginId: null,
-  installedPlugins: {},
-  dockPinnedIds: ["marketplace", "portals", "settings"],
+  installedPlugins: INITIAL_INSTALLED_PLUGINS,
+  dockPinnedIds: [
+    "marketplace",
+    "tuwien.official.tuwel",
+    "tuwien.official.tiss",
+    "tuwien.official.vowi",
+    "tuwien.official.tumaps",
+    "settings",
+  ],
   isSyncModalOpen: false,
   isGitHubInstallModalOpen: false,
   communityOrgName: "tu-cockpit-community",

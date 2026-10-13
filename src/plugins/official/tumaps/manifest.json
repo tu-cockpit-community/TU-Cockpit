@@ -1,0 +1,23 @@
+{
+  "id": "tuwien.official.tumaps",
+  "name": "TU Maps Navigator",
+  "version": "1.0.0",
+  "author": {
+    "name": "TU Wien Department of Geodesy",
+    "url": "https://maps.tuwien.ac.at"
+  },
+  "description": "Interactive campus navigation and floor plans for Karlsplatz, Freihaus, and Gußhaus.",
+  "category": "Campus Life",
+  "entrypoint": "index.html",
+  "homepage": "https://maps.tuwien.ac.at",
+  "type": "view",
+  "capabilities": {
+    "network": [
+      "https://maps.tuwien.ac.at/*"
+    ],
+    "storage": {
+      "quotaBytes": 2097152
+    },
+    "notifications": false
+  }
+}

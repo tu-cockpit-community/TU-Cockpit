@@ -1,0 +1,24 @@
+{
+  "id": "tuwien.official.tuwel",
+  "name": "TUWEL Moodle LMS",
+  "version": "1.0.0",
+  "author": {
+    "name": "TU Wien Teaching Support",
+    "url": "https://tuwel.tuwien.ac.at"
+  },
+  "description": "Official TU Wien Moodle learning management system for assignments, courses, and materials.",
+  "category": "Academic",
+  "entrypoint": "index.html",
+  "homepage": "https://tuwel.tuwien.ac.at",
+  "type": "view",
+  "capabilities": {
+    "network": [
+      "https://tuwel.tuwien.ac.at/*",
+      "https://login.tuwien.ac.at/*"
+    ],
+    "storage": {
+      "quotaBytes": 5242880
+    },
+    "notifications": true
+  }
+}
