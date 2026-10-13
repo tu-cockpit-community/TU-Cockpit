@@ -1121,4 +1121,696 @@ jobs:
    * Action: Add `.github/workflows/release.yml` with multi-platform matrix builds.
    * Commit Message: `ci: configure multi-platform release workflow for macos, windows, linux`
 
+---
+
+## 8. Phase 2 Architecture: The Marketplace-First Paradigm & Clean-Slate Purge
+
+### 8.1 Executive Architectural Shift
+In Phase 1, the client established core capabilities (Tauri v2 shell, sandboxing, central theme token engine, and zero-knowledge E2EE sync) using a bundled proof-of-concept plugin (`tuwien.tuwel.deadlines`). 
+
+**Phase 2 transitions TU Cockpit into a clean-slate, production-ready workstation.**
+The raw, out-of-the-box TU Cockpit does **not** ship with hardcoded mock plugins or simulated deadline cards. Its core application hub is the **Marketplace** (the portal for discovering, vetting, installing, updating, and configuring community plugins).
+
+All community tools will be distributed dynamically via **GitHub repositories** and verified through an official open-source **Community Store Registry**.
+
+### 8.2 Clean-Slate Purge Specification
+1. **Purge Bundled Samples:** The starter plugin directory (`plugins/tuwel-deadlines/`) and hardcoded `TUWEL_STARTER_HTML` in `src/App.tsx` are fully deprecated and removed.
+2. **Remove Static Catalog Mocks:** The hardcoded `catalog` array in `PluginMarketplace.tsx` is replaced by the dynamic `StoreRegistryClient` fetching verified metadata from GitHub.
+3. **Pristine State Navigation:**
+   * If no plugins are installed, the Cockpit defaults to the **Marketplace View** or **Embedded University Portals**.
+   * The Dock dynamically renders:
+     * **Marketplace** (Core Hub)
+     * **Embedded University Portals** (TUWEL, TISS, VoWi, TU Maps)
+     * **Installed Plugins** (dynamically appended as user installs tools from GitHub)
+     * **Developer Portal** (visible when Developer Mode is active)
+     * **Settings & Theming**
+
+### 8.3 Phase 2 System Architecture Topology
+```
++---------------------------------------------------------------------------------------------------+
+|                                      TU COCKPIT SHELL (PHASE 2)                                   |
+|                                                                                                   |
+|  +--------------------+  +----------------------+  +---------------------+  +------------------+  |
+|  | Dock & Tab Manager |  | Student Auth & RBAC  |  | Dynamic Marketplace |  | Developer Portal |  |
+|  +--------------------+  +----------------------+  +---------------------+  +------------------+  |
+|  +---------------------------------------------------------------------------------------------+  |
+|  |                      Central Theming Engine (--tu-* Tokens & Dynamic Fonts)                 |  |
+|  +---------------------------------------------------------------------------------------------+  |
+|            |                                |                                   |                 |
+|            | Webview IPC                    | MessagePort RPC                   | Tauri IPC       |
+|            v                                v                                   v                 |
+|  +-----------------------+     +--------------------------+     +-------------------------------+ |
+|  | Embedded Univ Portals |     | Sandboxed Dynamic Plugin |     | Tauri v2 Rust Core Runtime    | |
+|  | - TUWEL (Moodle)      |     | - Unpacked from GitHub   |     | - GitHub Release Downloader   | |
+|  | - TISS (Portal)       |     | - Isolated <iframe>      |     | - Zip Unpacker & Path Guard   | |
+|  | - VoWi Wiki           |     | - RPC Permission Gateway |     | - SQLite Installed DB         | |
+|  | - TU Maps (Campus)    |     | - Auto Theme Injection   |     | - OS Keyring Credential Vault | |
+|  | * Real-time Theme CSS |     +--------------------------+     | - Multi-Webview Manager       | |
+|  +-----------------------+                                      +-------------------------------+ |
++---------------------------------------------------------------------------------------------------+
+                                                  |
+                                                  v
+                     +---------------------------------------------------------+
+                     |                 External Ecosystem Services             |
+                     |  - GitHub API & Release Assets (Plugins & Updates)      |
+                     |  - Community Store Registry (store-registry.json)       |
+                     |  - University SAML / TISS Student Authentication        |
+                     +---------------------------------------------------------+
+```
+
+---
+
+## 9. Dynamic GitHub Plugin Distribution & Verification Engine
+
+### 9.1 Community Store Registry Schema (`store-registry.json`)
+The marketplace queries a central GitHub-hosted index (or mirrored CDN) defining verified plugins:
+
+```json
+{
+  "$schema": "https://tu-cockpit.tuwien.ac.at/schemas/v1/store-registry.json",
+  "version": "1.0.0",
+  "updatedAt": "2026-10-13T20:00:00.000Z",
+  "plugins": [
+    {
+      "id": "tuwien.community.smart-tuwel",
+      "name": "Smart TUWEL Companion",
+      "version": "1.2.0",
+      "author": {
+        "name": "TU Student Dev Group",
+        "github": "tuwien-community",
+        "url": "https://github.com/tuwien-community"
+      },
+      "description": "Auto-syncs assignment submission deadlines and course announcements.",
+      "category": "Academic",
+      "icon": "https://raw.githubusercontent.com/tuwien-community/smart-tuwel/main/icon.svg",
+      "homepage": "https://github.com/tuwien-community/smart-tuwel",
+      "githubRepo": "https://github.com/tuwien-community/smart-tuwel",
+      "downloadUrl": "https://github.com/tuwien-community/smart-tuwel/releases/download/v1.2.0/bundle.zip",
+      "checksumSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "capabilities": {
+        "network": ["https://tuwel.tuwien.ac.at/*"],
+        "storage": { "quotaBytes": 2097152 },
+        "notifications": true
+      },
+      "verified": true,
+      "rating": 4.9,
+      "downloads": 1420
+    }
+  ]
+}
+```
+
+### 9.2 Direct GitHub Installation Protocol
+Users and developers can paste any GitHub repository URL (`https://github.com/owner/repo` or release tag) directly into the Marketplace search/install bar:
+1. **Repository Discovery:** Query `https://api.github.com/repos/{owner}/{repo}/releases/latest` (or target tag).
+2. **Manifest Verification:** Fetch `manifest.json` from the release assets or default branch.
+3. **Capability Auditing:** Display a permission disclosure prompt in the Cockpit UI:
+   * Explicit list of external network domains requested.
+   * Local storage quota requested.
+   * Notification and clipboard privileges.
+4. **Binary / Asset Download:** Download `bundle.zip` through Tauri Rust core.
+5. **Path Traversal Protection & Extraction:** Unpack strictly inside `$APPDATA/installed_plugins/{plugin_id}/{version}/` preventing `..` or symlink escalation.
+6. **SQLite Registry Registration:** Update local `installed_plugins` table.
+
+### 9.3 SQLite Persistence Schema Migration
+```sql
+CREATE TABLE IF NOT EXISTS installed_plugins (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    version TEXT NOT NULL,
+    author_name TEXT,
+    author_github TEXT,
+    description TEXT,
+    homepage TEXT,
+    github_repo TEXT,
+    entrypoint_path TEXT NOT NULL,
+    install_dir TEXT NOT NULL,
+    capabilities_json TEXT NOT NULL,
+    source_type TEXT NOT NULL, -- 'registry' | 'github_direct' | 'local_dev'
+    enabled INTEGER NOT NULL DEFAULT 1,
+    installed_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS plugin_storage (
+    plugin_id TEXT NOT NULL,
+    key TEXT NOT NULL,
+    value TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    PRIMARY KEY (plugin_id, key)
+);
+```
+
+---
+
+## 10. In-App Embedded Institutional Portals Architecture
+
+### 10.1 The Embedded Multi-Webview Model
+Instead of opening external web browsers via `open_browser_url` or system shell, TU Cockpit embeds institutional portals directly within the workstation:
+* **TUWEL:** Moodle Learning Management System (`https://tuwel.tuwien.ac.at`)
+* **TISS:** TU Wien Information Systems (`https://tiss.tuwien.ac.at`)
+* **VoWi Wiki:** Student-run Course Wiki (`https://vowi.fsinf.at`)
+* **TU Maps:** Interactive Campus Navigation & Room Finder (`https://maps.tuwien.ac.at`)
+
+### 10.2 Tauri v2 Webview Integration
+* Standard `<iframe>` embedding fails on university portals due to `X-Frame-Options: SAMEORIGIN` and `Content-Security-Policy: frame-ancestors 'self'`.
+* **Solution:** In Tauri v2, native **Child Webviews** (`tauri::webview::Webview` or dedicated Webview Windows) operate as independent, top-level browsing contexts.
+* **Benefits:**
+  * Bypasses `X-Frame-Options` and CSP frame-ancestor blocks naturally.
+  * Preserves university session cookies (`MoodleSession`, `TISS_SESSION`) across tabs and restarts.
+  * Allows direct DOM script injection and CSS manipulation via `webview.eval()` / `initialization_script`.
+
+### 10.3 In-App Portal Shell Controls
+Every embedded portal is wrapped in a native Cockpit header:
+* **Tab Navigation:** Switch between `TUWEL`, `TISS`, `VoWi`, `TU Maps` with instant tab state preservation.
+* **Navigation Controls:** Back (`←`), Forward (`→`), Reload (`↻`), Home (`⌂`).
+* **Address & Security Bar:** Live URL display with HTTPS encryption badge.
+* **Theme Styling Indicator:** Badge indicating active CSS theme injection status.
+* **External Pop-out:** Fallback button to launch in default OS browser if required.
+
+---
+
+## 11. Cross-Site Theme Injection Engine & Curated Style Sheets
+
+### 11.1 Dynamic Theme Injection Daemon
+The Cockpit Theme Engine injects custom CSS into embedded university pages on load:
+1. When a portal webview initializes or navigates to a new page, Rust invokes `evaluate_script` to inject:
+   * Active `--tu-*` CSS variables synthesized from `useThemeStore`.
+   * Portal-specific custom CSS overrides.
+2. When the user changes themes (e.g. from *TU Wien Night* to *Catppuccin Mocha*), the host broadcasts the new tokens to all active webviews, updating `:root` properties instantly without reloading.
+
+### 11.2 Curated Portal Theme Overrides
+
+#### 1. TUWEL (Moodle) Theme Adapter (`src/styles/embedded-themes/tuwel.css`)
+```css
+:root {
+  --moodle-bg: var(--tu-bg-base) !important;
+  --moodle-surface: var(--tu-bg-surface) !important;
+}
+
+body, #page, #page-wrapper, .card, .block, #nav-drawer, .navbar, .header-maxwidth {
+  background-color: var(--tu-bg-base) !important;
+  color: var(--tu-text-primary) !important;
+  font-family: var(--tu-font-sans) !important;
+}
+
+.card, .block, .activity-item, .path-mod-assign [data-region="grade-panel"], .activity-header {
+  background-color: var(--tu-bg-surface) !important;
+  border: 1px solid var(--tu-border) !important;
+  border-radius: var(--tu-radius) !important;
+  color: var(--tu-text-primary) !important;
+}
+
+.btn-primary, .nav-tabs .nav-link.active, .page-item.active .page-link {
+  background-color: var(--tu-accent) !important;
+  border-color: var(--tu-accent) !important;
+  color: var(--tu-accent-contrast) !important;
+}
+
+a {
+  color: var(--tu-text-accent) !important;
+}
+
+table, .generaltable, .table {
+  background-color: var(--tu-bg-surface) !important;
+  color: var(--tu-text-primary) !important;
+  border-color: var(--tu-border) !important;
+}
+
+th {
+  background-color: var(--tu-bg-card) !important;
+  color: var(--tu-text-primary) !important;
+}
+```
+
+#### 2. TISS Theme Adapter (`src/styles/embedded-themes/tiss.css`)
+```css
+body, #content, .content, #header, #navigation, #wrapper {
+  background: var(--tu-bg-base) !important;
+  color: var(--tu-text-primary) !important;
+  font-family: var(--tu-font-sans) !important;
+}
+
+table.tissTable, .tissPanel, .box, fieldset, .form-group {
+  background: var(--tu-bg-surface) !important;
+  border: 1px solid var(--tu-border) !important;
+  border-radius: var(--tu-radius) !important;
+  color: var(--tu-text-primary) !important;
+}
+
+table.tissTable th {
+  background: var(--tu-bg-card) !important;
+  color: var(--tu-text-primary) !important;
+  border-bottom: 2px solid var(--tu-accent) !important;
+}
+
+table.tissTable td {
+  border-color: var(--tu-border-subtle) !important;
+  color: var(--tu-text-secondary) !important;
+}
+
+input, select, textarea {
+  background: var(--tu-bg-card) !important;
+  color: var(--tu-text-primary) !important;
+  border: 1px solid var(--tu-border) !important;
+  border-radius: var(--tu-radius-sm) !important;
+}
+```
+
+#### 3. VoWi Wiki Theme Adapter (`src/styles/embedded-themes/vowi.css`)
+```css
+#content, body, #mw-page-base, #mw-head-base, #footer {
+  background: var(--tu-bg-base) !important;
+  color: var(--tu-text-primary) !important;
+  font-family: var(--tu-font-sans) !important;
+}
+
+.wikitable, .toc, .catlinks, #mw-panel .portal {
+  background: var(--tu-bg-surface) !important;
+  border: 1px solid var(--tu-border) !important;
+  border-radius: var(--tu-radius) !important;
+  color: var(--tu-text-primary) !important;
+}
+
+pre, code {
+  background: var(--tu-bg-card) !important;
+  color: var(--tu-text-accent) !important;
+  font-family: var(--tu-font-mono) !important;
+}
+```
+
+#### 4. TU Maps Theme Adapter (`src/styles/embedded-themes/tumaps.css`)
+```css
+/* Dark Mode Tile Inversion for Canvas and Map Layers */
+.leaflet-tile-pane, .map-canvas, .ol-layer {
+  filter: invert(90%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+
+.leaflet-bar, .search-container, .floor-selector, .info-box, .panel {
+  background: var(--tu-bg-surface) !important;
+  border: 1px solid var(--tu-border) !important;
+  border-radius: var(--tu-radius) !important;
+  color: var(--tu-text-primary) !important;
+  box-shadow: var(--tu-shadow) !important;
+}
+```
+
+---
+
+## 12. Student Identity, Authentication & Role-Based Access Control (RBAC)
+
+### 12.1 User Model & Roles
+The application defines four distinct user access tiers:
+
+```typescript
+export type UserRole = "guest" | "student" | "developer" | "reviewer";
+
+export interface UserProfile {
+  id: string;                      // Student ID or UUID
+  matriculationNumber: string;     // TU Wien 8-digit matriculation number (e.g. 01234567)
+  email: string;                   // Official TU student email (eXXXXXXX@student.tuwien.ac.at)
+  displayName: string;             // First & Last Name
+  role: UserRole;                  // Access Tier
+  githubUsername?: string;         // Linked GitHub profile (required for Developer role)
+  developerStatus?: "none" | "pending" | "approved" | "rejected";
+  sessionToken?: string;
+}
+```
+
+### 12.2 Role Permissions Matrix
+| Permission / Capability | Guest | Student | Developer | Reviewer / Admin |
+| :--- | :---: | :---: | :---: | :---: |
+| Browse Official Marketplace | Yes | Yes | Yes | Yes |
+| Install Verified Store Plugins | No | Yes | Yes | Yes |
+| Use In-App Embedded Portals | Yes | Yes | Yes | Yes |
+| Apply Custom Themes & Fonts | Yes | Yes | Yes | Yes |
+| E2EE Zero-Knowledge Cloud Sync | No | Yes | Yes | Yes |
+| Install Unvetted Plugins via Direct GitHub Links | No | No | Yes | Yes |
+| Sideload Local Unpacked Plugins (`~/dev/plugin`) | No | No | Yes | Yes |
+| Access In-App Developer Console & RPC Inspector | No | No | Yes | Yes |
+| Submit Plugins for Store Publishing Rights | No | No | Yes | Yes |
+| Review, Approve & Revoke Store Plugins | No | No | No | Yes |
+
+### 12.3 Secure Credential Vault (OS Keyring)
+* Session tokens and private keys are never stored in plaintext `localStorage`.
+* Tauri integrates native OS credential stores via platform APIs:
+  * **macOS:** Apple Keychain Services (`Security.framework`)
+  * **Windows:** Windows Credential Manager (`wincred`)
+  * **Linux:** Freedesktop Secret Service API (`libsecret`)
+
+---
+
+## 13. Developer Registration & Marketplace Publishing Application Flow
+
+### 13.1 Developer Account Registration Lifecycle
+1. **Prerequisite:** User is authenticated as a verified `Student`.
+2. **Registration Form:** Inside Cockpit Settings > Developer Portal:
+   * Provide GitHub profile handle (e.g., `github.com/alice`).
+   * GitHub Verification: Cockpit generates a verification token (e.g., `tu-cockpit-verify-7f8e9a`). Student creates a public GitHub Gist or bio token to verify ownership.
+   * Agree to the **TU Cockpit Developer Security Charter** (No telemetry, strict capability bounding, no code injection).
+3. **Activation:** Account role updates to `developer`. The **Developer Portal** and **Sideloading** tools unlock in the Cockpit Dock.
+
+### 13.2 Marketplace Publishing Application Workflow
+Developers wanting to publish their plugins to the official community store submit an application directly inside TU Cockpit:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev as Student Developer
+    participant UI as Cockpit Dev Portal
+    participant Core as Tauri Rust Core
+    participant Git as GitHub Community Repo
+    actor Rev as Community Reviewer
+
+    Dev->>UI: Fill "Publish Plugin" Wizard (GitHub Repo, Release Tag)
+    UI->>Core: Request Pre-Flight Manifest Linting
+    Core->>Core: Validate manifest.json schema, capability bounds, entrypoint
+    Core-->>UI: Pre-flight checks PASSED (Report generated)
+    Dev->>UI: Submit Publishing Application
+    UI->>Git: Generate Pull Request with plugin metadata & manifest
+    Git->>Git: Automated CI Security Scanner runs
+    Rev->>Git: Review capability rationale & approve PR
+    Git->>Git: Merge PR -> store-registry.json updated
+    Git-->>UI: Webhook/Sync: Plugin listed as "Verified" in Store
+```
+
+### 13.3 Publishing Application Manifest Schema
+When applying to publish, the developer submits:
+* **Plugin ID:** Must follow reverse-DNS convention (e.g., `tuwien.student.calculator`).
+* **Source Repository:** GitHub URL with public tag/release.
+* **Capability Justification:** Rationale for each network domain requested.
+* **Security & Privacy Statement:** Confirmation that zero analytics or student data is harvested.
+
+---
+
+## 14. Phase 2 Target File Hierarchy & Dependencies
+
+### 14.1 Target Directory Tree
+```
+tu-cockpit/
+├── src-tauri/
+│   ├── Cargo.toml                          # Added zip, tar, keyring dependencies
+│   ├── capabilities/
+│   │   └── default.json                    # Expanded with keyring & webview perms
+│   └── src/
+│       ├── lib.rs                          # Handler registration for downloader & portals
+│       ├── main.rs
+│       ├── plugin_gateway.rs               # Existing capability proxy
+│       ├── plugin_downloader.rs            # NEW: GitHub download, unpack, integrity
+│       └── embedded_portals.rs             # NEW: Multi-webview manager & theme injector
+├── src/
+│   ├── App.tsx                             # Refactored: Marketplace-first, purged samples
+│   ├── components/
+│   │   ├── dock/
+│   │   │   └── Dock.tsx                    # Updated: Dynamic plugin pinning & portal icons
+│   │   ├── marketplace/
+│   │   │   ├── PluginMarketplace.tsx       # Dynamic catalog browser from store-registry.json
+│   │   │   ├── GitHubInstallModal.tsx      # Direct GitHub URL installer & permission auditor
+│   │   │   └── InstalledPluginsManager.tsx # Manage installed plugins & update checks
+│   │   ├── embedded/
+│   │   │   ├── EmbeddedPortalView.tsx      # Native tabbed shell for TUWEL, TISS, VoWi, Maps
+│   │   │   └── PortalControlsHeader.tsx    # Back/Forward/Reload/Theme status bar
+│   │   ├── developer/
+│   │   │   ├── DeveloperPortal.tsx         # Dev workspace, local unpacked loader, stats
+│   │   │   ├── DeveloperRegistration.tsx   # GitHub identity verification flow
+│   │   │   └── PublishPluginModal.tsx      # In-app store publishing submission wizard
+│   │   ├── auth/
+│   │   │   ├── LoginModal.tsx              # Student login & credentials entry
+│   │   │   └── UserProfileBadge.tsx        # Role badge (Student, Dev, Reviewer)
+│   │   └── settings/
+│   │       ├── ThemeCustomizer.tsx
+│   │       └── SyncSettings.tsx
+│   ├── services/
+│   │   ├── marketplace/
+│   │   │   └── GitHubPluginService.ts      # Fetch store registry & GitHub releases
+│   │   ├── auth/
+│   │   │   └── AuthService.ts              # Session token management & RBAC checks
+│   │   └── portal/
+│   │       └── PortalThemeInjector.ts      # Synthesizes CSS overrides for webviews
+│   ├── styles/
+│   │   ├── theme.css
+│   │   └── embedded-themes/                # Curated portal CSS stylesheets
+│   │       ├── tuwel.css
+│   │       ├── tiss.css
+│   │       ├── vowi.css
+│   │       └── tumaps.css
+│   └── store/
+│       ├── useAppStore.ts                  # Clean slate store (no mock plugins)
+│       ├── useAuthStore.ts                 # NEW: User session & role state
+│       └── useThemeStore.ts
+```
+
+### 14.2 Rust Crates Update (`src-tauri/Cargo.toml`)
+```toml
+[dependencies]
+# Existing dependencies
+tauri = { version = "2.0.0", features = [] }
+tauri-plugin-shell = "2.0.0"
+tauri-plugin-notification = "2.0.0"
+tauri-plugin-sql = { version = "2.0.0", features = ["sqlite"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
+regex = "1.10"
+thiserror = "1.0"
+tokio = { version = "1.38", features = ["full"] }
+
+# Phase 2 additions
+zip = { version = "2.2", default-features = false, features = ["deflate"] }
+sha2 = "0.10"
+dirs = "5.0"
+```
+
+---
+
+## 15. Phase 2 AI Worker Agent Prompts & Step-by-Step Implementation Milestones
+
+This section provides turnkey, copy-pasteable prompts for AI worker agents. Each prompt is fully self-contained, specifying objectives, files, exact contracts, verification commands, and git commit hygiene.
+
+---
+
+### Milestone 8 Prompt: Clean-Slate Purge & Marketplace-First Shell Refactor
+
+```markdown
+You are an expert full-stack desktop software engineer working on TU Cockpit.
+
+### Objective:
+Purge all Phase 1 mock/example plugins, remove hardcoded deadlines, and transform the Cockpit into a clean-slate, marketplace-first student workstation.
+
+### Tasks:
+1. Delete the starter plugin mock bundle `plugins/tuwel-deadlines/` and remove `TUWEL_STARTER_HTML` from `src/App.tsx`.
+2. In `src/store/useAppStore.ts`:
+   - Initialize `installedPlugins` as an empty object `{}`.
+   - Set `activeView` default to `"marketplace"`.
+   - Update `dockPinnedIds` to default to `["marketplace", "portals", "settings"]`.
+   - Remove any auto-installation logic on startup.
+3. In `src/components/dock/Dock.tsx`:
+   - Remove hardcoded `tuwien.tuwel.deadlines` item.
+   - Render:
+     - `Marketplace` (Store icon, default view)
+     - `University Portals` (GraduationCap icon, switches to embedded portals)
+     - Dynamically mapped icons for any installed plugins in `installedPlugins`
+     - `Developer Portal` (Code icon, rendered if user role is developer or devMode is on)
+     - `Settings` (Palette icon)
+4. In `src/App.tsx`:
+   - Refactor the main layout to render `PluginMarketplace` by default when no plugin is active.
+   - Remove the hardcoded deadlines widget grid and external link tiles from the dashboard view.
+   - Ensure clean aesthetic styling adhering to `--tu-*` CSS design tokens.
+
+### Verification:
+- Run `npm run build` and ensure zero TypeScript errors.
+- Launch `npm run tauri dev` or test the bundle: verify that the application boots up clean with zero mock plugins installed and displays the Marketplace.
+
+### Git Hygiene:
+Commit message:
+`feat(shell): purge mock plugins and establish marketplace-first clean slate`
+```
+
+---
+
+### Milestone 9 Prompt: Rust GitHub Plugin Downloader & Dynamic Manifest Installer
+
+```markdown
+You are an expert Rust and Tauri systems engineer working on TU Cockpit.
+
+### Objective:
+Implement the Rust backend and TypeScript frontend service to download, verify, unpack, and register community plugins directly from GitHub releases or repository URLs.
+
+### Tasks:
+1. In `src-tauri/Cargo.toml`, add `zip = { version = "2.2", default-features = false, features = ["deflate"] }` and `sha2 = "0.10"`.
+2. Create `src-tauri/src/plugin_downloader.rs`:
+   - Implement `install_plugin_from_github(app: tauri::AppHandle, repo_url: String, release_tag: Option<String>) -> Result<InstalledPluginMetadata, String>`:
+     - Parses GitHub repository owner and name from URL.
+     - Resolves the download URL (queries GitHub Releases API or uses release tag).
+     - Downloads the release archive (.zip) into a temporary buffer using `reqwest`.
+     - Validates safety: checks for path traversal vulnerabilities (`..` or absolute paths in zip file entries).
+     - Verifies `manifest.json` exists in root of archive, parses and validates required fields (`id`, `name`, `version`, `entrypoint`, `capabilities`).
+     - Extracts files into `$APPDATA/at.ac.tuwien.cockpit/plugins/<plugin_id>/<version>/`.
+     - Returns parsed metadata to the caller.
+3. Register the new command in `src-tauri/src/lib.rs` under `generate_handler![..., install_plugin_from_github]`.
+4. In `src/services/marketplace/GitHubPluginService.ts`:
+   - Create TypeScript client invoking `install_plugin_from_github`.
+   - Provide helper to fetch and parse remote `store-registry.json`.
+5. In `src/components/marketplace/GitHubInstallModal.tsx`:
+   - Build a sleek modal allowing users to enter a GitHub repository URL (e.g. `https://github.com/alice/my-plugin`).
+   - Fetches and displays a permission summary (network domains requested, storage quota, notifications).
+   - "Confirm & Install" button invokes the installation flow and updates `useAppStore`.
+
+### Verification:
+- Run `cargo check --manifest-path src-tauri/Cargo.toml` to verify Rust compilation.
+- Run `npm run build` to verify frontend typing.
+
+### Git Hygiene:
+Commit message:
+`feat(marketplace): implement secure github plugin downloader and dynamic unpacker`
+```
+
+---
+
+### Milestone 10 Prompt: Embedded University Webviews (TUWEL, TISS, VoWi, TU Maps) with Custom Tab Shell
+
+```markdown
+You are a senior Tauri v2 and React developer working on TU Cockpit.
+
+### Objective:
+Embed institutional university websites (TUWEL, TISS, VoWi Wiki, TU Maps) directly into TU Cockpit so students do not need external browser windows, wrapped in a tabbed browser control shell.
+
+### Tasks:
+1. In `src-tauri/src/embedded_portals.rs`:
+   - Implement Tauri v2 webview or window management for institutional portals:
+     - URLs:
+       - TUWEL: `https://tuwel.tuwien.ac.at`
+       - TISS: `https://tiss.tuwien.ac.at`
+       - VoWi: `https://vowi.fsinf.at`
+       - TU Maps: `https://maps.tuwien.ac.at`
+     - Provide commands:
+       - `navigate_portal(portal_id: String, url: String)`
+       - `reload_portal(portal_id: String)`
+       - `portal_go_back(portal_id: String)`
+       - `portal_go_forward(portal_id: String)`
+2. In `src/components/embedded/EmbeddedPortalView.tsx`:
+   - Create a workstation viewport with top tab switcher:
+     - `[TUWEL Moodle]` `[TISS Portal]` `[VoWi Wiki]` `[TU Campus Maps]`
+   - Add a navigation toolbar:
+     - Back / Forward / Reload buttons
+     - Current URL display with secure lock icon
+     - "Open in External Browser" fallback action (via `@tauri-apps/plugin-shell`)
+     - Theme styling status badge ("Theme: Active")
+3. Connect `activeView === "portals"` in `src/App.tsx` and add a quick launcher in the Dock.
+
+### Verification:
+- Build the project with `npm run build` and `cargo check --manifest-path src-tauri/Cargo.toml`.
+- Ensure all 4 portal tabs switch smoothly without losing authentication session cookies.
+
+### Git Hygiene:
+Commit message:
+`feat(portals): implement embedded university webviews for tuwel, tiss, vowi, and tu maps`
+```
+
+---
+
+### Milestone 11 Prompt: University Theme Injection Engine & Curated CSS Overrides
+
+```markdown
+You are an expert CSS architect and frontend engineer working on TU Cockpit.
+
+### Objective:
+Implement the real-time theme injection engine that customizes embedded university portals (TUWEL, TISS, VoWi, TU Maps) to match the user's active TU Cockpit color scheme and typography.
+
+### Tasks:
+1. Create stylesheet adapters in `src/styles/embedded-themes/`:
+   - `tuwel.css`: Custom dark/theme styling for Moodle 4.x navigation drawer, cards, assignment dropzones, and tables.
+   - `tiss.css`: Modernized card/table styling for TISS course search, exam registration, and gradebook.
+   - `vowi.css`: Clean dark theme for MediaWiki typography, content panels, and tables.
+   - `tumaps.css`: Canvas map filter inversion (`invert(90%) hue-rotate(180deg)`), floor selectors, and info cards.
+2. In `src/services/portal/PortalThemeInjector.ts`:
+   - Synthesize CSS containing active `:root` `--tu-*` tokens from `useThemeStore` merged with the target portal's CSS adapter.
+   - Expose `generateInjectedCss(portalId: string): string`.
+3. In `src-tauri/src/embedded_portals.rs`:
+   - Implement `inject_theme_css(portal_id: String, css: String)` which evaluates a DOM script inside the webview to insert or update a `<style id="tu-cockpit-injected-theme">` tag.
+4. In `src/store/useThemeStore.ts`:
+   - When the user changes themes, fonts, or colors in `ThemeCustomizer.tsx`, automatically broadcast the updated CSS to all active university portal webviews in real time.
+
+### Verification:
+- Test theme switching in Settings: verify that when switching between "TU Wien Night", "Catppuccin", and "TU Wien Daylight", the embedded TUWEL and TISS views adapt their colors without requiring a page reload.
+
+### Git Hygiene:
+Commit message:
+`feat(theming): implement live css theme injection engine for embedded university portals`
+```
+
+---
+
+### Milestone 12 Prompt: Student Authentication & Role-Based Access Control (RBAC)
+
+```markdown
+You are a desktop security and identity architect working on TU Cockpit.
+
+### Objective:
+Implement student authentication, credential vaulting via OS Keyring, and Role-Based Access Control (Guest, Student, Developer, Reviewer).
+
+### Tasks:
+1. Create `src/store/useAuthStore.ts`:
+   - Define `UserRole`: `"guest" | "student" | "developer" | "reviewer"`.
+   - Manage state for `currentUser: UserProfile | null`, `isAuthenticated: boolean`, and `devModeEnabled: boolean`.
+   - Provide actions: `login(credentials)`, `logout()`, `setDevMode(enabled)`.
+2. In `src/services/auth/AuthService.ts`:
+   - Validate TU Wien student email format (`eXXXXXXX@student.tuwien.ac.at`) and matriculation number.
+   - Store session token securely via Tauri OS Keyring / Keychain plugin.
+3. In `src/components/auth/LoginModal.tsx`:
+   - Design a student login modal adhering to Cockpit design tokens.
+   - Display student profile badge in the top header (`UserProfileBadge.tsx`) showing matriculation number and role badge.
+4. Enforce RBAC permissions across the app:
+   - Restrict direct unvetted GitHub plugin installation to `developer` role.
+   - Restrict developer portal access and local sideloading to `developer` role.
+   - Allow `guest` and `student` to browse the store and use embedded portals freely.
+
+### Verification:
+- Run `npm run build` to verify clean type-checking.
+- Test login flow: verify role badge displays properly in header and developer permissions gate appropriately.
+
+### Git Hygiene:
+Commit message:
+`feat(auth): implement student authentication, os keyring storage, and role-based access control`
+```
+
+---
+
+### Milestone 13 Prompt: Developer Registration & Marketplace Publishing Application System
+
+```markdown
+You are a full-stack engineer working on TU Cockpit.
+
+### Objective:
+Implement the Developer Registration flow and the Marketplace Publishing Application wizard for student developers to submit plugins to the official community store.
+
+### Tasks:
+1. In `src/components/developer/DeveloperRegistration.tsx`:
+   - Create registration screen for students to apply for Developer rights.
+   - Form inputs: GitHub username, developer display name, agreement to Developer Security Charter.
+   - Generates verification token string for the student to confirm GitHub identity.
+   - On submission, elevates account role to `developer`.
+2. In `src/components/developer/DeveloperPortal.tsx`:
+   - Build developer hub showing:
+     - Developer identity and linked GitHub account.
+     - **Local Sideloading Tool:** Select local folder on disk with `manifest.json` to test unpacked plugins in Cockpit sandbox.
+     - **Active Projects & Submissions:** List of submitted plugins with status badges (`Draft`, `Submitted`, `In Review`, `Approved`).
+3. In `src/components/developer/PublishPluginModal.tsx`:
+   - In-app wizard to apply for marketplace publishing rights:
+     - Plugin ID, Name, Description, Categories.
+     - GitHub Repository URL and Release Tag.
+     - Capability justification inputs (explaining why each network domain or permission is needed).
+     - Automated pre-flight linting of `manifest.json` against the schema.
+     - Dispatches submission payload (generates GitOps pull request or submits to community API).
+
+### Verification:
+- Run `npm run build`.
+- Test Developer registration: verify role switch enables local plugin sideloading and publishing submission modal.
+
+### Git Hygiene:
+Commit message:
+`feat(developer): implement developer registration and marketplace publishing application workflow`
+```
+
+
 
