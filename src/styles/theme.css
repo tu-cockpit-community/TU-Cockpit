@@ -1,0 +1,53 @@
+/* TU Cockpit Central Design Token Engine */
+
+:root {
+  /* Default Theme: TU Wien Night */
+  --tu-bg-base: #0f172a;
+  --tu-bg-surface: #1e293b;
+  --tu-bg-card: #334155;
+  --tu-bg-hover: #475569;
+
+  --tu-border: #334155;
+  --tu-border-subtle: #1e293b;
+  --tu-border-focus: #38bdf8;
+
+  --tu-text-primary: #f8fafc;
+  --tu-text-secondary: #94a3b8;
+  --tu-text-muted: #64748b;
+  --tu-text-accent: #38bdf8;
+
+  --tu-accent: #006699;
+  --tu-accent-hover: #007ab8;
+  --tu-accent-contrast: #ffffff;
+  --tu-danger: #ef4444;
+  --tu-success: #10b981;
+  --tu-warning: #f59e0b;
+
+  --tu-font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --tu-font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  --tu-font-size-base: 14px;
+  --tu-ui-scale: 1.0;
+
+  --tu-radius-sm: 4px;
+  --tu-radius: 8px;
+  --tu-radius-lg: 12px;
+  --tu-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+}
+
+/* Fluid UI Scaling wrapper */
+html {
+  font-size: calc(var(--tu-font-size-base) * var(--tu-ui-scale));
+}
+
+body {
+  font-family: var(--tu-font-sans);
+  background-color: var(--tu-bg-base);
+  color: var(--tu-text-primary);
+  min-height: 100vh;
+  margin: 0;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+code, pre, kbd {
+  font-family: var(--tu-font-mono);
+}
