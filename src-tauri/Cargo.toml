@@ -25,3 +25,6 @@ thiserror = "1.0"
 tokio = { version = "1.38", features = ["full"] }
 zip = { version = "2.2", default-features = false, features = ["deflate"] }
 sha2 = "0.10"
+totp-lite = "2.0.1"
+base32 = "0.5.1"
+keyring = "4.2.0"

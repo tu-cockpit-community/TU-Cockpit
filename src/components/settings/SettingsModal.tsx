@@ -3,19 +3,21 @@ import { ThemeCustomizer } from "./ThemeCustomizer";
 import { SyncSettings } from "./SyncSettings";
 import { LayoutSettings } from "./LayoutSettings";
 import { AccountSettings } from "./AccountSettings";
+import { AccountAutofillSettings } from "./AccountAutofillSettings";
 import {
   X,
   Palette,
   Cloud,
   Layout,
   User,
+  KeyRound,
   Settings as SettingsIcon,
 } from "lucide-react";
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialTab?: "themes" | "sync" | "layout" | "account";
+  initialTab?: "themes" | "sync" | "layout" | "account" | "autofill";
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -23,7 +25,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
   initialTab = "themes",
 }) => {
-  const [activeTab, setActiveTab] = useState<"themes" | "sync" | "layout" | "account">(initialTab);
+  const [activeTab, setActiveTab] = useState<
+    "themes" | "sync" | "layout" | "account" | "autofill"
+  >(initialTab);
 
   if (!isOpen) return null;
 
@@ -101,6 +105,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <User className="w-3.5 h-3.5" />
             Student Account & GitHub
           </button>
+
+          <button
+            onClick={() => setActiveTab("autofill")}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-[var(--tu-radius-sm)] transition-all cursor-pointer ${
+              activeTab === "autofill"
+                ? "bg-[var(--tu-accent)] text-[var(--tu-accent-contrast)] shadow-sm"
+                : "text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)]"
+            }`}
+          >
+            <KeyRound className="w-3.5 h-3.5" />
+            Credentials & MFA Vault
+          </button>
         </div>
 
         {/* Content Body */}
@@ -109,6 +125,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {activeTab === "sync" && <SyncSettings />}
           {activeTab === "layout" && <LayoutSettings />}
           {activeTab === "account" && <AccountSettings />}
+          {activeTab === "autofill" && <AccountAutofillSettings />}
         </div>
       </div>
     </div>

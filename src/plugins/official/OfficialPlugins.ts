@@ -175,6 +175,119 @@ const createPortalHtml = (
       <span>${description}</span>
     </div>
   </div>
+
+  <script>
+    let rpcPort = null;
+    let autofillPayload = null;
+
+    window.addEventListener('message', function(event) {
+      if (event.data && event.data.type === 'INIT_RPC_PORT') {
+        rpcPort = event.ports[0];
+        rpcPort.onmessage = function(e) {
+          if (e.data && e.data.id === 'autofill_req' && e.data.result) {
+            autofillPayload = e.data.result;
+            setupAutofill();
+          }
+        };
+        rpcPort.postMessage({
+          jsonrpc: '2.0',
+          id: 'autofill_req',
+          method: 'autofill:getPayload'
+        });
+      }
+    });
+
+    function setupAutofill() {
+      if (!autofillPayload || !autofillPayload.auto_fill) return;
+      const iframe = document.getElementById('portal-frame');
+      if (!iframe) return;
+
+      const runAutofill = () => {
+        try {
+          const doc = iframe.contentDocument || iframe.contentWindow.document;
+          if (!doc) return;
+
+          const userSelectors = ['input[name="j_username"]', 'input[name="username"]', 'input#username', 'input#id_username', 'input[type="email"]'];
+          const passSelectors = ['input[name="j_password"]', 'input[name="password"]', 'input#password', 'input#id_password', 'input[type="password"]'];
+          const mfaSelectors = ['input[name="token"]', 'input[name="totp"]', 'input#token', 'input[autocomplete="one-time-code"]'];
+
+          let filled = false;
+          let details = [];
+
+          if (autofillPayload.username) {
+            for (const sel of userSelectors) {
+              const el = doc.querySelector(sel);
+              if (el && !el.value) {
+                el.focus();
+                el.value = autofillPayload.username;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+                filled = true;
+                details.push('Username');
+                break;
+              }
+            }
+          }
+
+          if (autofillPayload.password) {
+            for (const sel of passSelectors) {
+              const el = doc.querySelector(sel);
+              if (el && !el.value) {
+                el.focus();
+                el.value = autofillPayload.password;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+                filled = true;
+                details.push('Password');
+                break;
+              }
+            }
+          }
+
+          if (autofillPayload.totp_code) {
+            for (const sel of mfaSelectors) {
+              const el = doc.querySelector(sel);
+              if (el && !el.value) {
+                el.focus();
+                el.value = autofillPayload.totp_code;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+                filled = true;
+                details.push('MFA Token');
+                break;
+              }
+            }
+          }
+
+          if (filled && !doc.getElementById('tu-cockpit-autofill-badge')) {
+            const badge = doc.createElement('div');
+            badge.id = 'tu-cockpit-autofill-badge';
+            badge.style.position = 'fixed';
+            badge.style.top = '12px';
+            badge.style.right = '12px';
+            badge.style.zIndex = '999999';
+            badge.style.background = '#0f172a';
+            badge.style.color = '#38bdf8';
+            badge.style.border = '1px solid #0284c7';
+            badge.style.borderRadius = '20px';
+            badge.style.padding = '6px 14px';
+            badge.style.fontSize = '12px';
+            badge.style.fontWeight = '600';
+            badge.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+            badge.style.boxShadow = '0 10px 25px rgba(0,0,0,0.4)';
+            badge.innerHTML = '🔐 Autofilled by TU Cockpit (' + details.join(', ') + ')';
+            doc.body.appendChild(badge);
+            setTimeout(() => { if (badge.parentNode) badge.remove(); }, 5000);
+          }
+        } catch (e) {
+          // Cross-origin boundary handled gracefully
+        }
+      };
+
+      iframe.addEventListener('load', runAutofill);
+      setInterval(runAutofill, 1000);
+    }
+  </script>
 </body>
 </html>`;
 

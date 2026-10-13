@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useThemeStore } from "@/store/useThemeStore";
+import { AutofillDaemon } from "@/services/auth/AutofillDaemon";
 
 export interface PluginFrameProps {
   pluginId: string;
@@ -107,6 +108,20 @@ export const PluginFrame: React.FC<PluginFrameProps> = ({
           const { key, value } = params || {};
           localStorage.setItem(`tu_plugin:${pluginId}:${key}`, value);
           port1.postMessage({ jsonrpc: "2.0", id, result: true });
+        } else if (method === "autofill:getPayload") {
+          if (pluginId.startsWith("tuwien.official.")) {
+            const payload = await AutofillDaemon.getAutofillPayload();
+            port1.postMessage({ jsonrpc: "2.0", id, result: payload });
+          } else {
+            port1.postMessage({
+              jsonrpc: "2.0",
+              id,
+              error: {
+                code: -32603,
+                message: "Access Denied: Autofill credentials are restricted to official university plugins.",
+              },
+            });
+          }
         } else {
           port1.postMessage({
             jsonrpc: "2.0",
