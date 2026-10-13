@@ -5,6 +5,7 @@ import {
   StoreRegistryPlugin,
 } from "@/services/marketplace/GitHubPluginService";
 import { CommunityOrgService } from "@/services/marketplace/CommunityOrgService";
+import { CommunityAuthorBadge } from "./CommunityAuthorBadge";
 import {
   Download,
   Trash2,
@@ -223,19 +224,9 @@ export const PluginMarketplace: React.FC = () => {
                           <ShieldCheck className="w-3.5 h-3.5 text-[var(--tu-accent)] shrink-0" />
                         )}
                       </h3>
-                      <span className="text-[11px] text-[var(--tu-text-secondary)] flex items-center gap-1 mt-0.5">
-                        <span>by {plugin.author.name}</span>
-                        {plugin.author.github && (
-                          <a
-                            href={`https://github.com/${plugin.author.github}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-[var(--tu-text-muted)] hover:text-[var(--tu-text-primary)]"
-                          >
-                            <Github className="w-3 h-3" />
-                          </a>
-                        )}
-                      </span>
+                      <div className="mt-1">
+                        <CommunityAuthorBadge author={plugin.author} />
+                      </div>
                     </div>
 
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--tu-bg-card)] border border-[var(--tu-border)] text-[var(--tu-text-muted)]">

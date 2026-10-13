@@ -8,7 +8,6 @@ import { ExecutiveHeader } from "@/components/header/ExecutiveHeader";
 import { SettingsModal } from "@/components/settings/SettingsModal";
 import { PluginMarketplace } from "@/components/marketplace/PluginMarketplace";
 import { EmbeddedPortalView } from "@/components/embedded/EmbeddedPortalView";
-import { DeveloperPortal } from "@/components/developer/DeveloperPortal";
 import { GitHubInstallModal } from "@/components/marketplace/GitHubInstallModal";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { SyncSettings } from "@/components/settings/SyncSettings";
@@ -42,9 +41,6 @@ export const App: React.FC = () => {
 
       {/* Legacy Portals View (Fallback) */}
       {activeView === "portals" && <EmbeddedPortalView />}
-
-      {/* Developer Portal View */}
-      {activeView === "developer" && <DeveloperPortal />}
 
       {/* Sandboxed Plugin View */}
       {activeView === "plugin" && activePlugin && (

@@ -42,7 +42,7 @@ export interface InstalledPlugin {
   installDir?: string;
 }
 
-export type SystemView = "marketplace" | "portals" | "developer" | "settings";
+export type SystemView = "marketplace" | "portals" | "settings";
 
 export type NavOrientation = "left" | "right" | "bottom" | "top";
 

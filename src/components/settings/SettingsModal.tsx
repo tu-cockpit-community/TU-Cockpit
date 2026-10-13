@@ -2,18 +2,20 @@ import React, { useState } from "react";
 import { ThemeCustomizer } from "./ThemeCustomizer";
 import { SyncSettings } from "./SyncSettings";
 import { LayoutSettings } from "./LayoutSettings";
+import { AccountSettings } from "./AccountSettings";
 import {
   X,
   Palette,
   Cloud,
   Layout,
+  User,
   Settings as SettingsIcon,
 } from "lucide-react";
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialTab?: "themes" | "sync" | "layout";
+  initialTab?: "themes" | "sync" | "layout" | "account";
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -21,7 +23,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
   initialTab = "themes",
 }) => {
-  const [activeTab, setActiveTab] = useState<"themes" | "sync" | "layout">(initialTab);
+  const [activeTab, setActiveTab] = useState<"themes" | "sync" | "layout" | "account">(initialTab);
 
   if (!isOpen) return null;
 
@@ -87,6 +89,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <Layout className="w-3.5 h-3.5" />
             Navigation & Layout
           </button>
+
+          <button
+            onClick={() => setActiveTab("account")}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-[var(--tu-radius-sm)] transition-all cursor-pointer ${
+              activeTab === "account"
+                ? "bg-[var(--tu-accent)] text-[var(--tu-accent-contrast)] shadow-sm"
+                : "text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)]"
+            }`}
+          >
+            <User className="w-3.5 h-3.5" />
+            Student Account & GitHub
+          </button>
         </div>
 
         {/* Content Body */}
@@ -94,6 +108,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {activeTab === "themes" && <ThemeCustomizer />}
           {activeTab === "sync" && <SyncSettings />}
           {activeTab === "layout" && <LayoutSettings />}
+          {activeTab === "account" && <AccountSettings />}
         </div>
       </div>
     </div>

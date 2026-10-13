@@ -9,6 +9,7 @@ export interface StoreRegistryPlugin {
     name: string;
     github?: string;
     url?: string;
+    matriculationNumber?: string;
   };
   description: string;
   category: "Academic" | "Campus Life" | "Productivity";
@@ -225,6 +226,27 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
       verified: true,
       rating: 4.6,
       downloads: 2890,
+    },
+    {
+      id: "tuwien.community.freihaus-timer",
+      name: "Freihaus Focus Timer",
+      version: "1.0.0",
+      author: {
+        name: "Stefan Weber",
+        github: "stefanweber",
+        matriculationNumber: "11823456",
+      },
+      description: "Custom study pomodoro timer designed for Freihaus library work blocks with break notifications.",
+      category: "Productivity",
+      githubRepo: "https://github.com/tu-cockpit-community/freihaus-focus-timer",
+      capabilities: {
+        network: [],
+        storage: { quotaBytes: 524288 },
+        notifications: true,
+      },
+      verified: true,
+      rating: 5.0,
+      downloads: 1240,
     },
   ],
 };
