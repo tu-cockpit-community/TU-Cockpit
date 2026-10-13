@@ -107,8 +107,8 @@ graph TD
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/tu-cockpit-community/tu-cockpit.git
-cd tu-cockpit
+git clone https://github.com/tu-cockpit-community/TU-Cockpit.git
+cd TU-Cockpit
 npm install
 ```
 

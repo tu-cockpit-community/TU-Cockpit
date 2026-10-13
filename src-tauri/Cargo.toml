@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "TU Cockpit - Desktop Hub & Dynamic Plugin Ecosystem for TU Wien Students"
 authors = ["TU Wien Community"]
 edition = "2021"
+repository = "https://github.com/tu-cockpit-community/TU-Cockpit"
+homepage = "https://github.com/tu-cockpit-community/TU-Cockpit"
 
 [lib]
 name = "tu_cockpit_lib"

@@ -9,6 +9,15 @@
 > - 🟢 **PHASE 4 (COMPLETED):** Native Child-Webviews (`tauri::Webview`) for TUWEL/TISS, Exploit Prevention (Marketplace-Only Policy), Community Store Developer Guide Tab, Living GitHub `README.md` (Milestones 20–23)  
 > - 🔵 **PHASE 5 (PLANNED / UPCOMING):** Global Command Palette (`Cmd+K`), Split-View Multitasking & Detachable Windows, Deadline Aggregator & Calendar Sync, Offline Slide Caching, and In-App Auto-Updater (Milestones 24–28)
 
+> [!IMPORTANT]
+> **OFFICIAL REPOSITORY & GITHUB COMMUNITY ORGANIZATION:**
+> - **Official Organization:** [`tu-cockpit-community`](https://github.com/tu-cockpit-community)
+> - **Official Core Project Repository:** [`tu-cockpit-community/TU-Cockpit`](https://github.com/tu-cockpit-community/TU-Cockpit)
+> - **Git Remote Origin:** `https://github.com/tu-cockpit-community/TU-Cockpit.git`
+> - **Auto-Updater & Release Endpoints:** `https://github.com/tu-cockpit-community/TU-Cockpit/releases/latest/download/latest.json`
+> - **MANDATE FOR ALL AGENTS & CONTRIBUTORS:**
+>   All worker agents, documentation, CI/CD pipelines, and configuration files **MUST** target and reference `https://github.com/tu-cockpit-community/TU-Cockpit`. All previous personal repository URLs (such as `OliverKnapp/Tuwel-Tools`) are permanently superseded by this official community organization repository.
+
 ---
 
 ## Master Table of Contents
@@ -3324,7 +3333,7 @@ Implement a seamless, cryptographically signed in-app auto-updater using `@tauri
      "plugins": {
        "updater": {
          "endpoints": [
-           "https://github.com/OliverKnapp/Tuwel-Tools/releases/latest/download/latest.json"
+           "https://github.com/tu-cockpit-community/TU-Cockpit/releases/latest/download/latest.json"
          ],
          "pubkey": "YOUR_MINISIGN_ED25519_PUBLIC_KEY"
        }
