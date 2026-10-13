@@ -4,6 +4,7 @@ import { SyncSettings } from "./SyncSettings";
 import { LayoutSettings } from "./LayoutSettings";
 import { AccountSettings } from "./AccountSettings";
 import { AccountAutofillSettings } from "./AccountAutofillSettings";
+import { UpdateSettings } from "./UpdateSettings";
 import {
   X,
   Palette,
@@ -11,13 +12,14 @@ import {
   Layout,
   User,
   KeyRound,
+  Rocket,
   Settings as SettingsIcon,
 } from "lucide-react";
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialTab?: "themes" | "sync" | "layout" | "account" | "autofill";
+  initialTab?: "themes" | "sync" | "layout" | "account" | "autofill" | "updates";
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -26,7 +28,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   initialTab = "themes",
 }) => {
   const [activeTab, setActiveTab] = useState<
-    "themes" | "sync" | "layout" | "account" | "autofill"
+    "themes" | "sync" | "layout" | "account" | "autofill" | "updates"
   >(initialTab);
 
   if (!isOpen) return null;
@@ -117,6 +119,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <KeyRound className="w-3.5 h-3.5" />
             Credentials & MFA Vault
           </button>
+
+          <button
+            onClick={() => setActiveTab("updates")}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-[var(--tu-radius-sm)] transition-all cursor-pointer ${
+              activeTab === "updates"
+                ? "bg-[var(--tu-accent)] text-[var(--tu-accent-contrast)] shadow-sm"
+                : "text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)]"
+            }`}
+          >
+            <Rocket className="w-3.5 h-3.5" />
+            Software Updates
+          </button>
         </div>
 
         {/* Content Body */}
@@ -126,6 +140,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {activeTab === "layout" && <LayoutSettings />}
           {activeTab === "account" && <AccountSettings />}
           {activeTab === "autofill" && <AccountAutofillSettings />}
+          {activeTab === "updates" && <UpdateSettings />}
         </div>
       </div>
     </div>

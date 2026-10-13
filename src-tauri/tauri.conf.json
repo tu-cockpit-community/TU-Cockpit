@@ -35,5 +35,13 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/tu-cockpit-community/TU-Cockpit/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlGRjZFOTM5QkY2QzhGOUUKUldTQ3QvT1Z1Nml1VDFpTGl4Z1h6Z29xTld4MWxYSnI5TStQYzlTUTVjUUlxL3lHQkx6c1ZzR2cK"
+    }
   }
 }
