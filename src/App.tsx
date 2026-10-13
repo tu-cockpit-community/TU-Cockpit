@@ -11,17 +11,17 @@ import { PluginMarketplace } from "@/components/marketplace/PluginMarketplace";
 import { EmbeddedPortalView } from "@/components/embedded/EmbeddedPortalView";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { SyncSettings } from "@/components/settings/SyncSettings";
-import { X, Store } from "lucide-react";
+import { X } from "lucide-react";
 
 export const App: React.FC = () => {
   const {
     activeView,
     activePluginId,
     installedPlugins,
-    setActiveView,
     isSyncModalOpen,
     setSyncModalOpen,
     navOrientation,
+    toggleSidebar,
   } = useAppStore();
 
   const { applyToRoot } = useThemeStore();
@@ -32,56 +32,55 @@ export const App: React.FC = () => {
     applyToRoot();
   }, [applyToRoot]);
 
+  // Global shortcut: Cmd+B / Ctrl+B to toggle sidebar when orientation is left/right
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
+        if (navOrientation === "left" || navOrientation === "right") {
+          e.preventDefault();
+          toggleSidebar();
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [navOrientation, toggleSidebar]);
+
   const activePlugin = activePluginId ? installedPlugins[activePluginId] : null;
 
-  const renderMainContent = () => (
-    <main className="flex-1 overflow-y-auto p-6 relative">
-      {/* Marketplace View (Default Clean Slate Hub) */}
-      {activeView === "marketplace" && <PluginMarketplace />}
+  const renderMainContent = () => {
+    if (activeView === "plugin" && activePlugin) {
+      return (
+        <main className="flex-1 w-full h-full relative overflow-hidden p-0 m-0">
+          {activePlugin.manifest.id.startsWith("tuwien.official.") &&
+          activePlugin.manifest.homepage ? (
+            <NativePortalContainer
+              key={activePlugin.manifest.id}
+              portalId={activePlugin.manifest.id}
+              url={activePlugin.manifest.homepage}
+              title={activePlugin.manifest.name}
+            />
+          ) : (
+            <PluginFrame
+              pluginId={activePlugin.manifest.id}
+              htmlContent={activePlugin.htmlContent}
+              allowedGlobs={activePlugin.manifest.capabilities?.network || []}
+            />
+          )}
+        </main>
+      );
+    }
 
-      {/* Legacy Portals View (Fallback) */}
-      {activeView === "portals" && <EmbeddedPortalView />}
+    return (
+      <main className="flex-1 overflow-y-auto p-6 relative">
+        {/* Marketplace View (Default Clean Slate Hub) */}
+        {activeView === "marketplace" && <PluginMarketplace />}
 
-      {/* Sandboxed Plugin View */}
-      {activeView === "plugin" && activePlugin && (
-        <div className="max-w-6xl mx-auto h-[calc(100vh-140px)] flex flex-col gap-3 pb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold">{activePlugin.manifest.name}</h2>
-              <span className="text-xs text-[var(--tu-text-secondary)] font-mono">
-                {activePlugin.manifest.id} (v{activePlugin.manifest.version})
-              </span>
-            </div>
-            <button
-              onClick={() => setActiveView("marketplace")}
-              className="px-3 py-1.5 text-xs rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-card)] border border-[var(--tu-border)] hover:bg-[var(--tu-bg-hover)] text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] flex items-center gap-1.5 cursor-pointer"
-            >
-              <Store className="w-3.5 h-3.5" />
-              Return to Marketplace
-            </button>
-          </div>
-
-          <div className="flex-1 w-full h-full">
-            {activePlugin.manifest.id.startsWith("tuwien.official.") &&
-            activePlugin.manifest.homepage ? (
-              <NativePortalContainer
-                key={activePlugin.manifest.id}
-                portalId={activePlugin.manifest.id}
-                url={activePlugin.manifest.homepage}
-                title={activePlugin.manifest.name}
-              />
-            ) : (
-              <PluginFrame
-                pluginId={activePlugin.manifest.id}
-                htmlContent={activePlugin.htmlContent}
-                allowedGlobs={activePlugin.manifest.capabilities?.network || []}
-              />
-            )}
-          </div>
-        </div>
-      )}
-    </main>
-  );
+        {/* Legacy Portals View (Fallback) */}
+        {activeView === "portals" && <EmbeddedPortalView />}
+      </main>
+    );
+  };
 
   return (
     <div className="h-screen w-screen bg-[var(--tu-bg-base)] text-[var(--tu-text-primary)] overflow-hidden transition-colors duration-200">

@@ -14,11 +14,15 @@ import {
   Trash2,
   Folder,
   SlidersHorizontal,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 
 export const ConfigurableNav: React.FC = () => {
   const {
     navOrientation,
+    isSidebarCollapsed,
+    toggleSidebar,
     activeView,
     activePluginId,
     installedPlugins,
@@ -42,29 +46,122 @@ export const ConfigurableNav: React.FC = () => {
   // Vertical Sidebar Rendering (Left or Right)
   if (navOrientation === "left" || navOrientation === "right") {
     const borderSide = navOrientation === "left" ? "border-r" : "border-l";
+    const tooltipPos =
+      navOrientation === "left"
+        ? "left-full ml-2 -translate-x-1 group-hover:translate-x-0"
+        : "right-full mr-2 translate-x-1 group-hover:translate-x-0";
 
+    // Collapsed Icon-Rail Mode (56px)
+    if (isSidebarCollapsed) {
+      return (
+        <aside
+          className={`w-14 h-full bg-[var(--tu-bg-surface)] ${borderSide} border-[var(--tu-border)] flex flex-col items-center shrink-0 select-none z-20 transition-all duration-200`}
+        >
+          {/* Top: Expand Toggle */}
+          <div className="p-2 border-b border-[var(--tu-border)] w-full flex items-center justify-center">
+            <button
+              onClick={toggleSidebar}
+              className="p-2 rounded-[var(--tu-radius-sm)] text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] transition-colors cursor-pointer"
+              title="Expand Sidebar (Cmd+B)"
+            >
+              <PanelLeftOpen className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Marketplace Button */}
+          <div className="p-2 border-b border-[var(--tu-border)] w-full flex flex-col items-center">
+            <button
+              onClick={() => setActiveView("marketplace")}
+              className={`relative group p-2.5 rounded-[var(--tu-radius-sm)] transition-all cursor-pointer ${
+                activeView === "marketplace"
+                  ? "bg-[var(--tu-accent)] text-[var(--tu-accent-contrast)] shadow-md"
+                  : "text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)]"
+              }`}
+              title="Community Store"
+            >
+              <Store className="w-4 h-4" />
+              <span className={`pointer-events-none absolute top-1/2 -translate-y-1/2 px-2.5 py-1 text-xs font-semibold rounded whitespace-nowrap bg-[var(--tu-bg-card)] text-[var(--tu-text-primary)] border border-[var(--tu-border)] opacity-0 transition-all duration-150 group-hover:opacity-100 shadow-xl z-50 ${tooltipPos}`}>
+                Community Store
+              </span>
+            </button>
+          </div>
+
+          {/* Compact Icon Rail for Installed Plugins */}
+          <div className="flex-1 overflow-y-auto p-2 space-y-1.5 w-full flex flex-col items-center">
+            {Object.values(installedPlugins).map((p) => {
+              const isPluginActive =
+                activeView === "plugin" && activePluginId === p.manifest.id;
+
+              return (
+                <button
+                  key={p.manifest.id}
+                  onClick={() => setActiveView("plugin", p.manifest.id)}
+                  className={`relative group p-2.5 rounded-[var(--tu-radius-sm)] transition-all cursor-pointer ${
+                    isPluginActive
+                      ? "bg-[var(--tu-accent)]/15 text-[var(--tu-accent)] font-semibold shadow-sm"
+                      : "text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)]"
+                  }`}
+                  title={p.manifest.name}
+                >
+                  {getPluginIcon(p.manifest.id)}
+                  <span className={`pointer-events-none absolute top-1/2 -translate-y-1/2 px-2.5 py-1 text-xs font-semibold rounded whitespace-nowrap bg-[var(--tu-bg-card)] text-[var(--tu-text-primary)] border border-[var(--tu-border)] opacity-0 transition-all duration-150 group-hover:opacity-100 shadow-xl z-50 ${tooltipPos}`}>
+                    {p.manifest.name}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Footer: Manage Categories Icon */}
+          <div className="p-2 border-t border-[var(--tu-border)] w-full flex items-center justify-center">
+            <button
+              onClick={() => setCategoryModalOpen(true)}
+              className="relative group p-2 rounded-[var(--tu-radius-sm)] text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] transition-colors cursor-pointer"
+              title="Manage Categories"
+            >
+              <FolderPlus className="w-4 h-4 text-[var(--tu-accent)]" />
+              <span className={`pointer-events-none absolute top-1/2 -translate-y-1/2 px-2.5 py-1 text-xs font-semibold rounded whitespace-nowrap bg-[var(--tu-bg-card)] text-[var(--tu-text-primary)] border border-[var(--tu-border)] opacity-0 transition-all duration-150 group-hover:opacity-100 shadow-xl z-50 ${tooltipPos}`}>
+                Manage Categories
+              </span>
+            </button>
+          </div>
+        </aside>
+      );
+    }
+
+    // Expanded Sidebar Mode (256px)
     return (
       <aside
         className={`w-64 h-full bg-[var(--tu-bg-surface)] ${borderSide} border-[var(--tu-border)] flex flex-col shrink-0 select-none z-20 transition-all duration-200`}
       >
-        {/* Top: Marketplace Anchor */}
+        {/* Top: Marketplace Anchor & Collapse Toggle */}
         <div className="p-3 border-b border-[var(--tu-border)] space-y-2">
-          <button
-            onClick={() => setActiveView("marketplace")}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-[var(--tu-radius-sm)] text-xs font-semibold transition-all cursor-pointer ${
-              activeView === "marketplace"
-                ? "bg-[var(--tu-accent)] text-[var(--tu-accent-contrast)] shadow-md"
-                : "text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)]"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <Store className="w-4 h-4" />
-              <span>Community Store</span>
-            </div>
-            <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded bg-black/20 text-current">
-              Hub
-            </span>
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setActiveView("marketplace")}
+              className={`flex-1 flex items-center justify-between px-3 py-2 rounded-[var(--tu-radius-sm)] text-xs font-semibold transition-all cursor-pointer ${
+                activeView === "marketplace"
+                  ? "bg-[var(--tu-accent)] text-[var(--tu-accent-contrast)] shadow-md"
+                  : "text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)]"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Store className="w-4 h-4" />
+                <span>Community Store</span>
+              </div>
+              <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded bg-black/20 text-current">
+                Hub
+              </span>
+            </button>
+
+            <button
+              onClick={toggleSidebar}
+              className="p-2 rounded-[var(--tu-radius-sm)] text-[var(--tu-text-muted)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] transition-colors cursor-pointer shrink-0"
+              title="Collapse Sidebar (Cmd+B)"
+            >
+              <PanelLeftClose className="w-4 h-4" />
+            </button>
+          </div>
 
           {/* Quick Filter */}
           <div className="relative">

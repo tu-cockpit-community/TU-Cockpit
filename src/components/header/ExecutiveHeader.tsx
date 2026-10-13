@@ -8,6 +8,8 @@ import {
   ChevronRight,
   Github,
   User,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 
 interface ExecutiveHeaderProps {
@@ -17,8 +19,15 @@ interface ExecutiveHeaderProps {
 export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
   onOpenSettings,
 }) => {
-  const { activeView, activePluginId, installedPlugins, setActiveView } =
-    useAppStore();
+  const {
+    activeView,
+    activePluginId,
+    installedPlugins,
+    setActiveView,
+    navOrientation,
+    isSidebarCollapsed,
+    toggleSidebar,
+  } = useAppStore();
   const { currentUser, setLoginModalOpen } = useAuthStore();
   const [currentTime, setCurrentTime] = useState<string>("");
 
@@ -40,6 +49,20 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
     <header className="h-12 border-b border-[var(--tu-border)] bg-[var(--tu-bg-surface)] px-4 flex items-center justify-between shrink-0 select-none z-30 shadow-sm text-[var(--tu-text-primary)]">
       {/* Left: Branding & Dynamic Breadcrumb */}
       <div className="flex items-center gap-2.5">
+        {(navOrientation === "left" || navOrientation === "right") && (
+          <button
+            onClick={toggleSidebar}
+            className="p-1.5 rounded-[var(--tu-radius-sm)] text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] transition-colors cursor-pointer"
+            title={isSidebarCollapsed ? "Expand Sidebar (Cmd+B)" : "Collapse Sidebar (Cmd+B)"}
+          >
+            {isSidebarCollapsed ? (
+              <PanelLeftOpen className="w-4 h-4" />
+            ) : (
+              <PanelLeftClose className="w-4 h-4" />
+            )}
+          </button>
+        )}
+
         <button
           onClick={() => setActiveView("marketplace")}
           className="flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer group"

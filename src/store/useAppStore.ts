@@ -63,10 +63,13 @@ export interface AppState {
   isSyncModalOpen: boolean;
   communityOrgName: string;
   navOrientation: NavOrientation;
+  isSidebarCollapsed: boolean;
   categories: PluginCategory[];
   isCategoryModalOpen: boolean;
   
   setActiveView: (view: SystemView | "plugin", pluginId?: string) => void;
+  toggleSidebar: () => void;
+  setSidebarCollapsed: (collapsed: boolean) => void;
   installPlugin: (manifest: PluginManifest, htmlContent: string, sourceType?: "registry" | "github_direct" | "local_dev", installDir?: string) => void;
   uninstallPlugin: (id: string) => void;
   togglePlugin: (id: string, enabled: boolean) => void;
@@ -138,11 +141,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   isSyncModalOpen: false,
   communityOrgName: "tu-cockpit-community",
   navOrientation: "left",
+  isSidebarCollapsed: false,
   categories: INITIAL_CATEGORIES,
   isCategoryModalOpen: false,
 
   setCommunityOrgName: (orgName) => set({ communityOrgName: orgName }),
   setNavOrientation: (orientation) => set({ navOrientation: orientation }),
+  toggleSidebar: () => set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
+  setSidebarCollapsed: (collapsed) => set({ isSidebarCollapsed: collapsed }),
   setCategoryModalOpen: (open) => set({ isCategoryModalOpen: open }),
 
   createCategory: (name, icon) => {
