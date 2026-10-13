@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { usePaletteStore } from "@/store/usePaletteStore";
 import { useSplitStore } from "@/store/useSplitStore";
 import { useDeadlineStore } from "@/store/useDeadlineStore";
+import { useVaultStore } from "@/store/useVaultStore";
 import {
   GraduationCap,
   Clock,
@@ -16,6 +17,7 @@ import {
   Search,
   Columns2,
   Calendar,
+  FolderArchive,
 } from "lucide-react";
 
 interface ExecutiveHeaderProps {
@@ -38,6 +40,7 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
   const { openPalette } = usePaletteStore();
   const { isSplitActive, toggleSplit } = useSplitStore();
   const { setAgendaOpen, getUpcomingCount24h, fetchDeadlines } = useDeadlineStore();
+  const { setVaultModalOpen } = useVaultStore();
   const [currentTime, setCurrentTime] = useState<string>("");
 
   useEffect(() => {
@@ -138,6 +141,16 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
               {upcomingCount}
             </span>
           )}
+        </button>
+
+        {/* Offline Lecture Vault Button */}
+        <button
+          onClick={() => setVaultModalOpen(true)}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-card)] border border-[var(--tu-border)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] text-[11px] font-medium transition-all cursor-pointer text-[var(--tu-text-secondary)] shadow-xs"
+          title="Open Offline Lecture Material Vault & Slide Search"
+        >
+          <FolderArchive className="w-3.5 h-3.5 text-[var(--tu-accent)]" />
+          <span className="hidden xl:inline">Slide Vault</span>
         </button>
 
         {/* Split Screen Workstation Toggle */}

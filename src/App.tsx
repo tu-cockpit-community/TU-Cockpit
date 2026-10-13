@@ -12,6 +12,8 @@ import { EmbeddedPortalView } from "@/components/embedded/EmbeddedPortalView";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { CommandPalette } from "@/components/palette/CommandPalette";
 import { DeadlineAgendaModal } from "@/components/deadlines/DeadlineAgendaModal";
+import { OfflineVaultView } from "@/components/offline/OfflineVaultView";
+import { PDFViewerModal } from "@/components/offline/PDFViewerModal";
 import { useSplitStore } from "@/store/useSplitStore";
 import { SplitViewContainer } from "@/components/split/SplitViewContainer";
 import { SyncSettings } from "@/components/settings/SyncSettings";
@@ -130,6 +132,8 @@ export const App: React.FC = () => {
       {/* Modals & Dialogs */}
       <CommandPalette onOpenSettings={() => setIsSettingsModalOpen(true)} />
       <DeadlineAgendaModal />
+      <OfflineVaultView />
+      <PDFViewerModal />
       <LoginModal />
       <CategoryManagerModal />
       <SettingsModal

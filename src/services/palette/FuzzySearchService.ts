@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import TU_ROOMS_DATA from "@/data/tu_rooms_index.json";
 import { useDeadlineStore } from "@/store/useDeadlineStore";
 import { useSplitStore } from "@/store/useSplitStore";
+import { useVaultStore } from "@/store/useVaultStore";
 
 export interface CampusRoom {
   id: string;
@@ -247,6 +248,20 @@ export class FuzzySearchService {
       keywords: ["split", "dual", "side-by-side", "multitask", "vowi", "tuwel", "workstation"],
       action: () => {
         useSplitStore.getState().toggleSplit();
+      },
+    });
+
+    items.push({
+      id: "action_open_vault",
+      title: "Open Offline Lecture Material Vault",
+      subtitle: "Browse and full-text search cached course slides and PDFs",
+      category: "actions",
+      categoryLabel: "Quick System Actions",
+      badge: "Vault",
+      iconName: "FolderArchive",
+      keywords: ["vault", "offline", "slides", "pdf", "lecture", "folien", "fts", "search"],
+      action: () => {
+        useVaultStore.getState().setVaultModalOpen(true);
       },
     });
 
