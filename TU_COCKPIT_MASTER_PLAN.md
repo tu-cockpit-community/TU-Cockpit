@@ -71,13 +71,14 @@
 
 ### 🔵 PART V: PHASE 5 — PRODUCTIVITY WORKSTATION, OFFLINE VAULT & AUTO-UPDATER (PLANNED / UPCOMING)
 * [32. Phase 5 Architecture: Workstation Productivity, Offline Resilience & Global Navigation](#32-phase-5-architecture-workstation-productivity-offline-resilience--global-navigation)
-* [33. Global Command Palette (`Cmd+K`) & Campus-Wide Fuzzy Search](#33-global-command-palette-cmdk--campus-wide-fuzzy-search)
-* [34. Split-View Multitasking & Multi-Window Detachable Workspace](#34-split-view-multitasking--multi-window-detachable-workspace)
-* [35. Deadline Aggregator, System Notification Daemon & Calendar Sync (iCal)](#35-deadline-aggregator-system-notification-daemon--calendar-sync-ical)
-* [36. Offline Course Materials Syncer & Local PDF Slide Caching](#36-offline-course-materials-syncer--local-pdf-slide-caching)
-* [37. Tauri v2 In-App Auto-Updater (`@tauri-apps/plugin-updater`) & GitHub Release Pipeline](#37-tauri-v2-in-app-auto-updater-tauri-appsplugin-updater--github-release-pipeline)
-* [38. Phase 5 Target File Hierarchy & Dependencies](#38-phase-5-target-file-hierarchy--dependencies)
-* [39. Phase 5 AI Worker Agent Prompts & Step-by-Step Implementation Milestones (Milestones 24–28 [STATUS: READY TO EXECUTE])](#39-phase-5-ai-worker-agent-prompts--step-by-step-implementation-milestones-milestones-2428-status-ready-to-execute)
+* [33. Seamless Full-Bleed Workstation Canvas & Orientation-Aware Collapsible Sidebar](#33-seamless-full-bleed-workstation-canvas--orientation-aware-collapsible-sidebar)
+* [34. Global Command Palette (`Cmd+K`) & Campus-Wide Fuzzy Search](#34-global-command-palette-cmdk--campus-wide-fuzzy-search)
+* [35. Split-View Multitasking & Multi-Window Detachable Workspace](#35-split-view-multitasking--multi-window-detachable-workspace)
+* [36. Deadline Aggregator, System Notification Daemon & Calendar Sync (iCal)](#36-deadline-aggregator-system-notification-daemon--calendar-sync-ical)
+* [37. Offline Course Materials Syncer & Local PDF Slide Caching](#37-offline-course-materials-syncer--local-pdf-slide-caching)
+* [38. Tauri v2 In-App Auto-Updater (`@tauri-apps/plugin-updater`) & GitHub Release Pipeline](#38-tauri-v2-in-app-auto-updater-tauri-appsplugin-updater--github-release-pipeline)
+* [39. Phase 5 Target File Hierarchy & Dependencies](#39-phase-5-target-file-hierarchy--dependencies)
+* [40. Phase 5 AI Worker Agent Prompts & Step-by-Step Implementation Milestones (Milestones 24–29 [STATUS: READY TO EXECUTE])](#40-phase-5-ai-worker-agent-prompts--step-by-step-implementation-milestones-milestones-2429-status-ready-to-execute)
 
 ---
 
@@ -2837,13 +2838,14 @@ Commit message:
 # 🔵 PART V: PHASE 5 — PRODUCTIVITY WORKSTATION, OFFLINE VAULT & AUTO-UPDATER (PLANNED / UPCOMING)
 # ==============================================================================
 
-> **Phase 5 Summary & Status:** 📋 SPECIFIED & READY FOR AGENT EXECUTION (Milestones 24–28)  
+> **Phase 5 Summary & Status:** 📋 SPECIFIED & READY FOR AGENT EXECUTION (Milestones 24–29)  
 > **Core Architectural Paradigms:**
-> 1. **Global Command Palette (`Cmd+K` / `Ctrl+K`):** Universal keyboard-first spotlight overlay indexing installed plugins, TU Maps lecture halls & rooms, TISS course codes, quick settings toggles, and offline materials.
-> 2. **Split-View Multitasking & Detachable Windows:** Dual-viewport workspace allowing side-by-side (50/50, 70/30) and vertical split of university portals and plugins, with floating window pop-out for multi-monitor setups.
-> 3. **Intelligent Deadline Aggregator & System Calendar Sync:** Background synchronization of TUWEL assignment deadlines and TISS exam dates, native OS notification daemon (24h/2h alerts), and dynamic `.ics` calendar feed export for Apple Calendar, Google Calendar, and Outlook.
-> 4. **Offline Lecture Material Vault & SQLite FTS5 Indexer:** Automated offline caching of course slides and PDFs into `$APPDATA/offline_vault/`, with full-text search across downloaded lecture slides and an integrated PDF reader.
-> 5. **Tauri v2 In-App Self-Updater (`@tauri-apps/plugin-updater`):** Cryptographically signed automatic update delivery via GitHub Releases, with one-click seamless background install and relaunch.
+> 1. **Seamless Full-Bleed Canvas & Orientation-Aware Collapsible Sidebar:** Elimination of artificial `max-w-6xl` containers and clunky faux-browser headers ("plugin name, address, return to marketplace"). Official portals and plugins render edge-to-edge taking up 100% of the viewport width and height. Orientation-aware sidebar collapse (`Cmd+B` / toggle button) active exclusively when sidebar is pinned to `left` or `right` (hidden when `top` or `bottom`).
+> 2. **Global Command Palette (`Cmd+K` / `Ctrl+K`):** Universal keyboard-first spotlight overlay indexing installed plugins, TU Maps lecture halls & rooms, TISS course codes, quick settings toggles, and offline materials.
+> 3. **Split-View Multitasking & Detachable Windows:** Dual-viewport workspace allowing side-by-side (50/50, 70/30) and vertical split of university portals and plugins, with floating window pop-out for multi-monitor setups.
+> 4. **Intelligent Deadline Aggregator & System Calendar Sync:** Background synchronization of TUWEL assignment deadlines and TISS exam dates, native OS notification daemon (24h/2h alerts), and dynamic `.ics` calendar feed export for Apple Calendar, Google Calendar, and Outlook.
+> 5. **Offline Lecture Material Vault & SQLite FTS5 Indexer:** Automated offline caching of course slides and PDFs into `$APPDATA/offline_vault/`, with full-text search across downloaded lecture slides and an integrated PDF reader.
+> 6. **Tauri v2 In-App Self-Updater (`@tauri-apps/plugin-updater`):** Cryptographically signed automatic update delivery via GitHub Releases, with one-click seamless background install and relaunch.
 
 ---
 
@@ -2853,13 +2855,15 @@ Commit message:
 While Phases 1 through 4 established the foundational runtime, marketplace, child-webviews, security hardening, and university authentication, **Phase 5 transforms TU Cockpit from an integrated viewer into an indispensable daily academic workstation.**
 
 Students face several recurring friction points in their daily university life:
-1. **Context Switching:** Moving between TUWEL for assignments, TISS for schedules, VoWi for notes, and TU Maps for room locations requires tedious clicking.
-2. **Room Navigation Panic:** Locating rooms like *"EI 7"* or *"Freihaus Hörsaal 1"* 5 minutes before a lecture starts requires deep navigation in TU Maps.
-3. **Missed Deadlines:** Deadlines are buried inside separate course folders in Moodle without unified OS reminders.
-4. **Offline Connectivity Gaps:** Commuting on trains (ÖBB/Westbahn) or studying in basement lecture halls often results in zero internet access, locking students out of lecture slides.
-5. **App Version Fragmentation:** Manual updates lead to bugs and missing security patches.
+1. **Viewport Squishing & Constant Scrolling:** TUWEL and TISS are currently confined inside a restrictive container with artificial paddings and a faux-browser header, forcing frequent horizontal and vertical scrolling.
+2. **Clunky Faux-Browser Framing:** Clicking a plugin displays a redundant header banner showing the plugin ID, URL address, and a "Return to Marketplace" button, making the app feel like an unintegrated website wrapper.
+3. **Rigid Sidebar Real Estate:** When the sidebar is placed on the left or right, it permanently consumes 256px of screen width without an option to collapse.
+4. **Context Switching:** Moving between TUWEL for assignments, TISS for schedules, VoWi for notes, and TU Maps for room locations requires tedious clicking.
+5. **Room Navigation Panic:** Locating rooms like *"EI 7"* or *"Freihaus Hörsaal 1"* 5 minutes before a lecture starts requires deep navigation in TU Maps.
+6. **Missed Deadlines:** Deadlines are buried inside separate course folders in Moodle without unified OS reminders.
+7. **Offline Connectivity Gaps:** Commuting on trains (ÖBB/Westbahn) or studying in basement lecture halls often results in zero internet access, locking students out of lecture slides.
 
-Phase 5 resolves these friction points with an integrated desktop productivity suite.
+Phase 5 resolves all of these friction points with an integrated desktop productivity suite.
 
 ### 32.2 Phase 5 System Architecture Topology
 ```
@@ -2867,14 +2871,14 @@ Phase 5 resolves these friction points with an integrated desktop productivity s
 |                                      TU COCKPIT SHELL (PHASE 5)                                   |
 |                                                                                                   |
 |  +---------------------------------------------------------------------------------------------+  |
-|  |             Executive Header: Command Palette Trigger [Cmd+K] | Update Toast | User Vault    |  |
+|  |  Executive Header: [Sidebar Toggle] | Search Campus [Cmd+K] | Update Toast | User Vault     |  |
 |  +---------------------------------------------------------------------------------------------+  |
-|  |  Categorized Sidebar |                               Workstation Viewport                   |  |
-|  |  (Configurable:      |                                                                      |  |
-|  |   L/R/B/T)           |  +-------------------------------+  +-------------------------------+ |  |
+|  |  Collapsible Sidebar |                         Full-Bleed Workstation Canvas                |  |
+|  |  (Left/Right Only:   |                         (Edge-to-Edge 100% W/H, Zero Gutters)         |  |
+|  |   Toggle w/ Cmd+B)   |  +-------------------------------+  +-------------------------------+ |  |
 |  |                      |  | Viewport A (Child-Webview A)  |  | Viewport B (Child-Webview B)  | |  |
-|  |  - Marketplace       |  | - TUWEL Lecture / Slides      |  | - VoWi Notes / Plugin Tool    | |  |
-|  |  - Official Portals  |  | - Synchronized OS Bounds      |  | - Draggable Split Divider     | |  |
+|  |  - Marketplace       |  | - TUWEL Full Window (No Bars) |  | - VoWi Notes / Plugin Tool    | |  |
+|  |  - Official Portals  |  | - Native WebKit/WebView2      |  | - Draggable Split Divider     | |  |
 |  |  - Custom Categories |  +-------------------------------+  +-------------------------------+ |  |
 |  |  - Offline Vault     |                                                                      |  |
 |  |  - Deadlines Agenda  |  [ Detach to Floating Window ]       [ Pop-Out Secondary Screen ]     |  |
@@ -2885,7 +2889,7 @@ Phase 5 resolves these friction points with an integrated desktop productivity s
                         v                                                   v
 +-----------------------------------------------+   +-----------------------------------------------+
 |             Rust Backend Daemons              |   |          Local Storage & Offline Vault        |
-|  - Global Shortcut Listener (Cmd+K)           |   |  - SQLite WAL (student_deadlines)             |
+|  - Global Shortcut Listener (Cmd+K, Cmd+B)    |   |  - SQLite WAL (student_deadlines)             |
 |  - Dual Webview Bounds Orchestrator           |   |  - SQLite FTS5 (offline_slide_fts)            |
 |  - Deadline Aggregator (TUWEL iCal / TISS)    |   |  - Local .ics Calendar Feed Export            |
 |  - Native OS Notification Daemon (24h/2h)     |   |  - $APPDATA/offline_vault/{course_id}/*.pdf   |
@@ -2896,14 +2900,76 @@ Phase 5 resolves these friction points with an integrated desktop productivity s
 
 ---
 
-## 33. Global Command Palette (`Cmd+K`) & Campus-Wide Fuzzy Search
+## 33. Seamless Full-Bleed Workstation Canvas & Orientation-Aware Collapsible Sidebar
 
-### 33.1 Interaction Design & Universal Trigger
+### 33.1 Technical Root Causes of Viewport Squishing & Clunky Framing
+Investigation of the existing rendering layer reveals three primary defects:
+1. **Artificial Max-Width & Padding:** `src/App.tsx` wraps the plugin canvas inside `<main className="flex-1 overflow-y-auto p-6 relative">` with `<div className="max-w-6xl mx-auto h-[calc(100vh-140px)] flex flex-col gap-3 pb-6">`. This restricts the viewport to 1152px width with huge empty gutters, making TUWEL and TISS render significantly smaller than a regular browser window and causing frequent horizontal and vertical scrollbars.
+2. **Redundant Faux-Browser Banner:** `App.tsx` renders a subheader directly above the webview containing the plugin title, plugin address (`tuwien.official.tuwel`), and a `Return to Marketplace` button. This clutters the interface, wastes vertical screen height, and feels like an unintegrated website wrapper.
+3. **Uncollapsible Lateral Sidebar:** When the navigation sidebar is pinned to the left or right (`navOrientation === "left" || "right"`), it permanently occupies 256px (`w-64`), squeezing the remaining workspace.
+
+### 33.2 Full-Bleed Canvas Specification (Edge-to-Edge Rendering)
+* When an active plugin or official portal is mounted, the main viewport renders with **zero padding and zero margins**:
+  ```tsx
+  <main className="flex-1 w-full h-full relative overflow-hidden p-0 m-0">
+    <NativePortalContainer portalId={activePlugin.manifest.id} url={activePlugin.manifest.homepage} />
+  </main>
+  ```
+* Native child-webviews (`tauri::Webview`) expand dynamically to **100% of the window width and 100% of the remaining height** below the Executive Header.
+* **Purge Faux-Browser Header:** The plugin name header, address indicator, and "Return to Marketplace" button are completely eliminated. The user is immersed directly into the tool. Navigation is handled natively via the Sidebar/Dock, Executive Header, or the Command Palette (`Cmd+K`).
+
+### 33.3 Orientation-Aware Collapsible Sidebar Engine
+A flexible sidebar collapse mechanism that respects the user's active navigation layout:
+
+```
++---------------------------------------------------------------------------------------------------+
+| SIDEBAR ORIENTATION = "LEFT" or "RIGHT"                                                           |
+|                                                                                                   |
+|  [Expanded: w-64]                           [Collapsed: w-14 (Icon Rail)]                         |
+|  +--------------------+                     +----+                                                |
+|  | [« Collapse]       |  --- (Toggle) --->  | [»]|                                                |
+|  | 🎓 TUWEL Moodle    |  (Cmd+B / Button)   | 🎓 | (Tooltip on hover: "TUWEL Moodle")             |
+|  | 📋 TISS Portal     |                     | 📋 | (Tooltip on hover: "TISS Portal")              |
+|  | 📚 VoWi Wiki       |                     | 📚 | (Tooltip on hover: "VoWi Wiki")                |
+|  +--------------------+                     +----+                                                |
+|  Reclaims 200px+ horizontal space for the portal viewport!                                        |
++---------------------------------------------------------------------------------------------------+
+| SIDEBAR ORIENTATION = "TOP" or "BOTTOM" (DOCK MODE)                                              |
+|                                                                                                   |
+|  [Collapse Toggle Button is COMPLETELY HIDDEN]                                                    |
+|  Dock remains pinned at top or bottom; no lateral width is obstructed.                            |
++---------------------------------------------------------------------------------------------------+
+```
+
+#### State Management (`src/store/useAppStore.ts`)
+```typescript
+interface AppState {
+  // Existing state
+  navOrientation: "left" | "right" | "bottom" | "top";
+  isSidebarCollapsed: boolean;
+  toggleSidebar: () => void;
+  setSidebarCollapsed: (collapsed: boolean) => void;
+}
+```
+
+#### Orientation Visibility Guard Rule
+* **If `navOrientation === "left"` or `navOrientation === "right"`:**
+  * Render a collapse toggle button (`PanelLeftClose` / `PanelLeftOpen`) in the sidebar header and in the Executive Header.
+  * Register keyboard shortcut: `Cmd+B` (macOS) / `Ctrl+B` (Windows/Linux) to toggle collapse.
+  * When collapsed: Sidebar smoothly animates from `w-64` (256px) to `w-14` (56px) compact icon rail. Hovering over icons shows floating tooltips.
+* **If `navOrientation === "top"` or `navOrientation === "bottom"`:**
+  * The collapse toggle button and keyboard shortcut are **completely hidden and disabled**. The dock retains its compact, unobtrusive bar format.
+
+---
+
+## 34. Global Command Palette (`Cmd+K`) & Campus-Wide Fuzzy Search
+
+### 34.1 Interaction Design & Universal Trigger
 * **Keyboard Shortcut:** `Cmd+K` (macOS) / `Ctrl+K` (Windows/Linux), or clicking the search bar in the Executive Header.
 * **Modal Overlay:** Centered backdrop blur modal (`bg-black/40 backdrop-blur-md`) with responsive keyboard navigation (`↑`/`↓` to highlight, `Enter` to execute, `Esc` to dismiss).
 * **Instant Fuzzy Filtering:** Zero-latency client-side scoring combining prefix match, acronym matching, and substring distance.
 
-### 33.2 Four Search Domains
+### 34.2 Four Search Domains
 
 ```
 +---------------------------------------------------------------------------------------------------+
@@ -2923,6 +2989,7 @@ Phase 5 resolves these friction points with an integrated desktop productivity s
 |  📖 104.261 Analysis 1 für Informatik (VO 3.0)                                       -> View LVA |
 |                                                                                                   |
 |  QUICK SYSTEM ACTIONS                                                                             |
+|  ⚙️ Toggle Sidebar (Collapse / Expand)                                                -> Action   |
 |  ⚙️ Toggle Dark / Light Theme                                                         -> Action   |
 |  🔐 Autofill University Credentials into Active Portal                                -> Action   |
 |  📥 Open Offline Materials Vault                                                      -> View     |
@@ -2930,7 +2997,7 @@ Phase 5 resolves these friction points with an integrated desktop productivity s
 +---------------------------------------------------------------------------------------------------+
 ```
 
-### 33.3 Campus Room Indexing Schema (`src/data/tu_rooms_index.json`)
+### 34.3 Campus Room Indexing Schema (`src/data/tu_rooms_index.json`)
 Pre-indexed campus locations for instant offline matching:
 ```json
 [
@@ -2963,16 +3030,16 @@ When a user selects a room result, TU Cockpit immediately:
 
 ---
 
-## 34. Split-View Multitasking & Multi-Window Detachable Workspace
+## 35. Split-View Multitasking & Multi-Window Detachable Workspace
 
-### 34.1 Multi-Webview Layout Architecture
+### 35.1 Multi-Webview Layout Architecture
 Students frequently need two tools open side-by-side:
 * **TUWEL (Left)** + **VoWi Wiki / Markdown Notes (Right)**
 * **TU Maps (Left)** + **TISS Schedule (Right)**
 
 In Phase 4, a single `NativePortalContainer` bounds one child-webview. In Phase 5, the host supports a **Dual Viewport Container** with a draggable divider (`SplitViewContainer.tsx`).
 
-### 34.2 Rust Multi-Webview Bounds Orchestrator (`src-tauri/src/native_webview.rs`)
+### 35.2 Rust Multi-Webview Bounds Orchestrator (`src-tauri/src/native_webview.rs`)
 ```rust
 #[tauri::command]
 pub async fn orchestrate_split_portals(
@@ -3007,16 +3074,16 @@ pub async fn orchestrate_split_portals(
 }
 ```
 
-### 34.3 Detachable Floating Windows
+### 35.3 Detachable Floating Windows
 * Each portal header includes a `[⧉ Detach Window]` button.
 * When clicked, Rust invokes `tauri::WebviewWindowBuilder::new(&app, format!("detached_{}", portal_id), WebviewUrl::External(url))` to create an independent OS window.
 * Ideal for multi-monitor workstations (e.g., placing TU Maps or TUWEL slides on an external monitor while coding on the primary display).
 
 ---
 
-## 35. Deadline Aggregator, System Notification Daemon & Calendar Sync (iCal)
+## 36. Deadline Aggregator, System Notification Daemon & Calendar Sync (iCal)
 
-### 35.1 Automated Deadline Synchronization
+### 36.1 Automated Deadline Synchronization
 TUWEL exposes an authenticated iCal calendar feed (`https://tuwel.tuwien.ac.at/calendar/export_execute.php?...`), and TISS exposes exam registration windows.
 
 Phase 5 introduces a background synchronizer that:
@@ -3039,7 +3106,7 @@ Phase 5 introduces a background synchronizer that:
    );
    ```
 
-### 35.2 Native OS Notification Daemon
+### 36.2 Native OS Notification Daemon
 A lightweight Rust background task checks `student_deadlines` every 5 minutes:
 * **T-24 Hours Alert:** Fires native desktop notification:
   > *"⏰ Abgabe morgen: [188.956] Aufgabe 2 in 24 Stunden fällig!"*
@@ -3047,18 +3114,18 @@ A lightweight Rust background task checks `student_deadlines` every 5 minutes:
   > *"🚨 Dringend: [188.956] Aufgabe 2 Abgabe schließt in 2 Stunden!"*
 * Clicking the notification brings TU Cockpit to focus and navigates directly to the submission dropzone in TUWEL.
 
-### 35.3 System Calendar Sync (.ics Feed)
+### 36.3 System Calendar Sync (.ics Feed)
 * Cockpit maintains a synchronized local iCal file at `$APPDATA/tu_cockpit_schedule.ics`.
 * Students can subscribe to this file or URL in **Apple Calendar**, **Google Calendar**, or **Microsoft Outlook**, keeping mobile devices synchronized automatically.
 
 ---
 
-## 36. Offline Course Materials Syncer & Local PDF Slide Caching
+## 37. Offline Course Materials Syncer & Local PDF Slide Caching
 
-### 36.1 Problem Statement
+### 37.1 Problem Statement
 When travelling via train or sitting in basement lecture halls with congested eduroam Wi-Fi, students lose access to lecture slides.
 
-### 36.2 Offline Slide Vault Architecture
+### 37.2 Offline Slide Vault Architecture
 1. **Background Cache Daemon:** When a student browses a course in TUWEL, the Rust backend detects linked PDF resources (`.pdf`, `.zip`).
 2. **Local Storage Hierarchy:**
    ```
@@ -3087,9 +3154,9 @@ When travelling via train or sitting in basement lecture halls with congested ed
 
 ---
 
-## 37. Tauri v2 In-App Auto-Updater (`@tauri-apps/plugin-updater`) & GitHub Release Pipeline
+## 38. Tauri v2 In-App Auto-Updater (`@tauri-apps/plugin-updater`) & GitHub Release Pipeline
 
-### 37.1 Cryptographically Signed Update Mechanism
+### 38.1 Cryptographically Signed Update Mechanism
 * **Public Key Infrastructure:** Ed25519 Minisign public key embedded in `src-tauri/tauri.conf.json`.
 * **Update Manifest Endpoint:** Hosted directly in GitHub Releases:
   `https://github.com/tu-cockpit-community/TU-Cockpit/releases/latest/download/latest.json`
@@ -3097,7 +3164,7 @@ When travelling via train or sitting in basement lecture halls with congested ed
   ```json
   {
     "version": "1.2.0",
-    "notes": "Phase 5: Global Command Palette (Cmd+K), Split-View Multitasking, and Offline Slide Caching.",
+    "notes": "Phase 5: Seamless Full-Bleed Canvas, Collapsible Sidebar, Command Palette (Cmd+K), and Split-View.",
     "pub_date": "2026-10-14T10:00:00Z",
     "platforms": {
       "darwin-aarch64": {
@@ -3112,7 +3179,7 @@ When travelling via train or sitting in basement lecture halls with congested ed
   }
   ```
 
-### 37.2 Non-Intrusive In-App Update Experience (`UpdaterToast.tsx`)
+### 38.2 Non-Intrusive In-App Update Experience (`UpdaterToast.tsx`)
 1. On startup or when triggered via Command Palette, the background updater checks for newer versions.
 2. If an update is detected, an elegant pill toast appears in the Executive Header:
    `[🚀 Update Available: v1.2.0 | Restart to Apply]`
@@ -3120,22 +3187,27 @@ When travelling via train or sitting in basement lecture halls with congested ed
 
 ---
 
-## 38. Phase 5 Target File Hierarchy & Dependencies
+## 39. Phase 5 Target File Hierarchy & Dependencies
 
-### 38.1 Target Directory Tree
+### 39.1 Target Directory Tree
 ```
 tu-cockpit/
 ├── src-tauri/
 │   ├── Cargo.toml                          # Added tauri-plugin-updater, icalendar, chrono, pdf-extract
 │   └── src/
 │       ├── lib.rs                          # Handler registration for split view, updater & vault
-│       ├── command_palette.rs              # NEW: Global shortcut listener & campus search
-│       ├── split_view.rs                   # NEW: Dual-webview bounds orchestrator
-│       ├── deadline_aggregator.rs          # NEW: iCal parser & OS notification daemon
-│       ├── offline_vault.rs                # NEW: Background PDF downloader & FTS5 search
-│       └── updater_service.rs              # NEW: Tauri v2 update check & install wrapper
+│       ├── command_palette.rs              # Global shortcut listener & campus search
+│       ├── split_view.rs                   # Dual-webview bounds orchestrator
+│       ├── deadline_aggregator.rs          # iCal parser & OS notification daemon
+│       ├── offline_vault.rs                # Background PDF downloader & FTS5 search
+│       └── updater_service.rs              # Tauri v2 update check & install wrapper
 ├── src/
+│   ├── App.tsx                             # Refactored: Full-bleed canvas, zero gutters, purged header
 │   ├── components/
+│   │   ├── navigation/
+│   │   │   └── ConfigurableNav.tsx         # Updated: Orientation-aware collapsible sidebar (left/right only)
+│   │   ├── header/
+│   │   │   └── ExecutiveHeader.tsx         # Added sidebar toggle button & Cmd+K search trigger
 │   │   ├── palette/
 │   │   │   ├── CommandPalette.tsx          # Cmd+K Spotlight overlay modal
 │   │   │   └── SearchResultItem.tsx        # Categorized result pill
@@ -3158,12 +3230,13 @@ tu-cockpit/
 │   │   └── deadlines/
 │   │       └── CalendarSyncService.ts      # iCal feed generator and poll trigger
 │   └── store/
+│       ├── useAppStore.ts                  # Added isSidebarCollapsed & toggleSidebar actions
 │       ├── usePaletteStore.ts              # Command palette visibility & query state
 │       ├── useSplitStore.ts                # Split view active pairs and divider ratio
 │       └── useDeadlineStore.ts             # Aggregated deadlines & notification status
 ```
 
-### 38.2 Rust Cargo Dependencies Update (`src-tauri/Cargo.toml`)
+### 39.2 Rust Cargo Dependencies Update (`src-tauri/Cargo.toml`)
 ```toml
 [dependencies]
 # Phase 5 Additions
@@ -3176,11 +3249,62 @@ pdf-extract = "0.7"
 
 ---
 
-## 39. Phase 5 AI Worker Agent Prompts & Step-by-Step Implementation Milestones (Milestones 24–28 [STATUS: READY TO EXECUTE])
+## 40. Phase 5 AI Worker Agent Prompts & Step-by-Step Implementation Milestones (Milestones 24–29 [STATUS: READY TO EXECUTE])
 
 ---
 
-### Milestone 24 Prompt: Global Spotlight / Command Palette (`Cmd+K`) with Campus Room & Plugin Search `[STATUS: PENDING ⏳]`
+### Milestone 24 Prompt: Seamless Full-Bleed Workstation Canvas & Orientation-Aware Collapsible Sidebar `[STATUS: PENDING ⏳]`
+
+```markdown
+You are a senior React UI and desktop workspace engineer working on TU Cockpit.
+
+### Objective:
+1. Eliminate the artificial `max-w-6xl` containers, excessive paddings, and clunky faux-browser header banners ("plugin name, address, return to marketplace") above plugins and portals, giving TUWEL and TISS full-window edge-to-edge sizing without squishing or unnecessary scrollbars.
+2. Add an orientation-aware collapsible sidebar for `left` and `right` layouts (collapsing from 256px to 56px icon rail or hidden), while strictly hiding the collapse option if the navigation is set to `top` or `bottom`.
+
+### Tasks:
+1. In `src/store/useAppStore.ts`:
+   - Add state: `isSidebarCollapsed: boolean` (default `false`).
+   - Add actions: `toggleSidebar: () => void`, `setSidebarCollapsed: (collapsed: boolean) => void`.
+2. In `src/App.tsx`:
+   - Refactor `renderMainContent`:
+     - When `activeView === "plugin"` and `activePlugin`:
+       - REMOVE the header banner: `<div className="flex items-center justify-between">... Return to Marketplace ...</div>`.
+       - REMOVE the wrapping constraint `max-w-6xl mx-auto h-[calc(100vh-140px)]` and `<main className="p-6">`.
+       - Render the viewport as full bleed: `<main className="flex-1 w-full h-full relative overflow-hidden p-0 m-0">`.
+       - Ensure `NativePortalContainer` and `PluginFrame` occupy 100% of the remaining width and height below the Executive Header.
+3. In `src/components/navigation/ConfigurableNav.tsx`:
+   - For `navOrientation === "left"` or `navOrientation === "right"`:
+     - When `isSidebarCollapsed === true`:
+       - Shrink aside to `w-14` (56px) compact icon-only mode.
+       - Render compact icon buttons with hover tooltips for Community Store and active plugins.
+       - Hide the search input and category labels to preserve a sleek vertical rail.
+     - Add a collapse toggle button at the top/edge of the sidebar (`PanelLeftClose` / `PanelLeftOpen`).
+   - For `navOrientation === "top"` or `navOrientation === "bottom"`:
+     - Keep the horizontal dock format completely unchanged.
+     - **DO NOT render the collapse toggle button** (it must remain completely hidden).
+4. In `src/components/header/ExecutiveHeader.tsx`:
+   - Only when `navOrientation === "left" || navOrientation === "right"`:
+     - Render a sleek sidebar collapse toggle button next to the app logo (`PanelLeftClose` / `PanelLeftOpen`).
+     - If `navOrientation === "top" || navOrientation === "bottom"`, hide this toggle button.
+5. Add keyboard shortcut `Cmd+B` (macOS) / `Ctrl+B` (Windows/Linux) to toggle sidebar collapse when orientation is left/right.
+
+### Verification:
+- Run `npm run build` with zero TypeScript errors.
+- Launch `npm run tauri dev`:
+  - Open TUWEL or TISS: verify the portal renders edge-to-edge taking up the full window width and height. Verify there is NO faux-browser header or "Return to Marketplace" button.
+  - Verify that scrolling issues are gone and the page looks like a native desktop app.
+  - Set sidebar to Left: verify clicking the collapse button or pressing `Cmd+B` collapses it to a 56px icon rail, expanding the portal width.
+  - Set sidebar to Bottom: verify the collapse toggle button completely disappears.
+
+### Git Hygiene:
+Commit message:
+`feat(workspace): implement full-bleed native canvas and orientation-aware collapsible sidebar`
+```
+
+---
+
+### Milestone 25 Prompt: Global Spotlight / Command Palette (`Cmd+K`) with Campus Room & Plugin Search `[STATUS: PENDING ⏳]`
 
 ```markdown
 You are a senior full-stack desktop software engineer working on TU Cockpit.
@@ -3196,7 +3320,7 @@ Implement a global Spotlight / Command Palette overlay triggered via `Cmd+K` (ma
      - Installed plugins and official portals.
      - TU Wien campus rooms (linking to TU Maps).
      - Student courses and LVAs.
-     - Quick system actions (Toggle Theme, Autofill Login, Open Settings, Check Updates).
+     - Quick system actions (Toggle Sidebar, Toggle Theme, Autofill Login, Open Settings, Check Updates).
 4. Create `src/components/palette/CommandPalette.tsx`:
    - Backdrop-blurred modal overlay (`bg-black/40 backdrop-blur-md`).
    - Keyboard listener for `Cmd+K` / `Ctrl+K` to toggle open.
@@ -3215,7 +3339,7 @@ Commit message:
 
 ---
 
-### Milestone 25 Prompt: Multi-Webview Split-Screen & Detachable Floating Windows `[STATUS: PENDING ⏳]`
+### Milestone 26 Prompt: Multi-Webview Split-Screen & Detachable Floating Windows `[STATUS: PENDING ⏳]`
 
 ```markdown
 You are a senior Tauri v2 and Rust systems engineer working on TU Cockpit.
@@ -3247,7 +3371,7 @@ Commit message:
 
 ---
 
-### Milestone 26 Prompt: University Deadline Aggregator, System Notification Daemon & Calendar Sync `[STATUS: PENDING ⏳]`
+### Milestone 27 Prompt: University Deadline Aggregator, System Notification Daemon & Calendar Sync `[STATUS: PENDING ⏳]`
 
 ```markdown
 You are a full-stack engineer and desktop systems specialist working on TU Cockpit.
@@ -3281,7 +3405,7 @@ Commit message:
 
 ---
 
-### Milestone 27 Prompt: Offline Lecture Material Vault & Slide Caching Engine with SQLite FTS5 `[STATUS: PENDING ⏳]`
+### Milestone 28 Prompt: Offline Lecture Material Vault & Slide Caching Engine with SQLite FTS5 `[STATUS: PENDING ⏳]`
 
 ```markdown
 You are a systems engineer and search specialist working on TU Cockpit.
@@ -3316,7 +3440,7 @@ Commit message:
 
 ---
 
-### Milestone 28 Prompt: Tauri v2 In-App Self-Updater (`@tauri-apps/plugin-updater`) & GitHub Release Pipeline `[STATUS: PENDING ⏳]`
+### Milestone 29 Prompt: Tauri v2 In-App Self-Updater (`@tauri-apps/plugin-updater`) & GitHub Release Pipeline `[STATUS: PENDING ⏳]`
 
 ```markdown
 You are a DevOps and desktop release engineer working on TU Cockpit.
