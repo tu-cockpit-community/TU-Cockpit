@@ -2,9 +2,43 @@
 
 > **Target Ecosystem:** Desktop Hub & Dynamic Plugin Ecosystem for TU Wien Students  
 > **Core Technologies:** Tauri v2, Rust (2021+), React 19, TypeScript 5.5+, Tailwind CSS v4, SQLite (WAL mode), WebCrypto E2EE  
-> **Status:** Production-Ready Architecture & Scaffold Specification
+> **Current Project Status:**
+> - 🟢 **PHASE 1 (COMPLETED):** Foundational Desktop Runtime, Sandboxed Engine, Dynamic Theme Engine, E2EE Sync, Starter Widget Proof-of-Concept, Multi-Platform CI/CD (Milestones 0–7)  
+> - 🟡 **PHASE 2 (PLANNED / TO DO):** Marketplace-First Workstation, GitHub Dynamic Plugin Engine, Embedded University Webviews (TUWEL, TISS, VoWi, Maps), Real-Time Web Theme Injection, Student Auth & Developer RBAC (Milestones 8–13)
 
 ---
+
+## Master Table of Contents
+
+### 🟢 PART I: PHASE 1 — FOUNDATIONAL RUNTIME & PROOF-OF-CONCEPT (COMPLETED)
+* [1. Executive Product Vision & Architecture Overview](#1-executive-product-vision--architecture-overview)
+* [2. Dynamic Plugin Engine & Sandboxing Specification](#2-dynamic-plugin-engine--sandboxing-specification)
+* [3. Centralized Theming Engine & Global Styling Customization](#3-centralized-theming-engine--global-styling-customization)
+* [4. Cross-Device End-to-End Encrypted (E2EE) Sync Protocol](#4-cross-device-end-to-end-encrypted-e2ee-sync-protocol)
+* [5. Phase 1 Implementation Reference Code](#5-phase-1-implementation-reference-code)
+* [6. Automated CI/CD Matrix (`.github/workflows/release.yml`)](#6-automated-cicd-matrix-githubworkflowsreleaseyml)
+* [7. Phase 1 Completed Execution Schedule & Commits (Milestones 0–7 [STATUS: COMPLETED])](#7-phase-1-completed-execution-schedule--commits-milestones-07-status-completed)
+
+---
+
+### 🟡 PART II: PHASE 2 — CLEAN-SLATE WORKSTATION, EMBEDDED PORTALS & RBAC (PLANNED / TO DO)
+* [8. Phase 2 Architecture: The Marketplace-First Paradigm & Clean-Slate Purge](#8-phase-2-architecture-the-marketplace-first-paradigm--clean-slate-purge)
+* [9. Dynamic GitHub Plugin Distribution & Verification Engine](#9-dynamic-github-plugin-distribution--verification-engine)
+* [10. In-App Embedded Institutional Portals Architecture (TUWEL, TISS, VoWi, TU Maps)](#10-in-app-embedded-institutional-portals-architecture)
+* [11. Cross-Site Theme Injection Engine & Curated Style Sheets](#11-cross-site-theme-injection-engine--curated-style-sheets)
+* [12. Student Identity, Authentication & Role-Based Access Control (RBAC)](#12-student-identity-authentication--role-based-access-control-rbac)
+* [13. Developer Registration & Marketplace Publishing Application Flow](#13-developer-registration--marketplace-publishing-application-flow)
+* [14. Phase 2 Target File Hierarchy & Dependencies](#14-phase-2-target-file-hierarchy--dependencies)
+* [15. Phase 2 AI Worker Agent Prompts & Step-by-Step Implementation Milestones (Milestones 8–13 [STATUS: READY TO EXECUTE])](#15-phase-2-ai-worker-agent-prompts--step-by-step-implementation-milestones)
+
+---
+
+# ==============================================================================
+# 🟢 PART I: PHASE 1 — FOUNDATIONAL RUNTIME & PROOF-OF-CONCEPT (COMPLETED)
+# ==============================================================================
+
+> **Phase 1 Summary & Status:** ✅ COMPLETED & VERIFIED IN GIT (Commits `0df51c1` back to `2e6cb13`)  
+> **Delivered Capabilities:** Tauri v2 desktop shell, sandboxed iframe RPC bridge (`PluginFrame.tsx`, `plugin_gateway.rs`), centralized CSS variable theme customizer (`useThemeStore.ts`), zero-knowledge E2EE sync engine (`CryptoSyncEngine.ts`), starter deadlines proof-of-concept widget (`plugins/tuwel-deadlines/`), and automated release packaging matrix (`release.yml`).
 
 ## 1. Executive Product Vision & Architecture Overview
 
@@ -1081,45 +1115,60 @@ jobs:
 
 ---
 
-## 7. Execution Protocol & Version Control Mandates for AI Agents
+## 7. Phase 1 Completed Execution Schedule & Commits (Milestones 0–7 [STATUS: COMPLETED])
 
-> [!IMPORTANT]
-> **Git & GitHub Discipline Mandate:**
-> The AI coding agent MUST initialize Git at the start and commit changes regularly after every completed phase using conventional commits (`feat:`, `fix:`, `chore:`, `ci:`). Never perform all steps in a single untracked blob. If GitHub CLI (`gh`) or a remote URL is available, link and push to the remote repository.
+> [!NOTE]
+> **Phase 1 Verification:**
+> All Phase 1 milestones (0 through 7) have been fully developed, verified, and pushed to the upstream repository. Each milestone corresponds to a verified conventional git commit.
 
-### 7.1 Step-by-Step Milestone Commit Schedule
+### 7.1 Step-by-Step Phase 1 Completed Commit Schedule
 
-1. **Milestone 0: Repository Initialization & Hygiene**
-   * Action: Execute `git init -b main`, configure comprehensive `.gitignore`.
+1. **Milestone 0: Repository Initialization & Hygiene** `[STATUS: COMPLETED ✅]`
+   * Action: Executed `git init -b main`, configured comprehensive `.gitignore`.
    * Commit Message: `chore: initialize repository and master plan`
 
-2. **Milestone 1: Shell Scaffolding**
+2. **Milestone 1: Shell Scaffolding** `[STATUS: COMPLETED ✅]`
    * Action: Run Tauri v2 + React initialization, install dependencies, configure `tauri.conf.json` and `capabilities/default.json`.
    * Commit Message: `feat(shell): initialize tauri v2 desktop shell with react and tailwind`
 
-3. **Milestone 2: Central Theming Engine & Customization UI**
+3. **Milestone 2: Central Theming Engine & Customization UI** `[STATUS: COMPLETED ✅]`
    * Action: Implement `src/styles/theme.css`, `src/store/useThemeStore.ts`, dynamic font loaders, and `src/components/settings/ThemeCustomizer.tsx`.
    * Commit Message: `feat(theme): implement centralized design tokens, custom font loader, and theme customizer`
 
-4. **Milestone 3: Core Bridge & Gateway**
+4. **Milestone 3: Core Bridge & Gateway** `[STATUS: COMPLETED ✅]`
    * Action: Implement `src-tauri/src/plugin_gateway.rs`, link in `main.rs`, verify `cargo check`.
    * Commit Message: `feat(core): implement secure rust network gateway and capability validator`
 
-5. **Milestone 4: Sandbox, SDK & Theme Propagation**
+5. **Milestone 4: Sandbox, SDK & Theme Propagation** `[STATUS: COMPLETED ✅]`
    * Action: Implement `PluginFrame.tsx` with theme injection, and `src/sdk/index.ts` with auto-theming listeners.
    * Commit Message: `feat(sandbox): implement iframe rpc bridge, plugin sdk runtime, and auto-theme propagation`
 
-6. **Milestone 5: Sync & Storage**
+6. **Milestone 5: Sync & Storage** `[STATUS: COMPLETED ✅]`
    * Action: Deploy `CryptoSyncEngine.ts` and `GistSyncAdapter.ts`, verify E2EE encrypt/decrypt round-trip with theme state.
    * Commit Message: `feat(sync): implement zero-knowledge e2ee sync engine with webcrypto and theme persistence`
 
-7. **Milestone 6: Starter Plugin Delivery**
+7. **Milestone 6: Starter Plugin Delivery** `[STATUS: COMPLETED ✅]`
    * Action: Create `plugins/tuwel-deadlines/` bundle utilizing `--tu-*` CSS design tokens, verify live countdown rendering.
    * Commit Message: `feat(plugins): implement tuwel deadlines starter widget with design tokens`
 
-8. **Milestone 7: CI/CD & Automated Release Packaging**
+8. **Milestone 7: CI/CD & Automated Release Packaging** `[STATUS: COMPLETED ✅]`
    * Action: Add `.github/workflows/release.yml` with multi-platform matrix builds.
    * Commit Message: `ci: configure multi-platform release workflow for macos, windows, linux`
+
+---
+
+# ==============================================================================
+# 🟡 PART II: PHASE 2 — CLEAN-SLATE WORKSTATION, EMBEDDED PORTALS & RBAC (PLANNED / TO DO)
+# ==============================================================================
+
+> **Phase 2 Summary & Status:** ⏳ PLANNED & SPECIFIED (Ready for Worker Agent Execution)  
+> **Upcoming Capabilities (Milestones 8–13):**
+> 1. **Clean-Slate Purge (M8):** Elimination of starter mock plugins and hardcoded deadlines; raw client boots clean into Marketplace.
+> 2. **Dynamic GitHub Plugin Downloader (M9):** Rust-powered archive download, security verification, and unzipping into sandboxed `$APPDATA`.
+> 3. **Embedded University Portals (M10):** In-app top-level webviews for TUWEL (Moodle), TISS, VoWi Wiki, and TU Maps with session persistence.
+> 4. **Cross-Site Theme Injection (M11):** Real-time CSS theme injection daemon adapting university portals to `--tu-*` tokens without page reloads.
+> 5. **Student Authentication & RBAC (M12):** Tiered roles (`Guest`, `Student`, `Developer`, `Reviewer`) with OS Keyring token vaulting.
+> 6. **Developer Portal & Publishing Workflow (M13):** Dev account onboarding, local unpacked plugin sideloading, and in-app store publishing pull-request wizard.
 
 ---
 
@@ -1583,13 +1632,13 @@ dirs = "5.0"
 
 ---
 
-## 15. Phase 2 AI Worker Agent Prompts & Step-by-Step Implementation Milestones
+## 15. Phase 2 AI Worker Agent Prompts & Step-by-Step Implementation Milestones (Milestones 8–13 [STATUS: READY TO EXECUTE])
 
 This section provides turnkey, copy-pasteable prompts for AI worker agents. Each prompt is fully self-contained, specifying objectives, files, exact contracts, verification commands, and git commit hygiene.
 
 ---
 
-### Milestone 8 Prompt: Clean-Slate Purge & Marketplace-First Shell Refactor
+### Milestone 8 Prompt: Clean-Slate Purge & Marketplace-First Shell Refactor `[STATUS: PENDING ⏳]`
 
 ```markdown
 You are an expert full-stack desktop software engineer working on TU Cockpit.
@@ -1628,7 +1677,7 @@ Commit message:
 
 ---
 
-### Milestone 9 Prompt: Rust GitHub Plugin Downloader & Dynamic Manifest Installer
+### Milestone 9 Prompt: Rust GitHub Plugin Downloader & Dynamic Manifest Installer `[STATUS: PENDING ⏳]`
 
 ```markdown
 You are an expert Rust and Tauri systems engineer working on TU Cockpit.
@@ -1667,7 +1716,7 @@ Commit message:
 
 ---
 
-### Milestone 10 Prompt: Embedded University Webviews (TUWEL, TISS, VoWi, TU Maps) with Custom Tab Shell
+### Milestone 10 Prompt: Embedded University Webviews (TUWEL, TISS, VoWi, TU Maps) with Custom Tab Shell `[STATUS: PENDING ⏳]`
 
 ```markdown
 You are a senior Tauri v2 and React developer working on TU Cockpit.
@@ -1709,7 +1758,7 @@ Commit message:
 
 ---
 
-### Milestone 11 Prompt: University Theme Injection Engine & Curated CSS Overrides
+### Milestone 11 Prompt: University Theme Injection Engine & Curated CSS Overrides `[STATUS: PENDING ⏳]`
 
 ```markdown
 You are an expert CSS architect and frontend engineer working on TU Cockpit.
@@ -1741,7 +1790,7 @@ Commit message:
 
 ---
 
-### Milestone 12 Prompt: Student Authentication & Role-Based Access Control (RBAC)
+### Milestone 12 Prompt: Student Authentication & Role-Based Access Control (RBAC) `[STATUS: PENDING ⏳]`
 
 ```markdown
 You are a desktop security and identity architect working on TU Cockpit.
@@ -1776,7 +1825,7 @@ Commit message:
 
 ---
 
-### Milestone 13 Prompt: Developer Registration & Marketplace Publishing Application System
+### Milestone 13 Prompt: Developer Registration & Marketplace Publishing Application System `[STATUS: PENDING ⏳]`
 
 ```markdown
 You are a full-stack engineer working on TU Cockpit.
