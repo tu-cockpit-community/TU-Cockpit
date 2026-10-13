@@ -1,0 +1,25 @@
+[package]
+name = "tu-cockpit"
+version = "0.1.0"
+description = "TU Cockpit - Desktop Hub & Dynamic Plugin Ecosystem for TU Wien Students"
+authors = ["TU Wien Community"]
+edition = "2021"
+
+[lib]
+name = "tu_cockpit_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.0.0", features = [] }
+
+[dependencies]
+tauri = { version = "2.0.0", features = [] }
+tauri-plugin-shell = "2.0.0"
+tauri-plugin-notification = "2.0.0"
+tauri-plugin-sql = { version = "2.0.0", features = ["sqlite"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+regex = "1.10"
+thiserror = "1.0"
+tokio = { version = "1.38", features = ["full"] }

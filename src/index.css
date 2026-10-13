@@ -1,0 +1,21 @@
+@import "tailwindcss";
+@import "./styles/theme.css";
+
+/* Scrollbar customization to adhere to --tu tokens */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--tu-bg-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--tu-border);
+  border-radius: var(--tu-radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--tu-bg-hover);
+}
