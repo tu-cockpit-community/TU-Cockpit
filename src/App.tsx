@@ -9,7 +9,6 @@ import { ExecutiveHeader } from "@/components/header/ExecutiveHeader";
 import { SettingsModal } from "@/components/settings/SettingsModal";
 import { PluginMarketplace } from "@/components/marketplace/PluginMarketplace";
 import { EmbeddedPortalView } from "@/components/embedded/EmbeddedPortalView";
-import { GitHubInstallModal } from "@/components/marketplace/GitHubInstallModal";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { SyncSettings } from "@/components/settings/SyncSettings";
 import { X, Store } from "lucide-react";
@@ -118,7 +117,6 @@ export const App: React.FC = () => {
 
       {/* Modals & Dialogs */}
       <LoginModal />
-      <GitHubInstallModal />
       <CategoryManagerModal />
       <SettingsModal
         isOpen={isSettingsModalOpen}

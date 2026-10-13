@@ -61,7 +61,6 @@ export interface AppState {
   installedPlugins: Record<string, InstalledPlugin>;
   dockPinnedIds: string[];
   isSyncModalOpen: boolean;
-  isGitHubInstallModalOpen: boolean;
   communityOrgName: string;
   navOrientation: NavOrientation;
   categories: PluginCategory[];
@@ -74,7 +73,6 @@ export interface AppState {
   pinToDock: (id: string) => void;
   unpinFromDock: (id: string) => void;
   setSyncModalOpen: (open: boolean) => void;
-  setGitHubInstallModalOpen: (open: boolean) => void;
   setCommunityOrgName: (orgName: string) => void;
   setNavOrientation: (orientation: NavOrientation) => void;
   setCategoryModalOpen: (open: boolean) => void;
@@ -138,7 +136,6 @@ export const useAppStore = create<AppState>((set, get) => ({
     "settings",
   ],
   isSyncModalOpen: false,
-  isGitHubInstallModalOpen: false,
   communityOrgName: "tu-cockpit-community",
   navOrientation: "left",
   categories: INITIAL_CATEGORIES,
@@ -307,5 +304,4 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   setSyncModalOpen: (open) => set({ isSyncModalOpen: open }),
-  setGitHubInstallModalOpen: (open) => set({ isGitHubInstallModalOpen: open }),
 }));

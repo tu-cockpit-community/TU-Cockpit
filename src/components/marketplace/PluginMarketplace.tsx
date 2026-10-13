@@ -15,7 +15,6 @@ import {
   Star,
   Users,
   ShieldCheck,
-  PlusCircle,
   Loader2,
   Github,
   RefreshCw,
@@ -27,7 +26,6 @@ export const PluginMarketplace: React.FC = () => {
     installPlugin,
     uninstallPlugin,
     setActiveView,
-    setGitHubInstallModalOpen,
     communityOrgName,
   } = useAppStore();
 
@@ -102,7 +100,7 @@ export const PluginMarketplace: React.FC = () => {
             TU Wien Community Store
           </h2>
           <p className="text-sm text-[var(--tu-text-secondary)] mt-1">
-            Discover and install community plugins auto-discovered from GitHub or load custom repositories.
+            Discover and install verified community plugins created by TU Wien students and researchers.
           </p>
         </div>
 
@@ -115,13 +113,15 @@ export const PluginMarketplace: React.FC = () => {
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
           </button>
-          <button
-            onClick={() => setGitHubInstallModalOpen(true)}
+          <a
+            href={`https://github.com/${communityOrgName}`}
+            target="_blank"
+            rel="noreferrer"
             className="px-4 py-2 text-xs font-semibold rounded-[var(--tu-radius-sm)] bg-[var(--tu-accent)] text-[var(--tu-accent-contrast)] hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow shrink-0 cursor-pointer"
           >
-            <PlusCircle className="w-4 h-4" />
-            Install from GitHub URL
-          </button>
+            <Github className="w-4 h-4" />
+            Browse Community Org
+          </a>
         </div>
       </div>
 

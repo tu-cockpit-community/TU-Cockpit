@@ -51,6 +51,14 @@ pub fn parse_github_repo(url: &str) -> Result<(String, String), String> {
     }
 }
 
+pub fn is_allowed_community_repo(url: &str) -> bool {
+    if let Ok((owner, _)) = parse_github_repo(url) {
+        owner.eq_ignore_ascii_case("tu-cockpit-community")
+    } else {
+        false
+    }
+}
+
 pub fn sanitize_entry_path(name: &str) -> Result<PathBuf, String> {
     let path = Path::new(name);
     // Guard against path traversal attacks (e.g. ../ or /etc/passwd)
@@ -75,6 +83,13 @@ pub async fn install_plugin_from_github(
     release_tag: Option<String>,
 ) -> Result<InstalledPluginMetadata, String> {
     let (owner, repo) = parse_github_repo(&repo_url)?;
+
+    // Exploit Prevention: Strictly enforce tu-cockpit-community namespace
+    if !owner.eq_ignore_ascii_case("tu-cockpit-community") {
+        return Err(
+            "Exploit Prevention: Direct unverified GitHub installs are disabled. Plugins must be published in the official Community Organization (tu-cockpit-community).".to_string()
+        );
+    }
 
     let client = reqwest::Client::builder()
         .user_agent("TU-Cockpit/0.1.0 (TU Wien Student Workstation)")
@@ -256,5 +271,11 @@ mod tests {
         assert!(sanitize_entry_path("../evil.js").is_err());
         assert!(sanitize_entry_path("a/b/../../evil.js").is_err());
         assert!(sanitize_entry_path("/absolute/path").is_err());
+    }
+
+    #[test]
+    fn test_verified_community_org_enforcement() {
+        assert!(is_allowed_community_repo("https://github.com/tu-cockpit-community/freihaus-timer"));
+        assert!(!is_allowed_community_repo("https://github.com/evil-hacker/backdoor-plugin"));
     }
 }

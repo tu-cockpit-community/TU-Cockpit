@@ -9,7 +9,6 @@ import {
   Puzzle,
   ChevronDown,
   ChevronRight,
-  Plus,
   Search,
   FolderPlus,
   Trash2,
@@ -27,7 +26,6 @@ export const ConfigurableNav: React.FC = () => {
     setActiveView,
     toggleCategoryCollapse,
     setCategoryModalOpen,
-    setGitHubInstallModalOpen,
     uninstallPlugin,
   } = useAppStore();
 
@@ -163,20 +161,13 @@ export const ConfigurableNav: React.FC = () => {
         </div>
 
         {/* Footer Actions */}
-        <div className="p-2 border-t border-[var(--tu-border)] space-y-1">
+        <div className="p-2 border-t border-[var(--tu-border)]">
           <button
             onClick={() => setCategoryModalOpen(true)}
             className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[var(--tu-radius-sm)] text-[11px] font-semibold text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] transition-colors cursor-pointer"
           >
             <FolderPlus className="w-3.5 h-3.5 text-[var(--tu-accent)]" />
             <span>Manage Categories</span>
-          </button>
-          <button
-            onClick={() => setGitHubInstallModalOpen(true)}
-            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[var(--tu-radius-sm)] text-[11px] font-semibold text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] transition-colors cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5 text-[var(--tu-text-accent)]" />
-            <span>Direct GitHub Install</span>
           </button>
         </div>
       </aside>
@@ -249,18 +240,6 @@ export const ConfigurableNav: React.FC = () => {
           <SlidersHorizontal className="w-4 h-4" />
           <span className="pointer-events-none absolute -top-8 px-2 py-0.5 text-[10px] font-medium rounded whitespace-nowrap bg-[var(--tu-bg-card)] text-[var(--tu-text-primary)] border border-[var(--tu-border)] opacity-0 -translate-y-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-y-0 shadow-md">
             Categories
-          </span>
-        </button>
-
-        {/* Direct GitHub Install */}
-        <button
-          onClick={() => setGitHubInstallModalOpen(true)}
-          title="Direct GitHub Install"
-          className="relative group flex items-center justify-center w-9 h-9 rounded-xl text-[var(--tu-text-muted)] hover:text-[var(--tu-text-accent)] hover:bg-[var(--tu-bg-hover)] transition-all cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span className="pointer-events-none absolute -top-8 px-2 py-0.5 text-[10px] font-medium rounded whitespace-nowrap bg-[var(--tu-bg-card)] text-[var(--tu-text-primary)] border border-[var(--tu-border)] opacity-0 -translate-y-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-y-0 shadow-md">
-            Install from GitHub
           </span>
         </button>
       </div>
