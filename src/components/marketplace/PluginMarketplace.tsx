@@ -6,6 +6,7 @@ import {
 } from "@/services/marketplace/GitHubPluginService";
 import { CommunityOrgService } from "@/services/marketplace/CommunityOrgService";
 import { CommunityAuthorBadge } from "./CommunityAuthorBadge";
+import { DeveloperGuideTab } from "./DeveloperGuideTab";
 import {
   Download,
   Trash2,
@@ -18,6 +19,8 @@ import {
   Loader2,
   Github,
   RefreshCw,
+  Store,
+  Code2,
 } from "lucide-react";
 
 export const PluginMarketplace: React.FC = () => {
@@ -30,6 +33,7 @@ export const PluginMarketplace: React.FC = () => {
   } = useAppStore();
 
   const [registryPlugins, setRegistryPlugins] = useState<StoreRegistryPlugin[]>([]);
+  const [activeTab, setActiveTab] = useState<"plugins" | "developers">("plugins");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
@@ -125,8 +129,45 @@ export const PluginMarketplace: React.FC = () => {
         </div>
       </div>
 
-      {/* GitHub Community Organization Discovery Banner */}
-      <div className="px-4 py-2.5 rounded-[var(--tu-radius)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--tu-text-secondary)]">
+      {/* Top Tab Switcher */}
+      <div className="flex border-b border-[var(--tu-border)] gap-6">
+        <button
+          onClick={() => setActiveTab("plugins")}
+          className={`pb-3 text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
+            activeTab === "plugins"
+              ? "border-[var(--tu-accent)] text-[var(--tu-text-primary)]"
+              : "border-transparent text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)]"
+          }`}
+        >
+          <Store className="w-4 h-4" />
+          <span>Community Plugins</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] text-[var(--tu-text-muted)]">
+            {registryPlugins.length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("developers")}
+          className={`pb-3 text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
+            activeTab === "developers"
+              ? "border-[var(--tu-accent)] text-[var(--tu-text-primary)]"
+              : "border-transparent text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)]"
+          }`}
+        >
+          <Code2 className="w-4 h-4" />
+          <span>Developer Guide</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-400 font-mono">
+            SDK v1
+          </span>
+        </button>
+      </div>
+
+      {activeTab === "developers" ? (
+        <DeveloperGuideTab />
+      ) : (
+        <>
+          {/* GitHub Community Organization Discovery Banner */}
+          <div className="px-4 py-2.5 rounded-[var(--tu-radius)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--tu-text-secondary)]">
         <div className="flex items-center gap-2">
           <Github className="w-4 h-4 text-[var(--tu-text-accent)] shrink-0" />
           <span>
@@ -313,6 +354,8 @@ export const PluginMarketplace: React.FC = () => {
             );
           })}
         </div>
+      )}
+        </>
       )}
     </div>
   );
