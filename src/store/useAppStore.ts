@@ -51,6 +51,7 @@ export interface AppState {
   dockPinnedIds: string[];
   isSyncModalOpen: boolean;
   isGitHubInstallModalOpen: boolean;
+  communityOrgName: string;
   
   setActiveView: (view: SystemView | "plugin", pluginId?: string) => void;
   installPlugin: (manifest: PluginManifest, htmlContent: string, sourceType?: "registry" | "github_direct" | "local_dev", installDir?: string) => void;
@@ -60,6 +61,7 @@ export interface AppState {
   unpinFromDock: (id: string) => void;
   setSyncModalOpen: (open: boolean) => void;
   setGitHubInstallModalOpen: (open: boolean) => void;
+  setCommunityOrgName: (orgName: string) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -69,6 +71,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   dockPinnedIds: ["marketplace", "portals", "settings"],
   isSyncModalOpen: false,
   isGitHubInstallModalOpen: false,
+  communityOrgName: "tu-cockpit-community",
+
+  setCommunityOrgName: (orgName) => set({ communityOrgName: orgName }),
 
   setActiveView: (view, pluginId) => {
     set({
