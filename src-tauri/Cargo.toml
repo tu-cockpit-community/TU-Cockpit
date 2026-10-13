@@ -13,7 +13,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2.0.0", features = [] }
 
 [dependencies]
-tauri = { version = "2.0.0", features = [] }
+tauri = { version = "2.0.0", features = ["unstable"] }
 tauri-plugin-shell = "2.0.0"
 tauri-plugin-notification = "2.0.0"
 tauri-plugin-sql = { version = "2.0.0", features = ["sqlite"] }
@@ -28,3 +28,4 @@ sha2 = "0.10"
 totp-lite = "2.0.1"
 base32 = "0.5.1"
 keyring = "4.2.0"
+url = "2.5.8"

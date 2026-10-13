@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { useThemeStore } from "@/store/useThemeStore";
 import { PluginFrame } from "@/components/plugin-host/PluginFrame";
+import { NativePortalContainer } from "@/components/plugin-host/NativePortalContainer";
 import { ConfigurableNav } from "@/components/navigation/ConfigurableNav";
 import { CategoryManagerModal } from "@/components/navigation/CategoryManagerModal";
 import { ExecutiveHeader } from "@/components/header/ExecutiveHeader";
@@ -62,11 +63,20 @@ export const App: React.FC = () => {
           </div>
 
           <div className="flex-1 w-full h-full">
-            <PluginFrame
-              pluginId={activePlugin.manifest.id}
-              htmlContent={activePlugin.htmlContent}
-              allowedGlobs={activePlugin.manifest.capabilities?.network || []}
-            />
+            {activePlugin.manifest.id.startsWith("tuwien.official.") &&
+            activePlugin.manifest.homepage ? (
+              <NativePortalContainer
+                portalId={activePlugin.manifest.id}
+                url={activePlugin.manifest.homepage}
+                title={activePlugin.manifest.name}
+              />
+            ) : (
+              <PluginFrame
+                pluginId={activePlugin.manifest.id}
+                htmlContent={activePlugin.htmlContent}
+                allowedGlobs={activePlugin.manifest.capabilities?.network || []}
+              />
+            )}
           </div>
         </div>
       )}
