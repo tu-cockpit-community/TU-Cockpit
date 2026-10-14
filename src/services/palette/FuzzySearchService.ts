@@ -142,18 +142,22 @@ export class FuzzySearchService {
         subtitle: `${room.building} • ${room.address} • ${room.floor}`,
         category: "rooms",
         categoryLabel: "TU Wien Campus Rooms & Lecture Halls",
-        badge: "TU Maps",
+        badge: "Room",
         iconName: "MapPin",
-        keywords: [room.name, room.code, room.building, room.floor, room.address],
+        keywords: [room.name, room.code, room.building, room.floor, room.address, "room", "study"],
         action: async () => {
-          ctx.setActiveView("plugin", "tuwien.official.tumaps");
-          try {
-            await invoke("navigate_native_portal", {
-              portalId: "tuwien.official.tumaps",
-              url: room.mapUrl,
-            });
-          } catch (e) {
-            console.warn("Could not navigate native portal directly:", e);
+          if (ctx.installedPlugins["tuwien.community.room-radar"]) {
+            ctx.setActiveView("plugin", "tuwien.community.room-radar");
+          } else {
+            ctx.setActiveView("plugin", "tuwien.official.tumaps");
+            try {
+              await invoke("navigate_native_portal", {
+                portalId: "tuwien.official.tumaps",
+                url: room.mapUrl,
+              });
+            } catch (e) {
+              console.warn("Could not navigate native portal directly:", e);
+            }
           }
         },
       });
@@ -258,6 +262,20 @@ export class FuzzySearchService {
       keywords: ["mensa", "food", "essen", "mittagessen", "lunch", "freihaus", "markt", "cafeteria", "speiseplan"],
       action: () => {
         ctx.setActiveView("plugin", "tuwien.community.mensa");
+      },
+    });
+
+    items.push({
+      id: "action_open_room_radar",
+      title: "Find Free Lecture Halls & Study Spots (Room Radar)",
+      subtitle: "Locate free study halls, silent zones, and room codes across campus",
+      category: "actions",
+      categoryLabel: "Quick System Actions",
+      badge: "Radar",
+      iconName: "MapPin",
+      keywords: ["rooms", "halls", "study", "free", "lernraum", "freihaus", "gusshaus", "audimax", "radar", "spot"],
+      action: () => {
+        ctx.setActiveView("plugin", "tuwien.community.room-radar");
       },
     });
 

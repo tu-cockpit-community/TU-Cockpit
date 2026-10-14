@@ -990,3 +990,255 @@ export const COMMUNITY_MENSA_HTML = `<!DOCTYPE html>
 </body>
 </html>`;
 
+export const COMMUNITY_ROOM_RADAR_HTML = `<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TU Room & Study Radar</title>
+  <style>
+    :root {
+      --tu-bg-canvas: #090d16;
+      --tu-bg-surface: #111827;
+      --tu-bg-card: rgba(31, 41, 55, 0.6);
+      --tu-bg-elevated: #1f2937;
+      --tu-border: #374151;
+      --tu-border-subtle: #1f2937;
+      --tu-border-focus: #006699;
+      --tu-text-primary: #f9fafb;
+      --tu-text-secondary: #9ca3af;
+      --tu-text-muted: #6b7280;
+      --tu-accent: #006699;
+      --tu-accent-subtle: rgba(0, 102, 153, 0.15);
+      --tu-accent-text: #ffffff;
+      --tu-status-success: #10b981;
+      --tu-status-warning: #f59e0b;
+      --tu-status-error: #ef4444;
+      --tu-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --tu-font-mono: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--tu-font-sans);
+      background-color: var(--tu-bg-canvas);
+      color: var(--tu-text-primary);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+    header {
+      height: 52px;
+      background: var(--tu-bg-surface);
+      border-bottom: 1px solid var(--tu-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      flex-shrink: 0;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 14px; }
+    .brand-icon { width: 28px; height: 28px; border-radius: 6px; background: var(--tu-accent); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+    .badge-live { font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 10px; background: rgba(16, 185, 129, 0.15); color: var(--tu-status-success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .search-input { width: 260px; padding: 6px 12px; border-radius: 6px; background: var(--tu-bg-card); border: 1px solid var(--tu-border); color: var(--tu-text-primary); font-size: 12px; outline: none; }
+    .search-input:focus { border-color: var(--tu-accent); }
+    .layout { display: flex; flex: 1; overflow: hidden; }
+    .sidebar { width: 260px; background: var(--tu-bg-surface); border-right: 1px solid var(--tu-border); padding: 16px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+    .loc-card { padding: 10px 12px; border-radius: 8px; background: var(--tu-bg-canvas); border: 1px solid var(--tu-border); cursor: pointer; transition: all 0.15s ease; }
+    .loc-card.active { border-color: var(--tu-accent); background: var(--tu-accent-subtle); }
+    .loc-title { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+    .loc-card.active .loc-title { color: #38bdf8; }
+    .loc-desc { font-size: 10px; color: var(--tu-text-muted); }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 16px 20px; }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--tu-border); }
+    .pills { display: flex; gap: 6px; }
+    .pill-btn { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--tu-border); background: var(--tu-bg-surface); color: var(--tu-text-secondary); font-size: 11px; font-weight: 600; cursor: pointer; }
+    .pill-btn.active { background: var(--tu-accent); color: #fff; border-color: var(--tu-accent); }
+    .grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; padding-right: 4px; }
+    .room-card { background: var(--tu-bg-surface); border: 1px solid var(--tu-border); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; }
+    .room-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .room-code { font-size: 11px; font-weight: 800; font-family: var(--tu-font-mono); padding: 2px 7px; border-radius: 4px; background: var(--tu-bg-elevated); border: 1px solid var(--tu-border); color: #38bdf8; }
+    .status-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 12px; }
+    .status-free { background: rgba(16, 185, 129, 0.15); color: var(--tu-status-success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-busy { background: rgba(245, 158, 11, 0.15); color: var(--tu-status-warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .status-study { background: rgba(0, 102, 153, 0.2); color: #38bdf8; border: 1px solid rgba(0, 102, 153, 0.4); }
+    .room-name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+    .room-loc { font-size: 11px; color: var(--tu-text-secondary); margin-bottom: 4px; }
+    .room-floor { font-size: 11px; color: var(--tu-text-muted); }
+    .room-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--tu-border); padding-top: 10px; margin-top: 10px; }
+    .amenities { display: flex; gap: 8px; font-size: 11px; color: var(--tu-text-muted); align-items: center; }
+    .view-btn { padding: 4px 10px; border-radius: 6px; background: var(--tu-bg-elevated); border: 1px solid var(--tu-border); color: var(--tu-text-primary); font-size: 11px; font-weight: 600; cursor: pointer; }
+    .view-btn:hover { background: var(--tu-accent); color: #fff; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal-content { background: var(--tu-bg-surface); border: 1px solid var(--tu-border); border-radius: 12px; width: 440px; padding: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-icon">📍</div>
+      <div>TU Room & Study Radar <span class="badge-live">Live WS 2026/27</span></div>
+    </div>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <input type="text" class="search-input" id="search-input" placeholder="Raum suchen (z.B. EI 7, HS 1, Bib)..." oninput="handleSearch()">
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--tu-text-muted); margin-bottom: 4px;">Standorte</div>
+      <div class="loc-card active" onclick="selectLoc('all')">
+        <div class="loc-title">Alle Standorte</div>
+        <div class="loc-desc">Gesamter TU Wien Campus</div>
+      </div>
+      <div class="loc-card" onclick="selectLoc('freihaus')">
+        <div class="loc-title">Freihaus (FH)</div>
+        <div class="loc-desc">Wiedner Hauptstraße 8-10</div>
+      </div>
+      <div class="loc-card" onclick="selectLoc('hauptgebaeude')">
+        <div class="loc-title">Hauptgebäude (HG)</div>
+        <div class="loc-desc">Karlsplatz 13</div>
+      </div>
+      <div class="loc-card" onclick="selectLoc('gusshaus')">
+        <div class="loc-title">Campus Gußhaus</div>
+        <div class="loc-desc">Gußhausstraße 25-29</div>
+      </div>
+      <div class="loc-card" onclick="selectLoc('getreidemarkt')">
+        <div class="loc-title">Getreidemarkt</div>
+        <div class="loc-desc">Lehartrakt & Hochhaus</div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="toolbar">
+        <div class="pills">
+          <button class="pill-btn active" onclick="selectType('all')">Alle Raumtypen</button>
+          <button class="pill-btn" onclick="selectType('lecture')">🎓 Hörsäle</button>
+          <button class="pill-btn" onclick="selectType('silent')">🤫 Ruhige Lernzonen</button>
+          <button class="pill-btn" onclick="selectType('group')">👥 Gruppenräume</button>
+        </div>
+      </div>
+
+      <div class="grid" id="rooms-grid"></div>
+    </div>
+  </div>
+
+  <div id="modal-container"></div>
+
+  <script>
+    const ROOMS = [
+      { id: 'fh_hs1', code: 'HS 1', name: 'Hörsaal 1 (Freihaus)', loc: 'freihaus', locName: 'Freihaus', floor: 'Turm Gelb, EG', type: 'lecture', seats: 380, outlets: true, wifi: true, status: 'free', freeUntil: '14:15 Uhr', dir: 'Haupteingang Wiedner Hauptstraße, links in den gelben Bereich.', sched: [{t: '08:00 - 10:00', l: 'VO Mathematik 1', b: true}, {t: '10:00 - 14:15', l: 'Frei für Selbststudium', b: false}, {t: '14:15 - 16:00', l: 'VO Lineare Algebra', b: true}] },
+      { id: 'fh_hs2', code: 'HS 2', name: 'Hörsaal 2 (Freihaus)', loc: 'freihaus', locName: 'Freihaus', floor: 'Turm Gelb, 1. OG', type: 'lecture', seats: 190, outlets: true, wifi: true, status: 'busy', busyUntil: '13:45 Uhr', dir: 'Stiege 2 im gelben Turm, 1. Stock direkt gegenüber Lift.', sched: [{t: '11:30 - 13:45', l: 'VU Algorithmen & Datenstrukturen', b: true}, {t: '13:45 - 17:00', l: 'Frei für Selbststudium', b: false}] },
+      { id: 'fh_bib', code: 'Lernraum Bib', name: 'Bibliothek Lernsaal & Silent Zone', loc: 'freihaus', locName: 'Freihaus', floor: 'UB TU Wien, 1.–4. OG', type: 'silent', seats: 420, outlets: true, wifi: true, status: 'study', dir: 'Universitätsbibliothek vor dem Freihausplatz.', sched: [{t: '08:30 - 21:00', l: 'Durchgehend geöffnet für Studierende', b: false}] },
+      { id: 'hg_audi', code: 'Audimax', name: 'Auditorium Maximum (Karlsplatz)', loc: 'hauptgebaeude', locName: 'Hauptgebäude', floor: 'Stiege 1, EG', type: 'lecture', seats: 600, outlets: true, wifi: true, status: 'busy', busyUntil: '14:00 Uhr', dir: 'Karlsplatz Haupteingang, nach Säulenhalle links die Rampe hinab.', sched: [{t: '12:00 - 14:00', l: 'VO Analysis 1', b: true}, {t: '14:00 - 16:30', l: 'Frei für Selbststudium', b: false}] },
+      { id: 'hg_boeckl', code: 'Boecklsaal', name: 'Boecklsaal (Historisches Hauptgebäude)', loc: 'hauptgebaeude', locName: 'Hauptgebäude', floor: 'Stiege 1, 1. Stock', type: 'group', seats: 65, outlets: true, wifi: true, status: 'study', dir: 'Prunkstiege 1 in den 1. Stock neben dem Rektorat.', sched: [{t: '08:00 - 19:00', l: 'Offene Gruppenarbeitszone & Tische', b: false}] },
+      { id: 'ei_7', code: 'EI 7', name: 'Elektrotechnik Hörsaal 7', loc: 'gusshaus', locName: 'Campus Gußhaus', floor: 'Altes EI-Gebäude, EG', type: 'lecture', seats: 250, outlets: true, wifi: true, status: 'free', freeUntil: '15:30 Uhr', dir: 'Gußhausstraße 27, durch den Innenhof rechts zum Hörsaaltrakt.', sched: [{t: '11:00 - 15:30', l: 'Frei für Selbststudium', b: false}, {t: '15:30 - 17:00', l: 'UE Schaltungstechnik', b: true}] },
+      { id: 'ei_stud', code: 'EI Lernzone', name: 'Gußhaus Lernraum & Projekttische', loc: 'gusshaus', locName: 'Campus Gußhaus', floor: 'Neues EI-Gebäude, 2. OG', type: 'group', seats: 80, outlets: true, wifi: true, status: 'study', dir: 'Foyer Neues EI, Lift in den 2. Stock, Lernbereich mit Whiteboards.', sched: [{t: '08:00 - 20:00', l: 'Gruppenarbeit & Laptoparbeitsplätze', b: false}] },
+      { id: 'gm_1', code: 'GM 1', name: 'Maschinenbau Hörsaal GM 1 (Radinger)', loc: 'getreidemarkt', locName: 'Getreidemarkt', floor: 'Lehartrakt, EG', type: 'lecture', seats: 310, outlets: true, wifi: true, status: 'free', freeUntil: '16:00 Uhr', dir: 'Getreidemarkt Eingang Lehartrakt, geradeaus durch die Glastür.', sched: [{t: '10:30 - 16:00', l: 'Frei für Selbststudium', b: false}] }
+    ];
+
+    let activeLoc = 'all';
+    let activeType = 'all';
+    let searchQuery = '';
+
+    function selectLoc(loc) {
+      activeLoc = loc;
+      document.querySelectorAll('.loc-card').forEach(c => c.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      render();
+    }
+
+    function selectType(t) {
+      activeType = t;
+      document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      render();
+    }
+
+    function handleSearch() {
+      searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+      render();
+    }
+
+    function showDetails(id) {
+      const room = ROOMS.find(r => r.id === id);
+      if (!room) return;
+      document.getElementById('modal-container').innerHTML = \`
+        <div class="modal-overlay" onclick="closeModal()">
+          <div class="modal-content" onclick="event.stopPropagation()">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div>
+                <span class="room-code">\${room.code}</span>
+                <h3 style="font-size: 15px; font-weight: 700; margin-top: 4px;">\${room.name}</h3>
+                <p style="font-size: 11px; color: var(--tu-text-muted);">\${room.locName} • \${room.floor}</p>
+              </div>
+              <button onclick="closeModal()" style="background: none; border: none; color: var(--tu-text-muted); font-size: 16px; cursor: pointer;">✕</button>
+            </div>
+            <div style="background: var(--tu-bg-card); border: 1px solid var(--tu-border); border-radius: 6px; padding: 10px; font-size: 11px; margin-bottom: 12px;">
+              <strong style="color: #38bdf8;">Wegbeschreibung:</strong> \${room.dir}
+            </div>
+            <div style="font-size: 11px; font-weight: 700; margin-bottom: 8px;">Tageszeitplan:</div>
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
+              \${room.sched.map(s => \`
+                <div style="display: flex; justify-content: space-between; font-size: 11px; padding: 6px 10px; border-radius: 6px; border: 1px solid \${s.b ? 'rgba(245,158,11,0.2)' : 'rgba(16,185,129,0.2)'}; background: \${s.b ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)'}; color: \${s.b ? '#fde047' : '#6ee7b7'};">
+                  <span>\${s.t}</span>
+                  <span>\${s.l}</span>
+                </div>
+              \`).join('')}
+            </div>
+            <div style="display: flex; justify-content: flex-end;">
+              <a href="https://maps.tuwien.ac.at/?q=\${encodeURIComponent(room.code)}" target="_blank" style="padding: 6px 14px; border-radius: 6px; background: var(--tu-accent); color: #fff; text-decoration: none; font-size: 11px; font-weight: 600;">Auf TU Maps öffnen</a>
+            </div>
+          </div>
+        </div>
+      \`;
+    }
+
+    function closeModal() {
+      document.getElementById('modal-container').innerHTML = '';
+    }
+
+    function render() {
+      const items = ROOMS.filter(r => {
+        if (activeLoc !== 'all' && r.loc !== activeLoc) return false;
+        if (activeType !== 'all' && r.type !== activeType) return false;
+        if (searchQuery && !r.code.toLowerCase().includes(searchQuery) && !r.name.toLowerCase().includes(searchQuery) && !r.locName.toLowerCase().includes(searchQuery)) return false;
+        return true;
+      });
+
+      const grid = document.getElementById('rooms-grid');
+      grid.innerHTML = items.map(r => {
+        const badgeClass = r.status === 'free' ? 'status-free' : r.status === 'busy' ? 'status-busy' : 'status-study';
+        const badgeLabel = r.status === 'free' ? 'Frei bis ' + r.freeUntil : r.status === 'busy' ? 'Belegt bis ' + r.busyUntil : 'Dauerhafte Lernzone';
+
+        return \`
+          <div class="room-card">
+            <div>
+              <div class="room-header">
+                <span class="room-code">\${r.code}</span>
+                <span class="status-badge \${badgeClass}">\${badgeLabel}</span>
+              </div>
+              <div class="room-name">\${r.name}</div>
+              <div class="room-loc">\${r.locName}</div>
+              <div class="room-floor">📍 \${r.floor}</div>
+            </div>
+            <div class="room-footer">
+              <div class="amenities">
+                <span>💺 \${r.seats}</span>
+                \${r.outlets ? '<span title="Steckdosen">🔌</span>' : ''}
+                \${r.wifi ? '<span title="WiFi 6">📶</span>' : ''}
+              </div>
+              <button class="view-btn" onclick="showDetails('\${r.id}')">Zeitplan</button>
+            </div>
+          </div>
+        \`;
+      }).join('');
+    }
+
+    render();
+  </script>
+</body>
+</html>`;
+
+

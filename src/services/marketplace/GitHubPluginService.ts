@@ -3,6 +3,7 @@ import { PluginManifest } from "@/store/useAppStore";
 import {
   COMMUNITY_CALENDAR_HTML,
   COMMUNITY_MENSA_HTML,
+  COMMUNITY_ROOM_RADAR_HTML,
   COMMUNITY_SLIDE_VAULT_HTML,
 } from "./CommunityPluginBundles";
 
@@ -202,6 +203,29 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
       rating: 4.9,
       downloads: 3800,
       htmlContent: COMMUNITY_MENSA_HTML,
+    },
+    {
+      id: "tuwien.community.room-radar",
+      name: "TU Room & Study Radar",
+      version: "1.0.0",
+      author: {
+        name: "TU Cockpit Community Contributors",
+        github: "tu-cockpit-community",
+        url: "https://github.com/tu-cockpit-community",
+      },
+      description: "Find free lecture halls, quiet study spots, and navigate campus rooms across Freihaus, Karlsplatz, and Gußhaus.",
+      category: "Campus Life",
+      homepage: "https://github.com/tu-cockpit-community/tu-room-radar",
+      githubRepo: "https://github.com/tu-cockpit-community/tu-room-radar",
+      capabilities: {
+        network: ["https://maps.tuwien.ac.at/*", "https://tiss.tuwien.ac.at/*"],
+        storage: { quotaBytes: 10485760 },
+        notifications: false,
+      },
+      verified: true,
+      rating: 4.9,
+      downloads: 4100,
+      htmlContent: COMMUNITY_ROOM_RADAR_HTML,
     },
   ],
 };
