@@ -14,8 +14,7 @@
 > - Milestone 43 (Phase 10): See [docs/archive/PHASE_10.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_10.md)  
 >
 > **Current Sprint Status:**
-> - 🟢 **PHASES 1–10 (COMPLETED & ARCHIVED):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, Headless VoWi Reader, Autonomous `tu-calendar` Community Plugin, and Autonomous `tu-slide-vault` Community Plugin (Milestones 0–43).
-> - 🟡 **PHASE 11 (ACTIVE SPRINT):** Launching Reliability, Native Webview Stability & Community Plugin Bundle Invariants (Milestones 44–46).
+> - 🟢 **PHASES 1–11 (COMPLETED & ACTIVE):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, Headless VoWi Reader, Autonomous `tu-calendar` Community Plugin, Autonomous `tu-slide-vault` Community Plugin, and Launching Reliability & Bundling Invariants (Milestones 0–46).
 
 ---
 
@@ -43,7 +42,7 @@
 
 ---
 
-### Milestone 44 Prompt: Fix Native Webview Lifecycle, Container Pointer-Events & Window Label Invariant `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 44 Prompt: Fix Native Webview Lifecycle, Container Pointer-Events & Window Label Invariant `[STATUS: COMPLETED ✅ - Commit 8447f7a]`
 
 ```markdown
 You are a desktop systems engineer and Rust/React developer working on TU Cockpit.
@@ -96,7 +95,7 @@ Commit message: `fix(portals): enforce main window label and pointer-events in n
 
 ---
 
-### Milestone 45 Prompt: Fix Community Plugin Sidebar Categorization & Discovery `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 45 Prompt: Fix Community Plugin Sidebar Categorization & Discovery `[STATUS: COMPLETED ✅ - Commit 02b82f4]`
 
 ```markdown
 You are a React and Zustand state architect working on TU Cockpit.
@@ -156,7 +155,7 @@ Commit message: `fix(navigation): ensure installed community plugins are assigne
 
 ---
 
-### Milestone 46 Prompt: Bundle Standalone Single-File Distributions for `tu-calendar` and `tu-slide-vault` `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 46 Prompt: Bundle Standalone Single-File Distributions for `tu-calendar` and `tu-slide-vault` `[STATUS: COMPLETED ✅ - Commit 8e0f129]`
 
 ```markdown
 You are a frontend build engineer and plugin architect working on TU Cockpit.
