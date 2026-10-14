@@ -116,6 +116,14 @@ const INITIAL_CATEGORIES: PluginCategory[] = [
       "tuwien.official.tumaps",
     ],
   },
+  {
+    id: "community",
+    name: "Community Tools",
+    icon: "Boxes",
+    isDefault: true,
+    isCollapsed: false,
+    pluginIds: [],
+  },
 ];
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -170,7 +178,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       const updated = state.categories
         .filter((c) => c.id !== id)
         .map((c) =>
-          c.id === "tools"
+          c.id === "community" || c.id === "tools"
             ? { ...c, pluginIds: [...new Set([...c.pluginIds, ...orphaned])] }
             : c
         );
@@ -236,13 +244,40 @@ export const useAppStore = create<AppState>((set, get) => ({
         ? state.dockPinnedIds
         : [...state.dockPinnedIds, manifest.id];
 
-      // Add to tools category if not in any category
+      // Ensure plugin is assigned to a category in sidebar
       const inAnyCategory = state.categories.some((c) => c.pluginIds.includes(manifest.id));
-      const categories = inAnyCategory
-        ? state.categories
-        : state.categories.map((c) =>
-            c.id === "tools" ? { ...c, pluginIds: [...c.pluginIds, manifest.id] } : c
+      let categories = state.categories;
+
+      if (!inAnyCategory) {
+        const hasCommunity = categories.some((c) => c.id === "community");
+        const hasTools = categories.some((c) => c.id === "tools");
+
+        if (hasCommunity) {
+          categories = categories.map((c) =>
+            c.id === "community"
+              ? { ...c, pluginIds: [...new Set([...c.pluginIds, manifest.id])] }
+              : c
           );
+        } else if (hasTools) {
+          categories = categories.map((c) =>
+            c.id === "tools"
+              ? { ...c, pluginIds: [...new Set([...c.pluginIds, manifest.id])] }
+              : c
+          );
+        } else {
+          categories = [
+            ...categories,
+            {
+              id: "community",
+              name: "Community Tools",
+              icon: "Boxes",
+              isDefault: true,
+              isCollapsed: false,
+              pluginIds: [manifest.id],
+            },
+          ];
+        }
+      }
 
       return {
         installedPlugins: updated,
