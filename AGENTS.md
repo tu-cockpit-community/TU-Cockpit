@@ -12,6 +12,7 @@ To prevent context window bloat, cognitive drift, and tool edit failures, all AI
 
 ```
 ├── AGENTS.md                   <-- READ FIRST: Swarm rules, verification commands, agent roles
+├── PROJECT_MAP.md              <-- FAST LOOKUP: "Where is X?" - File & symbol index for AI agents
 ├── ARCHITECTURE.md             <-- LIVING SPECIFICATIONS: Ground truth for IPC, CSS tokens, Webviews, Security
 ├── PLAN.md                     <-- ACTIVE SPRINT ONLY: Phase 6 tasks and milestones (< 600 lines)
 ├── README.md                   <-- USER DOCUMENTATION: End-user feature showcase and setup guide
@@ -69,6 +70,8 @@ npm run build
 
 # 2. Rust Backend & Tauri Capability Verification:
 cargo check --manifest-path src-tauri/Cargo.toml
+# Note (macOS): If cargo check encounters linker errors with beta SDKs, prefix with:
+# SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk cargo check --manifest-path src-tauri/Cargo.toml
 
 # 3. Optional: Local Dev Server (Background Daemon):
 npm run tauri dev
