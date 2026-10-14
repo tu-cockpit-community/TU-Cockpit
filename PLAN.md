@@ -13,234 +13,139 @@
 > - Milestone 42 (Phase 9): See [docs/archive/PHASE_9.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_9.md)  
 > - Milestone 43 (Phase 10): See [docs/archive/PHASE_10.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_10.md)  
 > - Milestones 44–46 (Phase 11): See [docs/archive/PHASE_11.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_11.md)  
+> - Milestones 47–49 (Phase 12): See [docs/archive/PHASE_12.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_12.md)  
 >
 > **Current Sprint Status:**
-> - 🟢 **PHASES 1–11 (COMPLETED & ARCHIVED):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, Headless VoWi Reader, Autonomous `tu-calendar` Community Plugin, Autonomous `tu-slide-vault` Community Plugin, and Launching Reliability & Bundling Invariants (Milestones 0–46).
-> - 🟡 **PHASE 12 (ACTIVE SPRINT):** Community Plugin Single-File Inlining, Local Dev Loader & Store Registry Hardening (Milestones 47–49).
+> - 🟢 **PHASES 1–12 (COMPLETED & ARCHIVED):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, Headless VoWi Reader, Autonomous `tu-calendar`, Autonomous `tu-slide-vault`, Launching Reliability & Bundling Invariants, Single-File Inlining, and Store Registry Hardening (Milestones 0–49).
+> - 🟡 **PHASE 13 (ACTIVE SPRINT):** Unified Spotlight Search (FTS5 Slides & Deadlines) & `tu-mensa` Community Plugin (Milestones 50–52).
 
 ---
 
 # ==============================================================================
-# 🟡 PART XII: PHASE 12 — COMMUNITY PLUGIN SINGLE-FILE INLINING, LOCAL DEV LOADER & STORE REGISTRY HARDENING
+# 🟡 PART XIII: PHASE 13 — UNIFIED SPOTLIGHT SEARCH & TU MENSA COMMUNITY PLUGIN
 # ==============================================================================
 
-> **Phase 12 Summary & Objective:**  
-> Eliminate the blank-screen failure mode in community plugins (`tu-calendar`, `tu-slide-vault`) by resolving the architectural clash between `srcDoc` sandboxed iframes and standard Vite multi-chunk builds.
->
-> **Root Cause Forensic Recap:**
-> 1. **`srcDoc` Asset Resolution Black Hole:** An iframe running via `<iframe srcDoc={htmlContent} />` has an origin of `about:srcdoc`. It cannot resolve relative assets (`./assets/index-*.js`) or uncompiled source modules (`/src/main.tsx`) against `localhost:1420`.
-> 2. **Missing `vite-plugin-singlefile` in Plugin Repos:** Standard Vite outputs chunked assets (`dist/index.html` + `dist/assets/*`). All scripts, stylesheets, and SVG assets must be inlined into a single self-contained HTML file.
-> 3. **`CommunityOrgService` Fallback Masking:** `CommunityOrgService.ts` queried GitHub for community plugins but set `htmlContent: undefined`, which stripped the working pre-bundled HTML fallbacks in `DEFAULT_STORE_REGISTRY` and triggered a broken download flow.
-> 4. **Git Source Tree vs. Compiled Distribution:** The Rust downloader (`plugin_downloader.rs`) downloaded raw GitHub repository `zipball`s (which only contain source code without `dist/`). Plugins must publish compiled `plugin.zip` release assets containing `dist/index.html` + `manifest.json`.
+> **Phase 13 Summary & Objective:**  
+> 1. Transform the Global Command Palette (`Cmd+K`) into an instantaneous academic spotlight by surfacing full-text search across cached PDF lecture slides (`offline_vault.rs` with SQLite FTS5) and upcoming course deadlines (`deadline_aggregator.rs`).
+> 2. Engineer and scaffold the 3rd autonomous community plugin: `tu-mensa` (TU Wien Campus Mensa Daily Menu, Price Radar & Dietary Filter), pre-bundled with `vite-plugin-singlefile` and published to `tu-cockpit-community/tu-mensa`.
+> 3. Register `tuwien.community.mensa` in `DEFAULT_STORE_REGISTRY` and add instant Command Palette navigation shortcuts.
 
 ---
 
-## 59. Phase 12 AI Worker Agent Prompts & Step-by-Step Implementation Milestones
+## 60. Phase 13 AI Worker Agent Prompts & Step-by-Step Implementation Milestones
 
 ---
 
-### Milestone 47 Prompt: Configure `vite-plugin-singlefile` in `tu-calendar` and `tu-slide-vault` `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 50 Prompt: Command Palette (`Cmd+K`) Unified Search Deepening (FTS5 Slides & Deadlines) `[STATUS: READY FOR EXECUTION 🟡]`
 
 ```markdown
-You are a frontend build engineer and plugin developer working on the TU Cockpit community ecosystem.
+You are a React and Tauri frontend engineer working on TU Cockpit's Global Command Palette.
 
 ### Objective:
-Configure `vite-plugin-singlefile` in both `community-plugins/tu-calendar` and `community-plugins/tu-slide-vault` so that running `npm run build` produces a 100% self-contained `dist/index.html` with all JavaScript, CSS, and assets inlined.
-
-### Context & Subfolder Repositories:
-- [community-plugins/tu-calendar/package.json](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-calendar/package.json)
-- [community-plugins/tu-calendar/vite.config.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-calendar/vite.config.ts)
-- [community-plugins/tu-slide-vault/package.json](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-slide-vault/package.json)
-- [community-plugins/tu-slide-vault/vite.config.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-slide-vault/vite.config.ts)
-
-### Tasks:
-
-#### 1. Setup Single-File Bundler in `community-plugins/tu-calendar`
-- In `community-plugins/tu-calendar/package.json`, add `"vite-plugin-singlefile": "^2.1.0"` to `devDependencies`.
-- In `community-plugins/tu-calendar/vite.config.ts`:
-  ```ts
-  import { defineConfig } from "vite";
-  import react from "@vitejs/plugin-react";
-  import { viteSingleFile } from "vite-plugin-singlefile";
-
-  export default defineConfig({
-    plugins: [react(), viteSingleFile()],
-    build: {
-      outDir: "dist",
-      emptyOutDir: true,
-    },
-  });
-  ```
-- Install dependencies and build:
-  ```bash
-  cd community-plugins/tu-calendar && npm install && npm run build
-  ```
-- Verify `dist/index.html` exists and contains inlined `<script>` and `<style>` blocks with NO external `<script src="...">` or `<link rel="stylesheet">`.
-- Commit changes in `tu-calendar` repo:
-  ```bash
-  git -C community-plugins/tu-calendar add package.json package-lock.json vite.config.ts
-  git -C community-plugins/tu-calendar commit -m "build(vite): add vite-plugin-singlefile for sandboxed iframe compatibility"
-  ```
-
-#### 2. Setup Single-File Bundler in `community-plugins/tu-slide-vault`
-- In `community-plugins/tu-slide-vault/package.json`, add `"vite-plugin-singlefile": "^2.1.0"` to `devDependencies`.
-- In `community-plugins/tu-slide-vault/vite.config.ts`:
-  ```ts
-  import { defineConfig } from "vite";
-  import react from "@vitejs/plugin-react";
-  import { viteSingleFile } from "vite-plugin-singlefile";
-
-  export default defineConfig({
-    plugins: [react(), viteSingleFile()],
-    build: {
-      outDir: "dist",
-      emptyOutDir: true,
-    },
-  });
-  ```
-- Install dependencies and build:
-  ```bash
-  cd community-plugins/tu-slide-vault && npm install && npm run build
-  ```
-- Verify `dist/index.html` exists and contains inlined `<script>` and `<style>` blocks.
-- Commit changes in `tu-slide-vault` repo:
-  ```bash
-  git -C community-plugins/tu-slide-vault add package.json package-lock.json vite.config.ts
-  git -C community-plugins/tu-slide-vault commit -m "build(vite): add vite-plugin-singlefile for sandboxed iframe compatibility"
-  ```
-
-### Verification:
-1. `test -f community-plugins/tu-calendar/dist/index.html` returns true.
-2. `test -f community-plugins/tu-slide-vault/dist/index.html` returns true.
-3. Neither `dist/index.html` references `./assets/*.js` or `./assets/*.css`.
-
-### Git Hygiene:
-Commits made within `community-plugins/tu-calendar` and `community-plugins/tu-slide-vault` with message:
-`build(vite): add vite-plugin-singlefile for sandboxed iframe compatibility`
-```
-
----
-
-### Milestone 48 Prompt: Fix `CommunityOrgService` Fallback Masking & Local Dev Loader `[STATUS: READY FOR EXECUTION 🟡]`
-
-```markdown
-You are a React and TypeScript frontend systems engineer working on TU Cockpit.
-
-### Objective:
-Ensure `CommunityOrgService.ts` preserves pre-bundled `htmlContent` when discovering plugins from GitHub, and implement local dev loading so that clicking "Install" on `tu-calendar` or `tu-slide-vault` renders the rich, compiled single-file bundle without blank screens.
+Integrate Rust backend search engines into `FuzzySearchService.ts` and `CommandPalette.tsx`:
+1. Search cached lecture slide pages using SQLite FTS5 (`search_offline_slides`).
+2. Search and display upcoming academic deadlines (`get_academic_deadlines`).
 
 ### Context & Files:
-- [src/services/marketplace/CommunityOrgService.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/marketplace/CommunityOrgService.ts)
-- [src/services/marketplace/GitHubPluginService.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/marketplace/GitHubPluginService.ts)
-- [src/components/marketplace/PluginMarketplace.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/marketplace/PluginMarketplace.tsx)
+- [src-tauri/src/offline_vault.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/offline_vault.rs)
+- [src-tauri/src/deadline_aggregator.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/deadline_aggregator.rs)
+- [src/services/palette/FuzzySearchService.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/palette/FuzzySearchService.ts)
+- [src/components/palette/CommandPalette.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/palette/CommandPalette.tsx)
 
 ### Tasks:
-
-#### 1. Inherit Pre-Bundled `htmlContent` in `CommunityOrgService.ts`
-- In `src/services/marketplace/CommunityOrgService.ts`:
-  - When constructing `StoreRegistryPlugin` from discovered GitHub repositories, cross-reference `DEFAULT_STORE_REGISTRY.plugins` by `manifest.id`.
-  - Preserve `htmlContent: defaultEntry?.htmlContent`:
-    ```ts
-    const defaultEntry = DEFAULT_STORE_REGISTRY.plugins.find(
-      (p) => p.id === manifest.id
-    );
-    const plugin: StoreRegistryPlugin = {
-      // ... existing fields ...
-      htmlContent: defaultEntry?.htmlContent,
-    };
-    ```
-  - This ensures that when the GitHub API returns repositories, it never overwrites the verified embedded single-file application with `undefined`.
-
-#### 2. Local Development Single-File Loader in `PluginMarketplace.tsx`
-- In `src/components/marketplace/PluginMarketplace.tsx`:
-  - When `handleInstall(entry)` is called:
-    - If `entry.htmlContent` is present (either from the registry or local bundle), install using `installPlugin(manifest, entry.htmlContent, "registry")`.
-    - If `entry.htmlContent` is missing, check if `DEFAULT_STORE_REGISTRY.plugins` has a bundled HTML for this ID before making network requests.
-    - Guarantee that `installPlugin` is never invoked with uncompiled JSX or placeholder cards.
-
-#### 3. End-to-End Verification of Community Tools
-- Open TU Cockpit Community Store (`activeView === "marketplace"`).
-- Install `tuwien.community.calendar`:
-  - Verify that the app launches in `PluginFrame`.
-  - Verify that the Weekly Timetable, TUWEL Deadlines Calendar, and Checklist render with full interactive controls and zero console errors.
-- Install `tuwien.community.slide-vault`:
-  - Verify that the Course Selector, Search Bar, Slide Deck Grid, and Dark-Mode PDF Viewer modal render with full interactive controls.
+1. In `src/services/palette/FuzzySearchService.ts`:
+   - Add new `PaletteCategory` types: `"slides"` and `"deadlines"`.
+   - Add asynchronous search method `searchAsync(query: string, ctx: PaletteContext): Promise<PaletteItem[]>`.
+   - Query `invoke<SlideSearchResult[]>("search_offline_slides", { query })` and map matches into `"slides"` items with file name, page number badge, and highlighted snippet.
+   - Query `invoke<AcademicDeadline[]>("get_academic_deadlines")` (or cached deadlines) and match against course code, title, or description with `"deadlines"` category and urgency badge.
+   - Selecting a slide item switches active view to `tuwien.community.slide-vault`.
+   - Selecting a deadline switches active view to `tuwien.community.calendar`.
+2. In `src/components/palette/CommandPalette.tsx`:
+   - Debounce and trigger asynchronous search when user types in the input.
+   - Render distinct category icons for slides (`BookOpen` / `FileText`) and deadlines (`Calendar` / `Clock`).
+   - Display snippets and urgency badges seamlessly.
 
 ### Verification:
 1. `npm run build` passes with zero errors.
-2. In dev runtime, both community plugins launch with 100% full interactive UI and zero blank screen errors.
+2. `SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk cargo check --manifest-path src-tauri/Cargo.toml` passes.
 
 ### Git Hygiene:
 Commit message in `Tuwel-Tools`:
-`fix(marketplace): preserve bundled htmlContent in CommunityOrgService and harden plugin installer`
+`feat(palette): integrate FTS5 slide search and live academic deadlines in command palette`
 ```
 
 ---
 
-### Milestone 49 Prompt: GitHub Actions Release Pipeline & `plugin_downloader.rs` Release Asset Invariant `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 51 Prompt: Autonomous `tu-mensa` Community Plugin Scaffolding & Single-File Bundler `[STATUS: READY FOR EXECUTION 🟡]`
 
 ```markdown
-You are a desktop systems engineer and CI/CD architect working on TU Cockpit.
+You are a React 19 and frontend systems developer building the autonomous `tu-mensa` plugin.
 
 ### Objective:
-Create automated GitHub Actions release workflows in `tu-calendar` and `tu-slide-vault` to publish single-file `plugin.zip` bundles on git tags, and update `plugin_downloader.rs` to fetch compiled `plugin.zip` release assets rather than raw source `zipball`s.
+Scaffold and build `community-plugins/tu-mensa` as an interactive, zero-dependency TU Wien Mensa Menu & Cafeteria Radar, configured with `vite-plugin-singlefile` and ready for sandboxed iframe execution.
 
-### Context & Files:
-- [community-plugins/tu-calendar/.github/workflows/release-plugin.yml](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-calendar/.github/workflows/release-plugin.yml)
-- [community-plugins/tu-slide-vault/.github/workflows/release-plugin.yml](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-slide-vault/.github/workflows/release-plugin.yml)
-- [src-tauri/src/plugin_downloader.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/plugin_downloader.rs)
+### Context & Subfolder:
+- `community-plugins/tu-mensa/`
+- Target Remote: `https://github.com/tu-cockpit-community/tu-mensa`
 
 ### Tasks:
-
-#### 1. Setup GitHub Actions Release Workflow for Community Plugins
-- In `community-plugins/tu-calendar/.github/workflows/release-plugin.yml` and `community-plugins/tu-slide-vault/.github/workflows/release-plugin.yml`:
-  ```yaml
-  name: Release Plugin Bundle
-
-  on:
-    push:
-      tags:
-        - "v*"
-
-  jobs:
-    build-and-release:
-      runs-on: ubuntu-latest
-      permissions:
-        contents: write
-      steps:
-        - uses: actions/checkout@v4
-        - uses: actions/setup-node@v4
-          with:
-            node-version: 20
-        - run: npm ci
-        - run: npm run build
-        - name: Package Plugin Archive
-          run: |
-            mkdir -p bundle
-            cp dist/index.html bundle/index.html
-            cp manifest.json bundle/manifest.json
-            cd bundle && zip -r ../plugin.zip *
-        - name: Create Release
-          uses: softprops/action-gh-release@v2
-          with:
-            files: plugin.zip
-            draft: false
-            prerelease: false
-  ```
-- Commit workflows inside their respective repositories and push to remotes.
-
-#### 2. Update `plugin_downloader.rs` to Download Compiled Release Assets
-- In `src-tauri/src/plugin_downloader.rs`:
-  - When `install_plugin_from_github` is called:
-    - First check if a GitHub Release exists with asset `plugin.zip` via `https://api.github.com/repos/{owner}/{repo}/releases/tags/{tag}` or `releases/latest`.
-    - If `plugin.zip` asset is available, download the release asset directly instead of the raw repository source `zipball`.
-    - If no release asset is found, fall back gracefully to extracting the zipball entrypoint.
-
-### Verification:
-1. `cargo check --manifest-path src-tauri/Cargo.toml` passes.
-2. `npm run build` in host repo passes.
+1. Initialize `community-plugins/tu-mensa/`:
+   - `package.json` with React 19, TypeScript, Lucide, Tailwind/CSS variables, and `"vite-plugin-singlefile": "^2.1.0"`.
+   - `vite.config.ts` using `viteSingleFile()`.
+   - `manifest.json` (`tuwien.community.mensa`, version 1.0.0, category "Campus Life").
+   - `.github/workflows/release-plugin.yml` for automated release packaging on `v*` tags.
+2. Build interactive UI in `src/App.tsx`:
+   - Mensa Location Selector:
+     - "TU Mensa Freihaus" (Wiedner Hauptstraße 8-10)
+     - "TU Mensa Markt" (Campus Gußhausstraße)
+     - "Cafeteria Gußhaus"
+   - Date Tabs: "Today", "Tomorrow", "Weekly View".
+   - Dishes & Menus:
+     - Menü Classic (Traditional Austrian dish + soup/salad, €6.90 student)
+     - Menü Veggie / Vegan (Plant-based hearty dish, €6.20 student)
+     - Daily Vital Bowl / Salad Bar
+   - Allergen badges (A: Gluten, C: Egg, G: Milk, L: Celery) and dietary filters (All, Vegetarian, Vegan).
+   - "TU Student Discount Active" indicator.
+3. Build and verify:
+   - Run `npm install && npm run build`.
+   - Verify `dist/index.html` has all assets inlined and no external file references.
+4. Commit and push to `tu-cockpit-community/tu-mensa`.
 
 ### Git Hygiene:
-Commit in `Tuwel-Tools`:
-`feat(downloader): support compiled plugin.zip release asset extraction in plugin_downloader`
+Commit in `community-plugins/tu-mensa`:
+`feat(mensa): scaffold autonomous tu-mensa single-file community plugin`
+```
+
+---
+
+### Milestone 52 Prompt: Host Registry Integration & Command Palette Shortcuts for TU Mensa `[STATUS: READY FOR EXECUTION 🟡]`
+
+```markdown
+You are a TypeScript and desktop integration engineer working on TU Cockpit.
+
+### Objective:
+Integrate `tuwien.community.mensa` into `DEFAULT_STORE_REGISTRY`, bundle its interactive standalone HTML distribution into `CommunityPluginBundles.ts`, and add direct Command Palette shortcuts.
+
+### Context & Files:
+- [src/services/marketplace/CommunityPluginBundles.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/marketplace/CommunityPluginBundles.ts)
+- [src/services/marketplace/GitHubPluginService.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/marketplace/GitHubPluginService.ts)
+- [src/services/palette/FuzzySearchService.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/palette/FuzzySearchService.ts)
+
+### Tasks:
+1. In `src/services/marketplace/CommunityPluginBundles.ts`:
+   - Export `COMMUNITY_MENSA_HTML` containing the interactive standalone TU Mensa application.
+2. In `src/services/marketplace/GitHubPluginService.ts`:
+   - Register `tuwien.community.mensa` in `DEFAULT_STORE_REGISTRY.plugins` with category `"Campus Life"`, rating `4.9`, and `htmlContent: COMMUNITY_MENSA_HTML`.
+3. In `src/services/palette/FuzzySearchService.ts`:
+   - Add direct action: "Open Mensa Menus" (`Cmd+K -> Mensa`), opening `tuwien.community.mensa`.
+4. Run standard verification runbook (`npm run build`, `cargo check`).
+
+### Verification:
+1. `npm run build` passes.
+2. `cargo check` passes.
+3. In Community Store HUB, `tuwien.community.mensa` appears with 1-click install.
+
+### Git Hygiene:
+Commit message in `Tuwel-Tools`:
+`feat(marketplace): catalog tu-mensa community plugin and add spotlight shortcuts`
 ```
