@@ -8,6 +8,21 @@ pub const KNOWN_PORTALS: [&str; 4] = [
     "portal_tuwien_official_tumaps",
 ];
 
+pub const PORTAL_INIT_SCRIPT: &str = r#"
+    (function() {
+      window.__TU_COCKPIT_THEMED__ = true;
+      function inject() {
+        if (!document.getElementById('tu-cockpit-injected-theme')) {
+          const style = document.createElement('style');
+          style.id = 'tu-cockpit-injected-theme';
+          (document.head || document.documentElement).appendChild(style);
+        }
+      }
+      inject();
+      document.addEventListener('DOMContentLoaded', inject);
+    })();
+"#;
+
 static ACTIVE_PORTAL: Mutex<Option<String>> = Mutex::new(None);
 
 /// Sanitizes portal IDs (e.g. "tuwien.official.tuwel") into valid Tauri webview labels
@@ -88,7 +103,9 @@ pub async fn create_or_show_native_portal(
     // Build native child webview attached to the main window
     let parsed_url = url.parse().map_err(|e: url::ParseError| e.to_string())?;
     let webview_url = WebviewUrl::External(parsed_url);
-    let webview_builder = WebviewBuilder::new(&label, webview_url).auto_resize();
+    let webview_builder = WebviewBuilder::new(&label, webview_url)
+        .initialization_script(PORTAL_INIT_SCRIPT)
+        .auto_resize();
 
     let pos = LogicalPosition::new(x, y);
     let size = LogicalSize::new(safe_width, safe_height);
@@ -97,6 +114,32 @@ pub async fn create_or_show_native_portal(
         .add_child(webview_builder, pos, size)
         .map_err(|e| e.to_string())?;
 
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn inject_portal_theme(
+    app: AppHandle,
+    portal_id: String,
+    css: String,
+) -> Result<(), String> {
+    let label = sanitize_portal_label(&portal_id);
+    let webview = app.get_webview(&label).ok_or_else(|| format!("Webview {} not found", label))?;
+
+    let escaped_css = serde_json::to_string(&css).map_err(|e| e.to_string())?;
+    let script = format!(
+        r#"(() => {{
+            let el = document.getElementById('tu-cockpit-injected-theme');
+            if (!el) {{
+                el = document.createElement('style');
+                el.id = 'tu-cockpit-injected-theme';
+                (document.head || document.documentElement).appendChild(el);
+            }}
+            el.textContent = {};
+        }})();"#,
+        escaped_css
+    );
+    webview.eval(&script).map_err(|e| e.to_string())?;
     Ok(())
 }
 
@@ -186,7 +229,9 @@ pub async fn orchestrate_split_portals(
     } else {
         let default_url = crate::embedded_portals::get_default_portal_url(&portal_left);
         if let Ok(parsed_url) = default_url.parse() {
-            let builder = WebviewBuilder::new(&left_label, WebviewUrl::External(parsed_url)).auto_resize();
+            let builder = WebviewBuilder::new(&left_label, WebviewUrl::External(parsed_url))
+                .initialization_script(PORTAL_INIT_SCRIPT)
+                .auto_resize();
             let _ = window.add_child(builder, LogicalPosition::new(total_x, total_y), LogicalSize::new(left_width, total_height));
         }
     }
@@ -198,7 +243,9 @@ pub async fn orchestrate_split_portals(
     } else {
         let default_url = crate::embedded_portals::get_default_portal_url(&portal_right);
         if let Ok(parsed_url) = default_url.parse() {
-            let builder = WebviewBuilder::new(&right_label, WebviewUrl::External(parsed_url)).auto_resize();
+            let builder = WebviewBuilder::new(&right_label, WebviewUrl::External(parsed_url))
+                .initialization_script(PORTAL_INIT_SCRIPT)
+                .auto_resize();
             let _ = window.add_child(builder, LogicalPosition::new(right_x, total_y), LogicalSize::new(right_width, total_height));
         }
     }

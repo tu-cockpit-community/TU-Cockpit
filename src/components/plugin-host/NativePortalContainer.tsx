@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { useOverlayStore } from "@/store/useOverlayStore";
 import { useAppStore } from "@/store/useAppStore";
+import { useThemeStore } from "@/store/useThemeStore";
+import { generateThemePayload } from "@/services/portal/PortalThemeInjector";
 
 interface NativePortalContainerProps {
   portalId: string;
@@ -27,6 +29,7 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
   const [isNative, setIsNative] = useState<boolean>(true);
   const isAnyOverlayActive = useOverlayStore((state) => state.isAnyOverlayActive);
   const { isSidebarCollapsed, navOrientation } = useAppStore();
+  const { tokens, fontSans, fontMono, uiScale } = useThemeStore();
 
   const lastBoundsRef = useRef<{ x: number; y: number; width: number; height: number }>({
     x: 0,
@@ -74,6 +77,15 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
     });
   }, [syncBounds]);
 
+  const applyTheme = useCallback(async () => {
+    try {
+      const css = generateThemePayload(portalId, tokens, fontSans, uiScale, fontMono);
+      await invoke("inject_portal_theme", { portalId, css });
+    } catch {
+      // Silently ignore if webview isn't loaded or active yet
+    }
+  }, [portalId, tokens, fontSans, uiScale, fontMono]);
+
   const updateBounds = useCallback(async () => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -96,13 +108,28 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
         height,
       });
       setIsNative(true);
+      setTimeout(applyTheme, 150);
     } catch (err) {
       if (typeof (window as any).__TAURI_INTERNALS__ !== "undefined") {
         console.error("create_or_show_native_portal failed:", err);
       }
       setIsNative(false);
     }
-  }, [portalId, url]);
+  }, [portalId, url, applyTheme]);
+
+  useEffect(() => {
+    applyTheme();
+  }, [applyTheme]);
+
+  // Ensure theme is injected after institutional cross-origin redirects/page loads
+  useEffect(() => {
+    const t1 = setTimeout(applyTheme, 500);
+    const t2 = setTimeout(applyTheme, 1500);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [portalId, url, applyTheme]);
 
   useEffect(() => {
     updateBounds();
@@ -178,6 +205,8 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
     } catch {
       // Browser fallback handled by updateBounds
     }
+    setTimeout(applyTheme, 500);
+    setTimeout(applyTheme, 1500);
   };
 
   const handleOpenExternal = async () => {

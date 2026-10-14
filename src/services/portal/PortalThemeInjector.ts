@@ -96,29 +96,23 @@ export class PortalThemeInjector {
     portalId: string,
     tokens: Record<string, string>,
     fontSans: string,
-    fontMono: string,
-    uiScale: number
+    fontMono: string = "monospace",
+    uiScale: number = 1.0
   ): string {
     const rootVariables = Object.entries(tokens)
       .map(([k, v]) => `${k}: ${v} !important;`)
       .join("\n      ");
 
+    const id = portalId.toLowerCase();
     let portalSpecificRules = "";
-    switch (portalId.toLowerCase()) {
-      case "tuwel":
-        portalSpecificRules = this.TUWEL_RULES;
-        break;
-      case "tiss":
-        portalSpecificRules = this.TISS_RULES;
-        break;
-      case "vowi":
-        portalSpecificRules = this.VOWI_RULES;
-        break;
-      case "tumaps":
-        portalSpecificRules = this.TUMAPS_RULES;
-        break;
-      default:
-        break;
+    if (id.includes("tuwel")) {
+      portalSpecificRules = this.TUWEL_RULES;
+    } else if (id.includes("tiss")) {
+      portalSpecificRules = this.TISS_RULES;
+    } else if (id.includes("vowi")) {
+      portalSpecificRules = this.VOWI_RULES;
+    } else if (id.includes("tumaps") || id.includes("maps")) {
+      portalSpecificRules = this.TUMAPS_RULES;
     }
 
     return `
@@ -131,4 +125,14 @@ export class PortalThemeInjector {
       ${portalSpecificRules}
     `;
   }
+}
+
+export function generateThemePayload(
+  portalId: string,
+  tokens: Record<string, string>,
+  fontSans: string,
+  uiScale: number = 1.0,
+  fontMono: string = "monospace"
+): string {
+  return PortalThemeInjector.generateInjectedCss(portalId, tokens, fontSans, fontMono, uiScale);
 }
