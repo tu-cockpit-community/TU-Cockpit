@@ -197,6 +197,18 @@ Every plugin must declare a standard `manifest.json`:
    - Rendered inside sandboxed iframes (`PluginFrame.tsx`) with `sandbox="allow-scripts allow-forms allow-same-origin"` and origin nullification.
    - Communicate with the host shell via an asynchronous `postMessage` RPC bridge with strict capability checking.
 
+### 5.4 Community Plugin Development Protocol & Isolated Subfolder Pattern
+To enable AI agent swarms and human contributors to develop separate community plugins without repository bloat:
+* **The Subfolder Pattern (`community-plugins/<plugin-repo>`):**
+  - Community repositories are cloned or scaffolded into `/community-plugins/` within the workspace root.
+  - The host repo (`Tuwel-Tools`) strictly ignores `/community-plugins/` in `.gitignore`.
+  - Agents operate with full filesystem and terminal privileges within the subfolder, running `git -C community-plugins/<repo>` to commit and push to their respective `tu-cockpit-community` GitHub remotes.
+* **Strict Externalized Planning Invariant:**
+  - Feature roadmaps, milestone prompts, and domain tasks for a community plugin (e.g. `tu-calendar`, `tu-slide-vault`) reside exclusively within the plugin's own `PLAN.md` (`community-plugins/<plugin-repo>/PLAN.md`).
+  - The host `PLAN.md` tracks only host-level integration, orchestration, and marketplace discovery.
+* **Auto-Discovery by `CommunityOrgService`:**
+  - When a plugin repo is pushed to `tu-cockpit-community` with a valid root `manifest.json`, TU Cockpit's Community Store HUB automatically discovers it via the GitHub Organization API and lists it for instant student installation.
+
 ---
 
 ## 6. Student Identity, Authentication & Autofill Vault

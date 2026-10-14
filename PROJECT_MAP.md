@@ -34,12 +34,13 @@ Before reading or editing code, understand which document governs what:
 ├── AGENTS.md                   <-- READ FIRST: Agent swarm operating rules & verification commands
 ├── PROJECT_MAP.md              <-- YOU ARE HERE: Quick-lookup table & file index for AI agents
 ├── ARCHITECTURE.md             <-- LIVING SPECIFICATIONS: Ground truth for IPC, CSS tokens, Webviews, Security
-├── PLAN.md                     <-- ACTIVE SPRINT ONLY: Phase 8 milestones and worker prompts (< 600 lines)
+├── PLAN.md                     <-- ACTIVE SPRINT ONLY: Phase 9 milestones and worker prompts (< 600 lines)
 ├── README.md                   <-- USER DOCUMENTATION: End-user features and showcase
 └── docs/
     └── archive/
         ├── PHASES_1_TO_6.md    <-- COLD STORAGE: Completed milestones 0–33 (do NOT read unless auditing history)
-        └── PHASE_7.md          <-- COLD STORAGE: Completed milestones 34–37 (do NOT read unless auditing history)
+        ├── PHASE_7.md          <-- COLD STORAGE: Completed milestones 34–37 (do NOT read unless auditing history)
+        └── PHASE_8.md          <-- COLD STORAGE: Completed milestones 38–41 (do NOT read unless auditing history)
 ```
 
 ### Golden Rules for AI Agents:

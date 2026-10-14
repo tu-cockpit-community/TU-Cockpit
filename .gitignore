@@ -23,3 +23,7 @@ dist-ssr/
 *.log
 .DS_Store
 Thumbs.db
+
+# Isolated Community Plugin Repositories
+/community-plugins/
+
