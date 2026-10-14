@@ -201,9 +201,14 @@ Every plugin must declare a standard `manifest.json`:
    - Communicate with the host shell via an asynchronous `postMessage` RPC bridge with strict capability checking.
    - **Self-Contained Bundle Invariant for Sandboxed `srcDoc` Iframes:**
      Plugins rendered via `PluginFrame.tsx` (`srcDoc={themedHtml}`) execute in an isolated `srcDoc` document without a base URL.
-     Standard browser iframes cannot resolve relative uncompiled TypeScript/JSX modules (e.g., `<script type="module" src="/src/main.tsx">`) against the host dev server.
-     Therefore, community plugins must compile into self-contained single-file HTML distributions (e.g. using `vite-plugin-singlefile`) with inlined JavaScript and CSS.
-     The `DEFAULT_STORE_REGISTRY` in `GitHubPluginService.ts` provides fully functional bundled HTML fallbacks so plugins launch immediately both online and offline.
+     Standard browser iframes cannot resolve relative uncompiled TypeScript/JSX modules (e.g., `<script type="module" src="/src/main.tsx">`) or relative asset chunks (`./assets/index-*.js`) against the host dev server.
+     Therefore, community plugins must compile into self-contained single-file HTML distributions using `vite-plugin-singlefile` with all JavaScript, CSS, and SVG assets inlined.
+   - **Registry Fallback Preservation Invariant:**
+     When `CommunityOrgService.ts` discovers repositories via the GitHub Organization API, it must preserve any bundled `htmlContent` already registered in `DEFAULT_STORE_REGISTRY`. It must never overwrite working HTML with `undefined`, which would force the application to download raw uncompiled source trees.
+   - **Local Development Loader Invariant:**
+     To allow seamless local development within the workspace, TU Cockpit can load compiled single-file bundles directly from `community-plugins/<plugin-id>/dist/index.html` via local disk reading, bypassing remote GitHub downloads.
+   - **Production Release Asset Specification (`plugin.zip`):**
+     Plugin repositories run a GitHub Actions release workflow on tags (`v*`). The workflow runs `npm run build` with `vite-plugin-singlefile` and packages `dist/index.html` + `manifest.json` into a compressed release artifact `plugin.zip`. The Rust downloader (`plugin_downloader.rs`) checks for release asset `plugin.zip` to ensure only compiled artifacts are installed.
    - **Sidebar Categorization Invariant:**
      All installed plugins must appear in the sidebar accordion navigation (`ConfigurableNav.tsx`).
      `INITIAL_CATEGORIES` in `useAppStore.ts` provides a pre-configured `"community"` category (`"Community Tools"`), and the `installPlugin` action guarantees that any newly installed plugin without an existing category is assigned to `"community"`.
@@ -218,7 +223,7 @@ To enable AI agent swarms and human contributors to develop separate community p
   - Feature roadmaps, milestone prompts, and domain tasks for a community plugin (e.g. `tu-calendar`, `tu-slide-vault`) reside exclusively within the plugin's own `PLAN.md` (`community-plugins/<plugin-repo>/PLAN.md`).
   - The host `PLAN.md` tracks only host-level integration, orchestration, and marketplace discovery.
 * **Auto-Discovery by `CommunityOrgService`:**
-  - When a plugin repo is pushed to `tu-cockpit-community` with a valid root `manifest.json`, TU Cockpit's Community Store HUB automatically discovers it via the GitHub Organization API and lists it for instant student installation.
+  - When a plugin repo is pushed to `tu-cockpit-community` with a valid root `manifest.json`, TU Cockpit's Community Store HUB automatically discovers it via the GitHub Organization API, merges with pre-bundled registry assets, and lists it for instant student installation.
 
 ---
 
