@@ -128,6 +128,28 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
       rating: 4.7,
       downloads: 7300,
     },
+    {
+      id: "tuwien.community.calendar",
+      name: "TU Calendar & Tasks",
+      version: "1.0.0",
+      author: {
+        name: "TU Cockpit Community Contributors",
+        github: "tu-cockpit-community",
+        url: "https://github.com/tu-cockpit-community",
+      },
+      description: "Interactive academic timetable, TUWEL deadlines calendar, and Google Tasks-style assignment checklist for TU Wien students.",
+      category: "Academic",
+      homepage: "https://github.com/tu-cockpit-community/tu-calendar",
+      githubRepo: "https://github.com/tu-cockpit-community/tu-calendar",
+      capabilities: {
+        network: ["https://tuwel.tuwien.ac.at/*", "https://tiss.tuwien.ac.at/*"],
+        storage: { quotaBytes: 52428800 },
+        notifications: true,
+      },
+      verified: true,
+      rating: 4.9,
+      downloads: 4200,
+    },
   ],
 };
 
