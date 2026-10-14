@@ -18,6 +18,18 @@ pub struct InstalledPluginMetadata {
 }
 
 #[derive(Debug, Deserialize)]
+struct GitHubReleaseAsset {
+    pub name: String,
+    pub browser_download_url: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct GitHubReleaseInfo {
+    #[serde(default)]
+    pub assets: Vec<GitHubReleaseAsset>,
+}
+
+#[derive(Debug, Deserialize)]
 struct PluginManifestRaw {
     pub id: String,
     pub name: String,
@@ -97,8 +109,40 @@ pub async fn install_plugin_from_github(
         .build()
         .map_err(|e| e.to_string())?;
 
-    // Determine download URL
-    let download_url = if let Some(ref tag) = release_tag {
+    // 1. Check if a compiled release asset (plugin.zip) is available on GitHub Releases
+    let release_api_url = if let Some(ref tag) = release_tag {
+        format!(
+            "https://api.github.com/repos/{}/{}/releases/tags/{}",
+            owner, repo, tag
+        )
+    } else {
+        format!(
+            "https://api.github.com/repos/{}/{}/releases/latest",
+            owner, repo
+        )
+    };
+
+    let mut asset_download_url: Option<String> = None;
+
+    if let Ok(rel_resp) = client
+        .get(&release_api_url)
+        .header("Accept", "application/vnd.github+json")
+        .send()
+        .await
+    {
+        if rel_resp.status().is_success() {
+            if let Ok(rel_info) = rel_resp.json::<GitHubReleaseInfo>().await {
+                if let Some(asset) = rel_info.assets.into_iter().find(|a| a.name == "plugin.zip") {
+                    asset_download_url = Some(asset.browser_download_url);
+                }
+            }
+        }
+    }
+
+    // 2. Download compiled release asset or fall back to repository source zipball
+    let download_url = if let Some(url) = asset_download_url {
+        url
+    } else if let Some(ref tag) = release_tag {
         format!(
             "https://api.github.com/repos/{}/{}/zipball/{}",
             owner, repo, tag
@@ -110,20 +154,21 @@ pub async fn install_plugin_from_github(
         )
     };
 
-    // Download archive bytes
-    let response = client
-        .get(&download_url)
-        .header("Accept", "application/vnd.github+json")
+    let mut req = client.get(&download_url);
+    if download_url.contains("api.github.com") {
+        req = req.header("Accept", "application/vnd.github+json");
+    }
+
+    let response = req
         .send()
         .await
         .map_err(|e| format!("Failed to reach GitHub for '{}/{}': {}", owner, repo, e))?;
 
     if !response.status().is_success() {
         return Err(format!(
-            "GitHub API responded with status {}: failed to download release for '{}/{}'",
+            "GitHub responded with status {}: failed to download archive from '{}'",
             response.status(),
-            owner,
-            repo
+            download_url
         ));
     }
 
@@ -278,4 +323,28 @@ mod tests {
         assert!(is_allowed_community_repo("https://github.com/tu-cockpit-community/freihaus-timer"));
         assert!(!is_allowed_community_repo("https://github.com/evil-hacker/backdoor-plugin"));
     }
+
+    #[test]
+    fn test_github_release_asset_deserialization() {
+        let json = r#"{
+            "assets": [
+                {
+                    "name": "other.tar.gz",
+                    "browser_download_url": "https://example.com/other.tar.gz"
+                },
+                {
+                    "name": "plugin.zip",
+                    "browser_download_url": "https://example.com/plugin.zip"
+                }
+            ]
+        }"#;
+        let release: GitHubReleaseInfo = serde_json::from_str(json).unwrap();
+        let plugin_asset = release.assets.into_iter().find(|a| a.name == "plugin.zip");
+        assert!(plugin_asset.is_some());
+        assert_eq!(
+            plugin_asset.unwrap().browser_download_url,
+            "https://example.com/plugin.zip"
+        );
+    }
 }
+
