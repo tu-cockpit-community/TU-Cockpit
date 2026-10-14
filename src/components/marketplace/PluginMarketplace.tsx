@@ -5,6 +5,7 @@ import {
   StoreRegistryPlugin,
 } from "@/services/marketplace/GitHubPluginService";
 import { CommunityOrgService } from "@/services/marketplace/CommunityOrgService";
+import { OFFICIAL_PLUGINS } from "@/plugins/official/OfficialPlugins";
 import { CommunityAuthorBadge } from "./CommunityAuthorBadge";
 import { DeveloperGuideTab } from "./DeveloperGuideTab";
 import {
@@ -65,6 +66,13 @@ export const PluginMarketplace: React.FC = () => {
   const handleInstallPlugin = async (entry: StoreRegistryPlugin) => {
     setLoadingMap((prev) => ({ ...prev, [entry.id]: true }));
     try {
+      if (entry.id.startsWith("tuwien.official.")) {
+        const officialDef = OFFICIAL_PLUGINS[entry.id];
+        if (officialDef) {
+          installPlugin(officialDef.manifest, officialDef.htmlContent, "registry");
+          return;
+        }
+      }
       const repoUrl =
         entry.githubRepo ||
         `https://github.com/${communityOrgName}/${entry.id.split(".").pop()}`;
@@ -78,6 +86,7 @@ export const PluginMarketplace: React.FC = () => {
         version: entry.version,
         description: entry.description,
         entrypoint: "index.html",
+        homepage: entry.homepage,
         githubRepo: entry.githubRepo,
         capabilities: entry.capabilities,
       };

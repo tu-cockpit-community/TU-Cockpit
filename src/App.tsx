@@ -52,23 +52,37 @@ export const App: React.FC = () => {
 
   const renderMainContent = () => {
     if (activeView === "plugin" && activePlugin) {
-      return (
-        <main className="flex-1 w-full h-full relative overflow-hidden p-0 m-0">
-          {activePlugin.manifest.id.startsWith("tuwien.official.") &&
-          activePlugin.manifest.homepage ? (
+      const KNOWN_OFFICIAL_URLS: Record<string, string> = {
+        "tuwien.official.tuwel": "https://tuwel.tuwien.ac.at",
+        "tuwien.official.tiss": "https://tiss.tuwien.ac.at",
+        "tuwien.official.vowi": "https://vowi.fsinf.at",
+        "tuwien.official.tumaps": "https://maps.tuwien.ac.at",
+      };
+
+      const isOfficialPortal = activePlugin.manifest.id.startsWith("tuwien.official.");
+      const portalUrl =
+        activePlugin.manifest.homepage || KNOWN_OFFICIAL_URLS[activePlugin.manifest.id];
+
+      if (isOfficialPortal && portalUrl) {
+        return (
+          <main className="flex-1 w-full h-full relative overflow-hidden p-0 m-0">
             <NativePortalContainer
               key={activePlugin.manifest.id}
               portalId={activePlugin.manifest.id}
-              url={activePlugin.manifest.homepage}
+              url={portalUrl}
               title={activePlugin.manifest.name}
             />
-          ) : (
-            <PluginFrame
-              pluginId={activePlugin.manifest.id}
-              htmlContent={activePlugin.htmlContent}
-              allowedGlobs={activePlugin.manifest.capabilities?.network || []}
-            />
-          )}
+          </main>
+        );
+      }
+
+      return (
+        <main className="flex-1 w-full h-full relative overflow-hidden p-0 m-0">
+          <PluginFrame
+            pluginId={activePlugin.manifest.id}
+            htmlContent={activePlugin.htmlContent}
+            allowedGlobs={activePlugin.manifest.capabilities?.network || []}
+          />
         </main>
       );
     }
