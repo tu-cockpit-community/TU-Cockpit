@@ -11,8 +11,7 @@
 > - Milestones 34–37 (Phase 7): See [docs/archive/PHASE_7.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_7.md)  
 >
 > **Current Sprint Status:**
-> - 🟢 **PHASES 1–7 (COMPLETED & ARCHIVED):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", and Invisibility Bus (Milestones 0–37).
-> - 🟡 **PHASE 8 (ACTIVE SPRINT):** Portal Reliability, Authentic Institutional Rendering, Direct SSO Autofill & Headless VoWi Reader (Milestones 38–41).
+> - 🟢 **PHASES 1–8 (COMPLETED ✅):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, and Headless VoWi Reader (Milestones 0–41).
 
 ---
 
@@ -192,7 +191,7 @@ Commit message:
 
 ---
 
-### Milestone 41 Prompt: Viewport Stability Polish & Headless Deadlines Aggregator Invariant `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 41 Prompt: Viewport Stability Polish & Headless Deadlines Aggregator Invariant `[STATUS: COMPLETED ✅ - Commit d920ff1]`
 
 ```markdown
 You are a desktop UI and runtime engineer working on TU Cockpit.
