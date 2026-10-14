@@ -17,6 +17,7 @@ import { CommandPalette } from "@/components/palette/CommandPalette";
 import { UpdaterToast } from "@/components/updater/UpdaterToast";
 import { SyncSettings } from "@/components/settings/SyncSettings";
 import { VoWiReader } from "@/components/vowi/VoWiReader";
+import { WorkstationStatusBar } from "@/components/layout/WorkstationStatusBar";
 import { X, BookOpen } from "lucide-react";
 
 export const App: React.FC = () => {
@@ -163,6 +164,7 @@ export const App: React.FC = () => {
           <div className="flex-1 flex flex-col h-full overflow-hidden">
             <ExecutiveHeader onOpenSettings={() => setIsSettingsModalOpen(true)} />
             {renderMainContent()}
+            <WorkstationStatusBar />
           </div>
         </div>
       )}
@@ -173,6 +175,7 @@ export const App: React.FC = () => {
           <div className="flex-1 flex flex-col h-full overflow-hidden">
             <ExecutiveHeader onOpenSettings={() => setIsSettingsModalOpen(true)} />
             {renderMainContent()}
+            <WorkstationStatusBar />
           </div>
           <ConfigurableNav />
         </div>
@@ -184,6 +187,7 @@ export const App: React.FC = () => {
           <ExecutiveHeader onOpenSettings={() => setIsSettingsModalOpen(true)} />
           <ConfigurableNav />
           {renderMainContent()}
+          <WorkstationStatusBar />
         </div>
       )}
 
