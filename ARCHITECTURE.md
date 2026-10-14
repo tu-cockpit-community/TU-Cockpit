@@ -124,6 +124,17 @@ TU Cockpit solves this using Tauri v2's native child webview API (`tauri::Webvie
   - Switching between views calls `hide_all_child_webviews()` or `show_child_webview(label)`.
   - Webviews stay alive in memory to preserve student forms, open PDF assignments, and active TISS searches.
 
+### 4.3 Modal Overlay Coordinator & Z-Index Resolution
+Because native child-webviews operate as OS window surfaces, they naturally sit on top of the host HTML webview. To allow host modals (Command Palette `Cmd+K`, Settings, Login, Category Manager) and floating plugin overlays to display unobstructed:
+* **The Invisibility Bus:** A global Zustand store (`useOverlayStore`) monitors modal open states.
+* **Lossless Toggling:** When any modal opens, Rust executes `set_portals_visibility(false)` via `webview.hide()`. The underlying web page stays loaded in memory with zero state or form loss.
+* **Instant Restoration:** When the modal closes, Rust executes `set_portals_visibility(true)`, instantly revealing the portal without a reload.
+
+### 4.4 In-Page Theme & Style Injection Engine
+Tauri v2 allows direct styling and DOM modification of third-party institutional websites:
+* **Pre-Render CSS (`initialization_script`):** In `WebviewBuilder`, an initialization script attaches `<style id="tu-cockpit-injected-theme">` before the DOM renders, preventing blinding white flashes on dark themes.
+* **Live Token Evaluation (`webview.eval`):** When students switch themes in Cockpit Settings, React generates updated CSS variables via `PortalThemeInjector.ts` and invokes `inject_portal_theme(portal_id, css)`. Rust evals the CSS directly into the live webview, harmonizing university portals with the Cockpit theme in real time.
+
 ---
 
 ## 5. Dynamic Plugin & Community Marketplace Ecosystem

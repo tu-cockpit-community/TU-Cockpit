@@ -6,531 +6,331 @@
 > **Living Specifications:** See [ARCHITECTURE.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/ARCHITECTURE.md)  
 > **Codebase Navigation Map:** See [PROJECT_MAP.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/PROJECT_MAP.md)  
 > **Swarm Protocol & Runbook:** See [AGENTS.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/AGENTS.md)  
-> **Historical Archive (Milestones 0–29):** See [docs/archive/PHASES_1_TO_5.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASES_1_TO_5.md)  
+> **Historical Archive (Milestones 0–33):** See [docs/archive/PHASES_1_TO_6.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASES_1_TO_6.md)  
 >
 > **Current Sprint Status:**
-> - 🟢 **PHASES 1–5 (COMPLETED & ARCHIVED):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater.
-> - 🟢 **PHASE 6 (COMPLETED):** Workstation Streamlining, Single Sidebar Collapser, Purge Deadlines & Split-View, Fix VoWi & Official Portal Child-Webviews, Purge Mock Plugins, "TU Essentials" Category, Standalone Community Slide Vault Repository (Milestones 30–33)
+> - 🟢 **PHASES 1–6 (COMPLETED & ARCHIVED):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", and Community Slide Vault Blueprint.
+> - 🟡 **PHASE 7 (READY FOR EXECUTION):** Native Child-Webview Orchestration, Modal Invisibility Bus, Anti-Stuck Defenses, and In-Page Theme & Style Injection (Milestones 34–37)
 
 ---
 
 # ==============================================================================
-# 🟢 PART VI: PHASE 6 — STREAMLINED WORKSTATION, PLUGIN ENGINE REPAIR & COMMUNITY SLIDE VAULT (COMPLETED)
+# 🟡 PART VII: PHASE 7 — NATIVE CHILD-WEBVIEW ORCHESTRATION, MODAL VISIBILITY BUS & IN-PAGE THEME INJECTION (READY FOR EXECUTION)
 # ==============================================================================
 
-> **Phase 6 Summary & Objective:**  
-> Phase 6 delivers radical workstation decluttering, repairs the plugin execution lifecycle, purges all mock demonstration data, and standardizes the community plugin architecture:
-> 1. **Executive Header Simplification:** Remove the redundant sidebar collapser from the header (retaining exclusively the collapser anchored on the sidebar rail), and purge the Deadlines, Split View, and Slide Vault buttons from the global chrome to restore a focused, distraction-free student workstation canvas.
-> 2. **Plugin Execution Engine Repair:** Diagnose and resolve the `"✓ Sandboxed execution verified"` bug where installing and opening portals like VoWi failed to mount the real webview. Enforce valid manifest propagation (`homepage`) and seamless fallback to `OFFICIAL_PLUGINS`.
-> 3. **Purge Mock Plugins & Consolidate "TU Essentials":** Eliminate all 6 mock demonstration plugins (`smart-tuwel`, `tiss-schedule`, `vowi-companion`, `mensa-today`, `room-locator`, `freihaus-timer`). Consolidate the pre-bundled portals under a single, professionally branded category: **"TU Essentials"** (`tuwien.official.tuwel`, `tuwien.official.tiss`, `tuwien.official.vowi`, `tuwien.official.tumaps`).
-> 4. **Decoupled Community Slide Vault Plugin (`tu-slide-vault`):** Extract the Slide Vault feature from the core shell into a dedicated, standalone GitHub repository under the community organization (`https://github.com/tu-cockpit-community/tu-slide-vault`), proving the end-to-end community plugin lifecycle.
+> **Phase 7 Summary & Objective:**  
+> Phase 7 tackles the core usability and rendering challenges of embedding institutional portals (TISS, TUWEL, VoWi, TU Maps):
+> 1. **Resolve the Z-Index Overlay Problem:** Because Tauri v2 native child webviews (`tauri::Webview`) are operating system window handles rather than HTML elements, they physically render on top of all React modals (Settings, Command Palette `Cmd+K`, Login, Category Manager) and intercept mouse clicks. Phase 7 implements a **Global Overlay Coordinator & Webview Invisibility Bus** that instantly and losslessly hides native webviews when any modal or overlay is open, restoring them seamlessly upon closure with zero page reload or state loss.
+> 2. **Eliminate Freezing & Coordinate Desync:** Fix webviews getting stuck during rapid sidebar collapse/expand animations (`Cmd+B`) and window resizing by introducing requestAnimationFrame-throttled bounds calculations and exclusive single-portal lifecycle invariants.
+> 3. **In-Page Theme & Style Injection:** Confirm and implement full website theming inside native child webviews! Utilizing Tauri v2's `initialization_script` and `webview.eval()` APIs, custom curated stylesheets (`tuwel.css`, `tiss.css`, `vowi.css`, `tumaps.css`) and dynamic `--tu-*` CSS tokens are injected directly into institutional pages, eliminating white flashes and harmonizing portals with student themes in real time.
+> 4. **Enhanced Navigation Toolbar & Usability Controls:** Add Back/Forward history navigation, in-page zoom controls, and clean up cumbersome university banners.
 
 ---
 
-## 41. Phase 6 Architecture: Minimalist Workstation Shell & Decoupled Community Plugins
+## 48. Architectural Problem Analysis: The Native Webview Hierarchy in Tauri v2
 
-### 41.1 Architectural Rationale: The Lean Workstation Paradigm
-During earlier iterations, features such as Split View, Deadlines, and Slide Vault were prototyped as first-party buttons directly in the top header chrome. While functional, this introduced visual density, increased cognitive load, and violated the core tenet of TU Cockpit: **The core application shell must remain a lightweight, lightning-fast operating canvas, while specialized student tools live as modular plugins.**
-
-Furthermore, having two sidebar collapser controls—one located in the header and another situated directly in the sidebar navigation header—created navigational ambiguity and visual dissonance.
+### 48.1 OS View Surface vs. HTML DOM Elements
+In Tauri v2, when `window.add_child(webview_builder, pos, size)` executes in Rust, the operating system creates a native view (`WKWebView` on macOS, `CoreWebView2Controller` on Windows, `WebKitWebView` on Linux) positioned as a child subview of the window.
 
 ```
-CURRENT HEADER (CLUTTERED):
-+------------------------------------------------------------------------------------------------------------------------+
-| [Store HUB] [|<-] | [|<-] [TU Cockpit] [Search Cmd+K] [WS 2026/27] | [Deadlines] [Slide Vault] [Split View] [User] [⚙] |
-+------------------------------------------------------------------------------------------------------------------------+
-                         ^                                                 ^             ^            ^
-                Duplicate Collapser                                        Hardcoded Experimental Features
-
-REFINED PHASE 6 HEADER (MINIMALIST & PRODUCTIVE):
-+------------------------------------------------------------------------------------------------------------------------+
-| [Store HUB] [|<-] | [TU Cockpit] [> Active Plugin]   [Search rooms, plugins... Cmd+K]   [WS 2026/27]   [User] [Clock] [⚙] |
-+------------------------------------------------------------------------------------------------------------------------+
-              ^                                                                                             ^
-       Single Collapser                                                                             Settings & Profile
-       (On Sidebar Rail)
+OPERATING SYSTEM VIEW HIERARCHY (THE ROOT CAUSE):
++-----------------------------------------------------------------------------------+
+| OS Window Container (`NSWindow` / `HWND`)                                         |
+|                                                                                   |
+|  [Layer 1: Main React Webview]                                                    |
+|  - Renders Navigation Sidebar, Executive Header                                   |
+|  - Renders Modals (`SettingsModal`, `CommandPalette`, `LoginModal` at z-index: 50)|
+|                                                                                   |
+|  [Layer 2: Native Child Webview (`tauri::Webview`)] <-- SITS AT NATIVE OS LEVEL! |
+|  - Renders live TUWEL / TISS page                                                 |
+|  - Sits PHYSICALLY ON TOP OF Layer 1!                                             |
+|  - Intercepts all clicks and obscures any HTML modal opening in that coordinate!   |
++-----------------------------------------------------------------------------------+
 ```
 
-### 41.2 The "TU Essentials" Category Architecture
-Previously, categories were fragmented between "University Portals" and "Community Tools", while the marketplace UI displayed arbitrary tags like "Academic", "Campus Life", and "Productivity". To create a cohesive, first-party experience, all built-in services that ship pre-configured with the application are consolidated under the moniker:
-
-> **"TU Essentials"** (Internal Identifier: `essentials`, Display Icon: `GraduationCap`)
-
-This cleanly designates official, core-supported TU Wien student portals (TUWEL, TISS, VoWi, TU Maps) without confusing users with internal developer jargon like "internal" or "system". When community plugins are installed from GitHub repositories, they populate dedicated community categories.
-
----
-
-## 42. Executive Header Streamlining & Single Sidebar Collapser Enforcement
-
-### 42.1 Excision of Duplicate Sidebar Collapser
-In `ExecutiveHeader.tsx`, the conditional toggle button rendered on the left flank when `navOrientation` is `"left"` or `"right"` is eliminated:
-- **Removed:** Lines rendering `<PanelLeftOpen />` / `<PanelLeftClose />` inside `ExecutiveHeader.tsx`.
-- **Retained & Strengthened:** The collapser button located inside `ConfigurableNav.tsx` directly adjacent to the "Community Store HUB" button in expanded mode, and at the apex of the 56px icon rail in collapsed mode.
-- **Global Keybinding Intact:** The `Cmd+B` / `Ctrl+B` keyboard shortcut continues to toggle the sidebar smoothly without requiring any header button.
-
-### 42.2 Purging Non-Core Global Controls
-The following controls and modal triggers are excised from `ExecutiveHeader.tsx` and `App.tsx`:
-1. **Deadlines Button & Pulse Badge:** Removed from header. The deadline logic is deferred to a future community calendar plugin.
-2. **Slide Vault Button:** Removed from header. Slide Vault is extracted into an external community repository.
-3. **Split View Multitasking Toggle:** Removed from header and `App.tsx`. The workspace returns to a stable, full-bleed single-surface canvas, maximizing screen real estate for TUWEL and TISS coursework.
-
----
-
-## 43. Plugin Installation Engine Diagnostics & VoWi / Official Portal Mount Fix
-
-### 43.1 Root Cause Forensics: The `"✓ Sandboxed execution verified"` Bug
-When students clicked "Install" on the VoWi Student Wiki in the Community Store, navigating to the installed plugin displayed a generic dark-mode card reading:
-`VoWi Student Wiki: ✓ Sandboxed execution verified`
-rather than rendering the actual VoWi wiki portal.
-
-**Forensic Breakdown of the Failure Chain:**
-1. **Manifest Attribute Omission:** In `GitHubPluginService.ts`, the `DEFAULT_STORE_REGISTRY` entry for `tuwien.official.vowi` specified `author.url: "https://vowi.fsinf.at"`, but lacked the top-level `homepage` field:
-   ```ts
-   // BUG IN DEFAULT_STORE_REGISTRY:
-   {
-     id: "tuwien.official.vowi",
-     name: "VoWi Student Wiki",
-     // Missing: homepage: "https://vowi.fsinf.at"
-     author: { url: "https://vowi.fsinf.at" }
-   }
-   ```
-2. **Network Fallback Synthesis:** In `PluginMarketplace.tsx`, `handleInstallPlugin` attempted `GitHubPluginService.installFromGitHub(...)`. Because the repository has no GitHub Release binary yet, the catch-block synthesized a fallback manifest:
-   ```ts
-   // BUG IN handleInstallPlugin catch block:
-   const manifest = {
-     id: entry.id,
-     name: entry.name,
-     version: entry.version,
-     description: entry.description,
-     entrypoint: "index.html",
-     githubRepo: entry.githubRepo,
-     capabilities: entry.capabilities,
-     // Missing: homepage: entry.homepage
-   };
-   const fallbackHtml = `...<div class="card">...✓ Sandboxed execution verified</div>...`;
-   installPlugin(manifest, fallbackHtml, "registry");
-   ```
-3. **View Resolver Bypass:** In `App.tsx`, the active view switch checked:
-   ```tsx
-   {activePlugin.manifest.id.startsWith("tuwien.official.") && activePlugin.manifest.homepage ? (
-     <NativePortalContainer ... />
-   ) : (
-     <PluginFrame htmlContent={activePlugin.htmlContent} ... />
-   )}
-   ```
-   Because `activePlugin.manifest.homepage` was `undefined`, the application fell through to `PluginFrame`, rendering the fallback string!
-
-### 43.2 The 3-Tier Defensive Resolution Strategy
-To guarantee that VoWi and all official portals render flawlessly regardless of installation vector:
-* **Tier 1 (Manifest Integrity):** `StoreRegistryPlugin` entries in `DEFAULT_STORE_REGISTRY` explicitly declare top-level `homepage: "https://vowi.fsinf.at"` (and respective portal URLs).
-* **Tier 2 (Official Golden Lookup):** In `PluginMarketplace.tsx`, when `handleInstallPlugin` encounters any plugin ID matching `tuwien.official.*`, it bypasses mock HTML generation and directly sources the authoritative definition from `OFFICIAL_PLUGINS[entry.id]`, ensuring complete manifest metadata and real embedded portal HTML.
-* **Tier 3 (View Mount Defense):** In `App.tsx`, portal URL resolution includes a fallback mapping:
-  ```ts
-  const KNOWN_PORTALS: Record<string, string> = {
-    "tuwien.official.tuwel": "https://tuwel.tuwien.ac.at",
-    "tuwien.official.tiss": "https://tiss.tuwien.ac.at",
-    "tuwien.official.vowi": "https://vowi.fsinf.at",
-    "tuwien.official.tumaps": "https://maps.tuwien.ac.at",
-  };
-  const portalUrl = activePlugin.manifest.homepage || KNOWN_PORTALS[activePlugin.manifest.id];
-  ```
-  If `portalUrl` exists and ID starts with `tuwien.official.`, `NativePortalContainer` is guaranteed to mount.
-
----
-
-## 44. Complete Mock Plugin Purge & "TU Essentials" Category Consolidation
-
-### 44.1 Permanent Elimination of Example Mock Plugins
-All 6 prototype mock plugins remaining in `src/services/marketplace/GitHubPluginService.ts` are permanently deleted:
-- ❌ `tuwien.community.smart-tuwel` (Mock AI helper)
-- ❌ `tuwien.community.tiss-schedule` (Mock iCal exporter)
-- ❌ `tuwien.community.vowi-companion` (Mock search widget)
-- ❌ `tuwien.community.mensa-today` (Mock cafeteria menu)
-- ❌ `tuwien.community.room-locator` (Mock GPS tracker)
-- ❌ `tuwien.community.freihaus-timer` (Mock study timer)
-
-### 44.2 The Canonical Official Quad
-The `DEFAULT_STORE_REGISTRY` contains strictly the four official TU services:
-1. **TUWEL Moodle LMS** (`tuwien.official.tuwel`) — `https://tuwel.tuwien.ac.at`
-2. **TISS Campus Portal** (`tuwien.official.tiss`) — `https://tiss.tuwien.ac.at`
-3. **VoWi Student Wiki** (`tuwien.official.vowi`) — `https://vowi.fsinf.at`
-4. **TU Maps Navigator** (`tuwien.official.tumaps`) — `https://maps.tuwien.ac.at`
-
-All four are assigned `category: "TU Essentials"`, with `verified: true`, `rating: 5.0`, and authentic student union / institutional authorship attribution.
-
----
-
-## 45. Standalone Community Plugin Architecture: Slide Vault (`tu-slide-vault`)
-
-### 45.1 Architectural Decoupling: Community Plugin Paradigm
-To prevent the core TU Cockpit desktop binary from bloating with specialized PDF parsers, OCR models, and document databases, the Slide Vault is architected as an autonomous community plugin repository:
-
-* **Official Repository:** [`https://github.com/tu-cockpit-community/tu-slide-vault`](https://github.com/tu-cockpit-community/tu-slide-vault)
-* **Plugin Identifier:** `tuwien.community.slide-vault`
-* **Distribution Channel:** Community Store auto-discovery via GitHub Releases (`plugin.zip`)
+### 48.2 The Solution: The Lossless Visibility Bus
+Because Tauri v2 webviews remain resident in memory when hidden via `webview.hide()`, the web page's JavaScript execution, form inputs, video player position, and Shibboleth session remain **100% active**. Hiding takes **0 milliseconds**.
 
 ```
-+-------------------------------------------------------------------------------+
-|                      tu-cockpit-community / tu-slide-vault                    |
-|                                                                               |
-|  +------------------+    +--------------------+    +-----------------------+  |
-|  |  manifest.json   |    | index.html (Vite)  |    | .github/workflows/    |  |
-|  |  - Capabilities  |    | - React 19 UI      |    |   release-plugin.yml  |  |
-|  |  - Scoped URLs   |    | - PDF.js / Worker  |    | - Bundles plugin.zip  |  |
-|  |  - Storage Quota |    | - Local IndexedDB  |    | - Signs release asset |  |
-|  +------------------+    +--------------------+    +-----------------------+  |
-+-------------------------------------------------------------------------------+
-                                    |
-            Published to GitHub Releases (tag: v1.0.0)
-                                    v
-+-------------------------------------------------------------------------------+
-|                         TU COCKPIT COMMUNITY STORE                            |
-|  - Auto-discovers tu-slide-vault repository from organization                 |
-|  - Validates manifest schema and sha256 checksum                              |
-|  - Installs bundle into ~/Library/Application Support/tu-cockpit/plugins/     |
-+-------------------------------------------------------------------------------+
-```
-
-### 45.2 Community Plugin Manifest Specification (`manifest.json`)
-```json
-{
-  "$schema": "https://raw.githubusercontent.com/tu-cockpit-community/TU-Cockpit/main/schemas/plugin-manifest.v1.json",
-  "id": "tuwien.community.slide-vault",
-  "name": "TU Slide Vault",
-  "version": "1.0.0",
-  "description": "Offline lecture slide indexer, instant full-text search across course PDF materials, and dark-mode slide viewer.",
-  "author": {
-    "name": "TU Cockpit Community Contributors",
-    "github": "tu-cockpit-community",
-    "url": "https://github.com/tu-cockpit-community"
-  },
-  "entrypoint": "index.html",
-  "category": "Academic",
-  "homepage": "https://github.com/tu-cockpit-community/tu-slide-vault",
-  "capabilities": {
-    "network": [
-      "https://tuwel.tuwien.ac.at/*",
-      "https://vowi.fsinf.at/*"
-    ],
-    "storage": {
-      "quotaBytes": 104857600
-    },
-    "notifications": true,
-    "systemClipboard": true
-  },
-  "permissions": [
-    "storage.indexeddb",
-    "network.fetch"
-  ]
-}
-```
-
-### 45.3 Automated Plugin Packaging Workflow (`.github/workflows/release-plugin.yml`)
-Community plugin repositories use an automated GitHub Action that compiles the frontend and generates a release artifact consumable by the TU Cockpit store:
-```yaml
-name: Release Community Plugin Bundle
-
-on:
-  push:
-    tags:
-      - 'v*'
-
-jobs:
-  bundle-plugin:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Source
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Install Dependencies & Build
-        run: |
-          npm ci
-          npm run build
-
-      - name: Package Plugin Archive
-        run: |
-          cp manifest.json dist/
-          cd dist
-          zip -r ../plugin.zip ./*
-          cd ..
-          sha256sum plugin.zip > checksum.sha256
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            plugin.zip
-            checksum.sha256
-            manifest.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+VISIBILITY BUS ORCHESTRATION:
+[Student presses Cmd+K or clicks Settings]
+         │
+         ▼
+[Global useOverlayStore.isAnyOverlayActive = true]
+         │
+         ▼
+[Rust IPC: set_portals_visibility(false)] ──► Native Webview hides instantly (0ms)
+                                                │
+                                                ▼
+                                         [React HTML Modal displays unobstructed]
+                                                │
+                                    [Student closes Modal]
+                                                │
+                                                ▼
+[Rust IPC: set_portals_visibility(true)]  ──► Native Webview reveals instantly!
+                                              (Zero reload, form data preserved)
 ```
 
 ---
 
-## 46. Phase 6 Target File Hierarchy & Dependencies
+## 49. In-Page Theme Injection Architecture (Tauri v2)
+
+### 49.1 Is It Possible to Change What is Displayed on the Websites?
+**YES. It is 100% possible.** Tauri v2 provides direct, unrestricted access to the webview DOM:
+
+1. **`WebviewBuilder::initialization_script(&str)`:**
+   Executes arbitrary JavaScript in every page/frame **before any server script runs**. We inject a `<style id="tu-cockpit-injected-theme">` tag that attaches immediately as the document is created, preventing bright white flashes during dark mode browsing!
+2. **`webview.eval(&str)`:**
+   Executes JavaScript dynamically at runtime. When the student changes their theme in Settings (`useThemeStore`), Rust updates the injected `<style>` tag in real time without refreshing the page!
+
+```
+IN-PAGE THEME INJECTION FLOW:
++---------------------+      theme tokens change      +---------------------------------+
+| useThemeStore (CSS) | ────────────────────────────► | Rust: inject_portal_theme(css)  |
++---------------------+                               +---------------------------------+
+                                                                      │
+                                                   webview.eval(...)  │
+                                                                      ▼
+                                                      +---------------------------------+
+                                                      | TUWEL / TISS Native Webview     |
+                                                      | <style id="tu-cockpit-theme">   |
+                                                      |   body { background: #0f172a! } |
+                                                      |   .card { border: #334155! }    |
+                                                      | </style>                        |
+                                                      +---------------------------------+
+```
+
+---
+
+## 50. Phase 7 Target File Hierarchy & Dependencies
 
 ```
 Tuwel-Tools/
 ├── src/
-│   ├── App.tsx                                 # Excises SplitView & Deadlines containers; fixes portal URL mounting
+│   ├── App.tsx                                 # Connects overlay coordinator; calls hide_all_native_portals on view change
 │   ├── components/
-│   │   ├── header/
-│   │   │   └── ExecutiveHeader.tsx             # Excises duplicate sidebar toggle, Deadlines, Split View & Slide Vault
-│   │   ├── navigation/
-│   │   │   └── ConfigurableNav.tsx             # Remains sole authority for sidebar collapse/expand controls
-│   │   └── marketplace/
-│   │       └── PluginMarketplace.tsx           # Category filter to "TU Essentials"; fixes official plugin install fallback
-│   ├── plugins/
-│   │   └── official/
-│   │       └── OfficialPlugins.ts              # Canonical definitions with verified URLs & homepage parameters
+│   │   ├── palette/
+│   │   │   └── CommandPalette.tsx              # Registers open/close state with useOverlayStore
+│   │   ├── plugin-host/
+│   │   │   └── NativePortalContainer.tsx       # Subscribes to overlay bus; RAF-throttled bounds; theme eval integration
+│   │   └── settings/
+│   │       ├── SettingsModal.tsx               # Registers open/close state with useOverlayStore
+│   │       └── ThemeCustomizer.tsx             # Broadcasts theme updates to active portals
 │   ├── services/
-│   │   └── marketplace/
-│   │       └── GitHubPluginService.ts          # Purges mock plugins; enforces official quad under "TU Essentials"
+│   │   └── portal/
+│   │       └── PortalThemeInjector.ts          # Compiles CSS token rules for TUWEL, TISS, VoWi, TU Maps
 │   └── store/
-│       └── useAppStore.ts                      # Resets INITIAL_CATEGORIES to single "TU Essentials" accordion
+│       └── useOverlayStore.ts                  # Global overlay coordinator tracking modal state
 │
-# Standalone Community Project (Separate GitHub Repository):
-tu-slide-vault/                                 # https://github.com/tu-cockpit-community/tu-slide-vault
-├── manifest.json                               # Plugin manifest with scoped network & storage
-├── package.json                                # Standalone React + Vite project
-├── vite.config.ts                              # Bundles self-contained relative assets for sandboxing
-├── src/
-│   ├── App.tsx                                 # Slide Vault UI (Course Explorer, PDF Reader, Search)
-│   ├── services/
-│   │   ├── pdfIndexer.ts                       # Client-side WebWorker PDF text extractor
-│   │   └── storageService.ts                   # IndexedDB storage within sandbox quota
-│   └── components/
-│       ├── SlideSearchBar.tsx                  # Instant fuzzy full-text query input
-│       └── PDFViewerModal.tsx                  # Canvas-based dark-inverted PDF renderer
-└── .github/
-    └── workflows/
-        └── release-plugin.yml                  # Automated compilation to plugin.zip GitHub release
+└── src-tauri/
+    └── src/
+        ├── lib.rs                              # Registers set_portals_visibility, inject_portal_theme, portal navigation
+        └── native_webview.rs                   # Visibility bus, initialization scripts, bounds clamping, eval engine
 ```
 
 ---
 
-## 47. Phase 6 AI Worker Agent Prompts & Step-by-Step Implementation Milestones
+## 51. Phase 7 AI Worker Agent Prompts & Step-by-Step Implementation Milestones
 
 ---
 
-### Milestone 30 Prompt: Executive Header Decluttering & Single Sidebar Collapser Enforcement `[STATUS: COMPLETED ✅ - Commit 213cc8f]`
+### Milestone 34 Prompt: Global Overlay Coordinator & Webview Invisibility Bus `[STATUS: READY FOR EXECUTION 🟡]`
 
 ```markdown
-You are a frontend UI engineer working on the TU Cockpit desktop application.
+You are a desktop core and frontend engineer working on TU Cockpit.
 
 ### Objective:
-Streamline the Executive Header according to user feedback:
-1. Eliminate the duplicate sidebar collapser button from `ExecutiveHeader.tsx`. The collapse/expand button must exist solely on the sidebar navigation component (`ConfigurableNav.tsx`).
-2. Remove the Deadlines button, the Slide Vault button, and the Split View button from `ExecutiveHeader.tsx`.
-3. In `App.tsx`, remove the Deadlines agenda modal and Split View container overlays, returning the main application area to a pristine, focused workstation canvas.
+Fix the critical bug where native child-webviews (TUWEL, TISS, VoWi, TU Maps) render on top of React modals (Command Palette `Cmd+K`, Settings, Login, Category Manager, Sync), obscuring them and trapping mouse clicks.
 
 ### Tasks:
-1. In `src/components/header/ExecutiveHeader.tsx`:
-   - Remove lines 70–82 rendering the duplicate `PanelLeftOpen` / `PanelLeftClose` toggle button.
-   - Remove the Deadlines Agenda button (`setAgendaOpen(true)`).
-   - Remove the Offline Lecture Vault button (`setVaultModalOpen(true)`).
-   - Remove the Split View button (`toggleSplit()`).
-   - Remove unused imports (`Calendar`, `FolderArchive`, `Columns2`, `PanelLeftClose`, `PanelLeftOpen`, `useDeadlineStore`, `useSlideVaultStore`).
-   - Retain strictly:
-     - Left: TU Cockpit branding logo and active plugin breadcrumb (when viewing a plugin).
-     - Center: Global Search trigger (`Cmd+K`) and academic semester indicator (`WS 2026/27`).
-     - Right: Student Profile Pill (`currentUser`), Live Clock, and Settings gear icon.
-2. In `src/App.tsx`:
-   - Remove `isSplitActive` check and `<SplitViewContainer />` from `renderMainContent`.
-   - Remove `<DeadlinesAgendaModal />` and `<OfflineVaultView />` modals from the main render tree.
-   - Remove unused imports related to split view and deadlinestore.
-3. In `src/components/navigation/ConfigurableNav.tsx`:
-   - Verify that the sidebar collapse button functions reliably in both expanded (`w-64`) and collapsed (`w-14`) states, as well as via the `Cmd+B` keyboard shortcut.
-
-### Verification:
-- Run `npm run build` to confirm zero TypeScript compilation errors or broken imports.
-- Launch the application and observe the Executive Header:
-  - Verify that only one sidebar toggle button is visible (on the sidebar rail).
-  - Verify that Deadlines, Slide Vault, and Split View buttons are completely gone from the header.
-  - Verify the header looks clean, balanced, and responsive.
-
-### Git Hygiene:
-Commit message:
-`refactor(header): streamline executive header, remove duplicate collapser, deadlines, and splitview`
-```
-
----
-
-### Milestone 31 Prompt: Purge Example Mock Plugins & Consolidate "TU Essentials" Category `[STATUS: COMPLETED ✅ - Commit cecb5d5]`
-
-```markdown
-You are a software engineer working on the TU Cockpit plugin registry and category system.
-
-### Objective:
-Completely eliminate all 6 hardcoded mock/example plugins and consolidate the application's built-in tools under a single, official category named **"TU Essentials"**.
-
-### Tasks:
-1. In `src/services/marketplace/GitHubPluginService.ts`:
-   - In `StoreRegistryPlugin` interface, update `category` type to allow `"TU Essentials"`:
-     `category: "TU Essentials" | "Academic" | "Campus Life" | "Productivity" | string;`
-   - In `DEFAULT_STORE_REGISTRY.plugins`:
-     - Delete the 6 mock plugins completely:
-       - `tuwien.community.smart-tuwel`
-       - `tuwien.community.tiss-schedule`
-       - `tuwien.community.vowi-companion`
-       - `tuwien.community.mensa-today`
-       - `tuwien.community.room-locator`
-       - `tuwien.community.freihaus-timer`
-     - Retain strictly the 4 official plugins:
-       1. `tuwien.official.tuwel`
-       2. `tuwien.official.tiss`
-       3. `tuwien.official.vowi`
-       4. `tuwien.official.tumaps`
-     - Set `category: "TU Essentials"` for all four official plugins.
-2. In `src/store/useAppStore.ts`:
-   - Replace `INITIAL_CATEGORIES` with a single default category:
-     ```ts
-     const INITIAL_CATEGORIES: PluginCategory[] = [
-       {
-         id: "essentials",
-         name: "TU Essentials",
-         icon: "GraduationCap",
-         isDefault: true,
-         isCollapsed: false,
-         pluginIds: [
-           "tuwien.official.tuwel",
-           "tuwien.official.tiss",
-           "tuwien.official.vowi",
-           "tuwien.official.tumaps",
-         ],
-       },
-     ];
-     ```
-3. In `src/components/marketplace/PluginMarketplace.tsx`:
-   - Update `CATEGORIES` array:
-     `const CATEGORIES = ["All", "TU Essentials"] as const;`
-   - Ensure the category filter pills cleanly filter the 4 official plugins.
-
-### Verification:
-- Run `npm run build`.
-- Open the application:
-  - Check the sidebar: Confirm there is only one category titled **"TU Essentials"** holding the 4 official portals.
-  - Open the Community Store: Confirm that no mock plugins (`Smart TUWEL`, `Mensa Today`, etc.) are shown anywhere in the catalog.
-  - Verify that only TUWEL, TISS, VoWi, and TU Maps are present.
-
-### Git Hygiene:
-Commit message:
-`feat(store): purge mock example plugins and consolidate official portals under tu essentials`
-```
-
----
-
-### Milestone 32 Prompt: Fix VoWi & Official Plugins Installation / Native Child-Webview Loading Bug `[STATUS: COMPLETED ✅ - Commit bea8bfd]`
-
-```markdown
-You are a desktop core engineer working on TU Cockpit's plugin runtime and webview orchestration.
-
-### Objective:
-Fix the critical bug where installing an official plugin (tested with VoWi) and launching it shows only a fallback message `"✓ Sandboxed execution verified"` instead of rendering the live institutional portal or webview.
-
-### Tasks:
-1. In `src/services/marketplace/GitHubPluginService.ts`:
-   - Ensure every official plugin entry in `DEFAULT_STORE_REGISTRY` explicitly includes the top-level `homepage` attribute:
-     - `tuwien.official.tuwel`: `homepage: "https://tuwel.tuwien.ac.at"`
-     - `tuwien.official.tiss`: `homepage: "https://tiss.tuwien.ac.at"`
-     - `tuwien.official.vowi`: `homepage: "https://vowi.fsinf.at"`
-     - `tuwien.official.tumaps`: `homepage: "https://maps.tuwien.ac.at"`
-2. In `src/components/marketplace/PluginMarketplace.tsx`:
-   - In `handleInstallPlugin(entry: StoreRegistryPlugin)`:
-     - If `entry.id.startsWith("tuwien.official.")`:
-       - Import `OFFICIAL_PLUGINS` from `@/plugins/official/OfficialPlugins`.
-       - Retrieve `const officialDef = OFFICIAL_PLUGINS[entry.id];`.
-       - If `officialDef` exists, install using its authoritative manifest and htmlContent:
-         `installPlugin(officialDef.manifest, officialDef.htmlContent, "registry");`
-       - This prevents the routine from attempting an external GitHub fetch and falling back to dummy HTML!
-     - In the fallback manifest synthesis (for non-official plugins), ensure `homepage: entry.homepage` is preserved in the manifest object.
-3. In `src/App.tsx`:
-   - Strengthen the active plugin view renderer for official portals:
-     ```tsx
-     const KNOWN_OFFICIAL_URLS: Record<string, string> = {
-       "tuwien.official.tuwel": "https://tuwel.tuwien.ac.at",
-       "tuwien.official.tiss": "https://tiss.tuwien.ac.at",
-       "tuwien.official.vowi": "https://vowi.fsinf.at",
-       "tuwien.official.tumaps": "https://maps.tuwien.ac.at",
-     };
-
-     const isOfficialPortal = activePlugin.manifest.id.startsWith("tuwien.official.");
-     const portalUrl = activePlugin.manifest.homepage || KNOWN_OFFICIAL_URLS[activePlugin.manifest.id];
-
-     if (isOfficialPortal && portalUrl) {
-       return (
-         <main className="flex-1 w-full h-full relative overflow-hidden p-0 m-0">
-           <NativePortalContainer
-             key={activePlugin.manifest.id}
-             portalId={activePlugin.manifest.id}
-             url={portalUrl}
-             title={activePlugin.manifest.name}
-           />
-         </main>
-       );
+1. Create `src/store/useOverlayStore.ts`:
+   - Define `OverlayState`:
+     ```typescript
+     interface OverlayState {
+       activeOverlays: Set<string>;
+       openOverlay: (id: string) => void;
+       closeOverlay: (id: string) => void;
+       isAnyOverlayActive: boolean;
      }
      ```
-4. In `src/plugins/official/OfficialPlugins.ts`:
-   - Double-check that `tuwien.official.vowi` and `tuwien.official.tumaps` have valid `homepage`, `title`, and `htmlContent`.
+   - Whenever `activeOverlays.size > 0`, `isAnyOverlayActive` is `true`.
+2. In `src-tauri/src/native_webview.rs`:
+   - Implement `set_portals_visibility(app: AppHandle, visible: bool) -> Result<(), String>`:
+     - Iterates all known portal labels (`portal_tuwien_official_tuwel`, `portal_tuwien_official_tiss`, `portal_tuwien_official_vowi`, `portal_tuwien_official_tumaps`).
+     - If `visible == false`, invokes `.hide()` on each existing webview.
+     - If `visible == true`, checks which portal should be active and invokes `.show()`.
+   - Implement `hide_all_native_portals(app: AppHandle) -> Result<(), String>`.
+   - In `src-tauri/src/lib.rs`, register `set_portals_visibility` and `hide_all_native_portals` in `tauri::generate_handler![]`.
+3. In `src/components/plugin-host/NativePortalContainer.tsx`:
+   - Subscribe to `useOverlayStore((state) => state.isAnyOverlayActive)`.
+   - When `isAnyOverlayActive` changes:
+     - If `true`, call `invoke("set_portals_visibility", { visible: false })`.
+     - If `false`, call `invoke("set_portals_visibility", { visible: true })` and refresh bounds.
+4. In `src/App.tsx`:
+   - In a `useEffect` on `activeView`, if `activeView !== "plugin"`, call `invoke("hide_all_native_portals")`.
+   - Connect `isSettingsModalOpen`, `isSyncModalOpen`, etc. to `useOverlayStore` via `openOverlay("settings")` / `closeOverlay("settings")`.
+5. In `src/components/palette/CommandPalette.tsx`:
+   - Register open/close lifecycle with `useOverlayStore`: `openOverlay("palette")` when opened, `closeOverlay("palette")` when closed.
 
 ### Verification:
-- Run `npm run build`.
-- In the app, uninstall VoWi if already installed, then go to Community Store and click "Install" on "VoWi Student Wiki".
-- Click on "VoWi Student Wiki" in the sidebar:
-  - **Verify:** The live VoWi portal (`https://vowi.fsinf.at`) loads seamlessly in the native child-webview.
-  - **Verify:** It does NOT show `"✓ Sandboxed execution verified"`.
-- Test clicking TUWEL, TISS, and TU Maps as well: all four must open their real websites cleanly.
+- Run `npm run build` and `SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk cargo check --manifest-path src-tauri/Cargo.toml`.
+- Open TUWEL or TISS:
+  - Press `Cmd+K`: verify Command Palette appears cleanly in front, receives typing and arrow key navigation, and is NOT blocked by the portal.
+  - Press `Escape`: verify Command Palette closes and the portal re-appears with form state and scroll position preserved.
+  - Click Settings gear: verify SettingsModal opens cleanly above the canvas.
 
 ### Git Hygiene:
 Commit message:
-`fix(plugins): repair official portal manifest propagation and resolve vowi webview mounting bug`
+`fix(portals): implement global overlay coordinator and webview invisibility bus`
 ```
 
 ---
 
-### Milestone 33 Prompt: Standalone Community Repository Specification & Scaffold: `tu-slide-vault` `[STATUS: COMPLETED ✅ - Commit f89f048]`
+### Milestone 35 Prompt: High-Frequency Bounds Synchronization & Anti-Freezing Defenses `[STATUS: READY FOR EXECUTION 🟡]`
 
 ```markdown
-You are an open-source maintainer and plugin architect for the TU Cockpit Community (`tu-cockpit-community`).
+You are a desktop runtime engineer working on Tauri child webview orchestration in TU Cockpit.
 
 ### Objective:
-Decouple the Slide Vault from TU Cockpit's core codebase and create the complete architecture and repository blueprint for `https://github.com/tu-cockpit-community/tu-slide-vault`.
+Eliminate native webview freezing, coordinate stutter, and layout desync during sidebar collapse/expand animations (`Cmd+B`), dock orientation switching, and window resizing.
 
 ### Tasks:
-1. Document the full project repository scaffold for `tu-slide-vault` in `docs/plugins/tu-slide-vault.md`:
-   - Repository name: `tu-slide-vault` under org `https://github.com/tu-cockpit-community`.
-   - `manifest.json`:
-     - ID: `tuwien.community.slide-vault`
-     - Name: `TU Slide Vault`
-     - Version: `1.0.0`
-     - Category: `Academic`
-     - Entrypoint: `index.html`
-     - Capabilities: `["https://tuwel.tuwien.ac.at/*", "https://vowi.fsinf.at/*"]`, storage quota: 100MB.
-2. Provide the standalone frontend implementation structure:
-   - React 19 + TypeScript + Vite.
-   - Client-side PDF text indexing using `pdfjs-dist` (or WebAssembly SQLite FTS5) in a Web Worker to avoid blocking the UI thread.
-   - Offline slide storage using browser `IndexedDB` with chunked blob storage.
-   - Built-in PDF reader with page jumping, zoom controls, and dark-mode tile inversion CSS filter.
-3. Provide `.github/workflows/release-plugin.yml`:
-   - Automated workflow triggered on tags (`v*`).
-   - Runs `npm run build`, copies `manifest.json` into `dist/`, compresses into `plugin.zip`, generates `checksum.sha256`, and creates a GitHub Release.
-4. Clean up the core `TU-Cockpit` repository:
-   - Ensure `OfflineVaultView.tsx` and `useSlideVaultStore.ts` are deprecated or moved to community documentation references, ensuring zero runtime dead weight in the core shell.
+1. In `src/components/plugin-host/NativePortalContainer.tsx`:
+   - Replace unthrottled `ResizeObserver` callbacks with a `requestAnimationFrame`-throttled loop:
+     - Store pending RAF ID and only dispatch `resize_native_portal` when dimensions actually change.
+     - Round coordinates and dimensions with `Math.round`.
+   - Listen to CSS transition lifecycle:
+     - When the sidebar toggles (`Cmd+B`), the CSS width animates over 200ms (`transition-all duration-200`).
+     - Run a smooth RAF tracking loop for 220ms post-toggle to keep the webview locked to the container edge with zero lag.
+2. In `src-tauri/src/native_webview.rs`:
+   - In `create_or_show_native_portal` and `resize_native_portal`:
+     - Guard against zero or negative dimensions (clamp `width = width.max(10.0)`, `height = height.max(10.0)`).
+     - Explicitly use `LogicalPosition::new(x, y)` and `LogicalSize::new(width, height)`.
+   - Enforce exclusive portal visibility:
+     - When showing portal `X`, atomically hide all other portals in the loop so multiple child webviews never fight for focus.
+3. In `src/components/plugin-host/NativePortalContainer.tsx`:
+   - Add a manual recovery icon (`RotateCw`) in the top bar that re-triggers bounds synchronization if ever requested by the user.
 
 ### Verification:
-- Verify that `docs/plugins/tu-slide-vault.md` contains a complete, turnkey recipe to initialize the standalone GitHub repo with `git init`, `package.json`, `manifest.json`, and the CI/CD pipeline.
-- Ensure TU Cockpit's GitHub Community discovery engine (`GitHubPluginService.discoverCommunityPlugins()`) will automatically discover and present `tu-slide-vault` once published to the organization.
+- Run `npm run build` and `cargo check`.
+- In TUWEL or TISS:
+  - Press `Cmd+B` rapidly 10 times: verify the child webview animates fluidly into the 56px collapsed layout and back without clipping or freezing.
+  - Drag and resize the desktop window vigorously: verify the webview resizes cleanly without glitching.
 
 ### Git Hygiene:
 Commit message:
-`docs(plugins): specify standalone community repository blueprint for tu-slide-vault`
+`perf(portals): implement requestanimationframe bounds synchronization and transition defenses`
 ```
 
+---
 
+### Milestone 36 Prompt: In-Page Theme & CSS Style Injection Engine for Native Portals `[STATUS: READY FOR EXECUTION 🟡]`
+
+```markdown
+You are a frontend theming and webview integration engineer working on TU Cockpit.
+
+### Objective:
+Implement in-page CSS theme and style injection directly into live institutional portals (TUWEL, TISS, VoWi, TU Maps) in Tauri v2 native child webviews.
+
+### Tasks:
+1. In `src-tauri/src/native_webview.rs`:
+   - In `create_or_show_native_portal`:
+     - Add an `initialization_script` to `WebviewBuilder`:
+       ```javascript
+       (function() {
+         window.__TU_COCKPIT_THEMED__ = true;
+         function inject() {
+           if (!document.getElementById('tu-cockpit-injected-theme')) {
+             const style = document.createElement('style');
+             style.id = 'tu-cockpit-injected-theme';
+             (document.head || document.documentElement).appendChild(style);
+           }
+         }
+         inject();
+         document.addEventListener('DOMContentLoaded', inject);
+       })();
+       ```
+     - This guarantees the `<style>` tag exists on every page navigation before white pixels render.
+   - Implement `inject_portal_theme(app: AppHandle, portal_id: String, css: String) -> Result<(), String>`:
+     - Retrieves the webview by sanitized label.
+     - Executes:
+       ```rust
+       let escaped_css = serde_json::to_string(&css).map_err(|e| e.to_string())?;
+       let script = format!(
+           r#"(() => {{
+               let el = document.getElementById('tu-cockpit-injected-theme');
+               if (!el) {{
+                   el = document.createElement('style');
+                   el.id = 'tu-cockpit-injected-theme';
+                   (document.head || document.documentElement).appendChild(el);
+               }}
+               el.textContent = {};
+           }})();"#,
+           escaped_css
+       );
+       webview.eval(&script).map_err(|e| e.to_string())?;
+       ```
+   - In `src-tauri/src/lib.rs`, register `inject_portal_theme` in `tauri::generate_handler![]`.
+2. In `src/services/portal/PortalThemeInjector.ts`:
+   - Verify rules for TUWEL (`TUWEL_RULES`), TISS (`TISS_RULES`), VoWi (`VOWI_RULES`), and TU Maps (`TUMAPS_RULES`).
+   - Export helper function `generateThemePayload(portalId: string, tokens: ThemeTokens, fontSans: string, uiScale: number): string`.
+3. In `src/components/plugin-host/NativePortalContainer.tsx`:
+   - Connect to `useThemeStore`:
+     ```tsx
+     const { tokens, fontSans, uiScale } = useThemeStore();
+     ```
+   - In a `useEffect` on `[portalId, tokens, fontSans, uiScale]`:
+     - Generate the compiled CSS string using `PortalThemeInjector`.
+     - Invoke `inject_portal_theme({ portalId, css })`.
+   - Also invoke theme injection 500ms and 1500ms after initial mount to guarantee injection after cross-origin page loads.
+
+### Verification:
+- Run `npm run build` and `cargo check`.
+- Launch the application and open TUWEL:
+  - **Verify:** The page renders in sleek dark mode with `--tu-bg-base`, `--tu-border`, and `--tu-accent` styling!
+  - Open Settings -> Themes, and switch to "TU Wien Daylight" or "High Contrast":
+  - **Verify:** The live portal instantly changes its colors without reloading or losing student session state!
+
+### Git Hygiene:
+Commit message:
+`feat(theming): implement live in-page css style injection for native child webviews`
+```
+
+---
+
+### Milestone 37 Prompt: Portal Navigation Toolbar, In-Page Zoom & Usability Polish `[STATUS: READY FOR EXECUTION 🟡]`
+
+```markdown
+You are a frontend UI engineer working on the desktop portal experience in TU Cockpit.
+
+### Objective:
+Provide full student browsing controls (Back, Forward, Reload, Zoom scaling) in the Native Viewport header and clean up cumbersome legacy university banners via targeted CSS.
+
+### Tasks:
+1. In `src-tauri/src/native_webview.rs`:
+   - Implement `portal_go_back(app: AppHandle, portal_id: String) -> Result<(), String>`:
+     `webview.eval("window.history.back()")`.
+   - Implement `portal_go_forward(app: AppHandle, portal_id: String) -> Result<(), String>`:
+     `webview.eval("window.history.forward()")`.
+   - In `src-tauri/src/lib.rs`, register these commands.
+2. In `src/components/plugin-host/NativePortalContainer.tsx`:
+   - Enhance the header toolbar:
+     - Add Back (`<ChevronLeft />`) and Forward (`<ChevronRight />`) buttons.
+     - Add Zoom controls: `[-]` `[Zoom %]` `[+]` that adjust zoom via CSS zoom / transform or Tauri webview zoom API.
+     - Add active page security indicator (`<Lock />` HTTPS badge).
+     - Display clean portal title and favicon.
+3. In `src/styles/embedded-themes/tuwel.css` and `tiss.css`:
+   - Refine rules to hide redundant university headers (e.g. legacy top marketing banner on TUWEL) so coursework and course modules take 100% of the view.
+   - Add sticky headers to TISS grade and exam tables.
+
+### Verification:
+- Run `npm run build` and `cargo check`.
+- Click into course modules in TUWEL:
+  - Click the Back button in the Native Viewport toolbar: verify it returns to the previous page.
+  - Test the Zoom controls: verify content scales legibly.
+  - Verify that the layout feels clean, native, and deeply integrated into the workstation.
+
+### Git Hygiene:
+Commit message:
+`feat(portals): implement navigation toolbar, in-page zoom, and layout polish`
+```
