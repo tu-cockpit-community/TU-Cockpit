@@ -130,10 +130,26 @@ Because native child-webviews operate as OS window surfaces, they naturally sit 
 * **Lossless Toggling:** When any modal opens, Rust executes `set_portals_visibility(false)` via `webview.hide()`. The underlying web page stays loaded in memory with zero state or form loss.
 * **Instant Restoration:** When the modal closes, Rust executes `set_portals_visibility(true)`, instantly revealing the portal without a reload.
 
-### 4.4 In-Page Theme & Style Injection Engine
-Tauri v2 allows direct styling and DOM modification of third-party institutional websites:
-* **Pre-Render CSS (`initialization_script`):** In `WebviewBuilder`, an initialization script attaches `<style id="tu-cockpit-injected-theme">` before the DOM renders, preventing blinding white flashes on dark themes.
-* **Live Token Evaluation (`webview.eval`):** When students switch themes in Cockpit Settings, React generates updated CSS variables via `PortalThemeInjector.ts` and invokes `inject_portal_theme(portal_id, css)`. Rust evals the CSS directly into the live webview, harmonizing university portals with the Cockpit theme in real time.
+### 4.4 Authentic University Portal Rendering & Invariant
+To ensure 100% stability during exam registrations and course activities:
+* **Zero Intrusive CSS Injections:** Third-party institutional websites (TUWEL, TISS, TU Maps) render with their authentic, native institutional styling. Destructive `!important` CSS overrides are decommissioned to prevent layout corruption of complex Moodle YUI/Bootstrap components and JavaServer Faces viewstates.
+* **Cockpit Chrome Isolation:** Dynamic themes (`useThemeStore.ts`) apply exclusively to the TU Cockpit desktop shell (navigation dock, executive header, settings, command palette, and modal dialogues).
+
+### 4.5 In-Webview Shibboleth SSO & MFA Autofill Engine
+* **Direct SSO Entrypoint:** The TUWEL portal links directly to `https://tuwel.tuwien.ac.at/login/index.php`, immediately triggering university Shibboleth authentication (`login.tuwien.ac.at`).
+* **Daemon Execution (`inject_portal_autofill`):** When the webview navigates to `login.tuwien.ac.at`, Rust queries the secure credential and TOTP vault (`totp_vault::get_autofill_payload()`). If enabled, Rust executes a verified autofill script that populates username (`j_username`), password (`j_password`), and the real-time calculated 6-digit TOTP code (`token`/`totp`), accompanied by a floating `🔐 Autofilled by TU Cockpit` badge.
+* **One-Click Manual Trigger:** Students can also trigger autofill on demand from the Native Viewport header toolbar (`<KeyRound />`).
+
+### 4.6 Native Headless VoWi MediaWiki Reader
+* **MediaWiki Action API:** Rather than forcing an embedded webview for simple course lookups, VoWi course information, summaries, and exam tips are fetched via `https://vowi.fsinf.at/api.php?action=opensearch` and `action=parse`.
+* **Instant Native UI:** Rendered in high-performance native React components with instant fuzzy filtering and zero iframe overhead.
+* **Live Portal Toggle:** Students who wish to edit the wiki or browse raw pages can seamlessly toggle into the live child webview (`NativePortalContainer`).
+
+### 4.7 Architectural Verdict: Child Webviews vs. Local Header-Stripping Reverse Proxy
+While a local reverse proxy (e.g. Axum stripping `X-Frame-Options` and `CSP`) sounds appealing in theory, it is fatally flawed for authenticated university portals:
+1. **Cookie Partitioning & WebKit ITP:** Modern WebKit engines (used by Tauri on macOS) enforce Intelligent Tracking Prevention, rejecting cross-origin third-party cookies inside `<iframe>`s.
+2. **SAML/Shibboleth SSO Redirection:** TUWEL and TISS redirect across distinct institutional domains (`tuwel.tuwien.ac.at` -> `login.tuwien.ac.at` -> `tiss.tuwien.ac.at`). A reverse proxy breaks on cross-origin redirects and relative URLs without rewriting all HTML/JS assets.
+3. **Session Integrity:** Tauri v2's native child webview (`tauri::Webview`) provides an authentic first-party browser context with persistent, isolated cookie jars and hardware acceleration, which with the Lossless Invisibility Bus gives complete modal support and rock-solid session security.
 
 ---
 
