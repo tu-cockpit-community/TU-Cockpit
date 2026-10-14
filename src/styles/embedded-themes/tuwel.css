@@ -37,3 +37,17 @@ th {
   background-color: var(--tu-bg-card) !important;
   color: var(--tu-text-primary) !important;
 }
+
+/* Clean up redundant legacy university marketing/banners */
+#page-header .marketing-banner,
+.tu-header-banner,
+.alert-marketing,
+#tuwel-header-image,
+.site-announcement-dismissible {
+  display: none !important;
+}
+
+/* Maximize coursework viewport */
+#region-main, #page-content, .course-content {
+  max-width: 100% !important;
+}

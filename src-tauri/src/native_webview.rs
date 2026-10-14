@@ -187,6 +187,35 @@ pub async fn navigate_native_portal(app: AppHandle, portal_id: String, url: Stri
 }
 
 #[tauri::command]
+pub async fn portal_go_back(app: AppHandle, portal_id: String) -> Result<(), String> {
+    let label = sanitize_portal_label(&portal_id);
+    if let Some(existing) = app.get_webview(&label) {
+        let _ = existing.eval("window.history.back()");
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn portal_go_forward(app: AppHandle, portal_id: String) -> Result<(), String> {
+    let label = sanitize_portal_label(&portal_id);
+    if let Some(existing) = app.get_webview(&label) {
+        let _ = existing.eval("window.history.forward()");
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn portal_set_zoom(app: AppHandle, portal_id: String, zoom: f64) -> Result<(), String> {
+    let label = sanitize_portal_label(&portal_id);
+    if let Some(existing) = app.get_webview(&label) {
+        let clamped = zoom.clamp(0.5, 3.0);
+        let script = format!("document.body.style.zoom = '{}';", clamped);
+        let _ = existing.eval(&script);
+    }
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn orchestrate_split_portals(
     app: AppHandle,
     portal_left: String,

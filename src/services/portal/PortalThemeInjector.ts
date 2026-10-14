@@ -26,6 +26,16 @@ export class PortalThemeInjector {
       background-color: var(--tu-bg-card) !important;
       color: var(--tu-text-primary) !important;
     }
+    #page-header .marketing-banner,
+    .tu-header-banner,
+    .alert-marketing,
+    #tuwel-header-image,
+    .site-announcement-dismissible {
+      display: none !important;
+    }
+    #region-main, #page-content, .course-content {
+      max-width: 100% !important;
+    }
   `;
 
   private static TISS_RULES = `
@@ -44,6 +54,15 @@ export class PortalThemeInjector {
       background: var(--tu-bg-card) !important;
       color: var(--tu-text-primary) !important;
       border-bottom: 2px solid var(--tu-accent) !important;
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 10 !important;
+      box-shadow: 0 1px 0 var(--tu-border) !important;
+    }
+    table.tissTable thead th {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 10 !important;
     }
     table.tissTable td {
       border-color: var(--tu-border-subtle) !important;

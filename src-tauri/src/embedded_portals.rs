@@ -51,16 +51,6 @@ pub fn reload_portal(_portal_id: String) -> Result<bool, String> {
 }
 
 #[tauri::command]
-pub fn portal_go_back(_portal_id: String) -> Result<bool, String> {
-    Ok(true)
-}
-
-#[tauri::command]
-pub fn portal_go_forward(_portal_id: String) -> Result<bool, String> {
-    Ok(true)
-}
-
-#[tauri::command]
 pub fn inject_theme_css(_portal_id: String, _css: String) -> Result<bool, String> {
     Ok(true)
 }

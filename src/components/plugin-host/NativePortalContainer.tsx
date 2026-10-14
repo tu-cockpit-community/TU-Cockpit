@@ -8,6 +8,10 @@ import {
   Sparkles,
   Lock,
   Maximize2,
+  ChevronLeft,
+  ChevronRight,
+  Minus,
+  Plus,
 } from "lucide-react";
 import { useOverlayStore } from "@/store/useOverlayStore";
 import { useAppStore } from "@/store/useAppStore";
@@ -27,6 +31,7 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isNative, setIsNative] = useState<boolean>(true);
+  const [zoomLevel, setZoomLevel] = useState<number>(100);
   const isAnyOverlayActive = useOverlayStore((state) => state.isAnyOverlayActive);
   const { isSidebarCollapsed, navOrientation } = useAppStore();
   const { tokens, fontSans, fontMono, uiScale } = useThemeStore();
@@ -189,6 +194,34 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
     }
   }, [isAnyOverlayActive, updateBounds]);
 
+  const handleGoBack = async () => {
+    try {
+      await invoke("portal_go_back", { portalId });
+    } catch {
+      window.history.back();
+    }
+    setTimeout(applyTheme, 400);
+  };
+
+  const handleGoForward = async () => {
+    try {
+      await invoke("portal_go_forward", { portalId });
+    } catch {
+      window.history.forward();
+    }
+    setTimeout(applyTheme, 400);
+  };
+
+  const handleSetZoom = async (newZoom: number) => {
+    const clamped = Math.min(Math.max(newZoom, 50), 200);
+    setZoomLevel(clamped);
+    try {
+      await invoke("portal_set_zoom", { portalId, zoom: clamped / 100 });
+    } catch (err) {
+      console.warn("portal_set_zoom failed:", err);
+    }
+  };
+
   const handleDetachWindow = async () => {
     try {
       await invoke("detach_portal_window", { portalId, url });
@@ -217,31 +250,94 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
     }
   };
 
+  const getPortalBadge = () => {
+    const id = portalId.toLowerCase();
+    if (id.includes("tuwel")) return "TUWEL";
+    if (id.includes("tiss")) return "TISS";
+    if (id.includes("vowi")) return "VoWi";
+    if (id.includes("tumaps") || id.includes("maps")) return "TU Maps";
+    return title || "Portal";
+  };
+
   return (
     <div className="w-full h-full flex flex-col bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] rounded-[var(--tu-radius-lg)] overflow-hidden shadow-[var(--tu-shadow)]">
       {/* Native Webview Navigation Bar */}
-      <div className="h-10 border-b border-[var(--tu-border)] bg-[var(--tu-bg-card)] px-4 flex items-center justify-between shrink-0 select-none text-xs">
-        <div className="flex items-center gap-2">
+      <div className="h-10 border-b border-[var(--tu-border)] bg-[var(--tu-bg-card)] px-3 flex items-center justify-between shrink-0 select-none text-xs gap-2">
+        {/* Left: Navigation and Portal Badge */}
+        <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-0.5">
+            <button
+              onClick={handleGoBack}
+              className="p-1 rounded text-[var(--tu-text-muted)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] transition-colors cursor-pointer"
+              title="Go Back"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={handleGoForward}
+              className="p-1 rounded text-[var(--tu-text-muted)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] transition-colors cursor-pointer"
+              title="Go Forward"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={handleReload}
+              className="p-1 rounded text-[var(--tu-text-muted)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] transition-colors cursor-pointer"
+              title="Reload Portal Page"
+            >
+              <RotateCw className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="h-4 w-[1px] bg-[var(--tu-border)] mx-0.5" />
+
           <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[var(--tu-accent)]/15 border border-[var(--tu-accent)]/30 text-[var(--tu-accent)] font-semibold text-[11px]">
             <Sparkles className="w-3 h-3" />
-            <span>Native Viewport</span>
+            <span>{getPortalBadge()}</span>
           </div>
 
           {title && (
-            <span className="font-semibold text-[var(--tu-text-primary)] hidden sm:inline">
+            <span className="font-semibold text-[var(--tu-text-primary)] hidden md:inline truncate max-w-[120px]">
               {title}
             </span>
           )}
         </div>
 
-        {/* URL Pill */}
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] text-[11px] font-mono text-[var(--tu-text-secondary)] max-w-sm truncate">
+        {/* Center: URL Pill with Lock HTTPS Indicator */}
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] text-[11px] font-mono text-[var(--tu-text-secondary)] max-w-xs sm:max-w-sm truncate shadow-inner">
           <Lock className="w-3 h-3 text-emerald-400 shrink-0" />
           <span className="truncate">{url}</span>
         </div>
 
-        {/* Controls */}
+        {/* Right: Zoom controls, Pop-Out & External */}
         <div className="flex items-center gap-1.5">
+          {/* Zoom Controls */}
+          <div className="flex items-center bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] rounded-[var(--tu-radius-sm)] px-1 py-0.5 text-[11px]">
+            <button
+              onClick={() => handleSetZoom(zoomLevel - 10)}
+              className="p-0.5 text-[var(--tu-text-muted)] hover:text-[var(--tu-text-primary)] transition-colors cursor-pointer disabled:opacity-30"
+              disabled={zoomLevel <= 50}
+              title="Zoom Out (-10%)"
+            >
+              <Minus className="w-3 h-3" />
+            </button>
+            <button
+              onClick={() => handleSetZoom(100)}
+              className="px-1 text-[10px] font-mono text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-accent)] transition-colors cursor-pointer"
+              title="Reset Zoom to 100%"
+            >
+              {zoomLevel}%
+            </button>
+            <button
+              onClick={() => handleSetZoom(zoomLevel + 10)}
+              className="p-0.5 text-[var(--tu-text-muted)] hover:text-[var(--tu-text-primary)] transition-colors cursor-pointer disabled:opacity-30"
+              disabled={zoomLevel >= 200}
+              title="Zoom In (+10%)"
+            >
+              <Plus className="w-3 h-3" />
+            </button>
+          </div>
+
           <button
             onClick={handleDetachWindow}
             className="flex items-center gap-1 px-2 py-1 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] hover:bg-[var(--tu-bg-hover)] text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] transition-colors cursor-pointer text-[11px]"
@@ -252,20 +348,12 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
           </button>
 
           <button
-            onClick={handleReload}
-            className="p-1 rounded text-[var(--tu-text-muted)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] transition-colors cursor-pointer"
-            title="Reload Portal Page"
-          >
-            <RotateCw className="w-3.5 h-3.5" />
-          </button>
-
-          <button
             onClick={handleOpenExternal}
             className="flex items-center gap-1 px-2 py-1 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] hover:bg-[var(--tu-bg-hover)] text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] transition-colors cursor-pointer text-[11px]"
             title="Open in System Browser"
           >
             <ExternalLink className="w-3 h-3" />
-            <span className="hidden md:inline">External</span>
+            <span className="hidden lg:inline">External</span>
           </button>
         </div>
       </div>
