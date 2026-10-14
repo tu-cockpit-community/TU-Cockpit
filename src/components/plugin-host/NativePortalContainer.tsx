@@ -305,7 +305,10 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
         </div>
 
         {/* Center: URL Pill with Lock HTTPS Indicator */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] text-[11px] font-mono text-[var(--tu-text-secondary)] max-w-xs sm:max-w-sm truncate shadow-inner">
+        <div
+          title="Secure Institutional Connection (HTTPS WebKit Sandbox)"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] text-[11px] font-mono text-[var(--tu-text-secondary)] max-w-xs sm:max-w-sm truncate shadow-inner cursor-default"
+        >
           <Lock className="w-3 h-3 text-emerald-400 shrink-0" />
           <span className="truncate">{url}</span>
         </div>
@@ -353,10 +356,10 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
           <button
             onClick={handleDetachWindow}
             className="flex items-center gap-1 px-2 py-1 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] hover:bg-[var(--tu-bg-hover)] text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] transition-colors cursor-pointer text-[11px]"
-            title="Pop out into a detached floating OS window"
+            title="Detach Window: Pop out into a secondary desktop monitor"
           >
             <Maximize2 className="w-3 h-3" />
-            <span className="hidden sm:inline">Pop-Out</span>
+            <span className="hidden sm:inline">Detach</span>
           </button>
 
           <button

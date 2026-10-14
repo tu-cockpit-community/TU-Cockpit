@@ -156,7 +156,7 @@ Commit message:
 
 ---
 
-### Milestone 40 Prompt: Native Headless VoWi MediaWiki API Reader `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 40 Prompt: Native Headless VoWi MediaWiki API Reader `[STATUS: COMPLETED ✅ - Commit ee09880]`
 
 ```markdown
 You are a frontend applications engineer working on student utilities in TU Cockpit.
