@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from "react";
+import React, { useEffect, useRef, useMemo, useState } from "react";
 import { usePaletteStore } from "@/store/usePaletteStore";
 import { useAppStore } from "@/store/useAppStore";
 import { useThemeStore } from "@/store/useThemeStore";
@@ -22,6 +22,9 @@ import {
   Settings,
   CornerDownLeft,
   X,
+  Calendar,
+  FileText,
+  Loader2,
 } from "lucide-react";
 
 interface CommandPaletteProps {
@@ -48,6 +51,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ onOpenSettings }
   const { activeThemeId, setTheme } = useThemeStore();
   const { setLoginModalOpen } = useAuthStore();
   const { openOverlay, closeOverlay } = useOverlayStore();
+
+  const [asyncItems, setAsyncItems] = useState<PaletteItem[]>([]);
+  const [isSearchingAsync, setIsSearchingAsync] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -98,13 +104,44 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ onOpenSettings }
     [installedPlugins, setActiveView, toggleSidebar, activeThemeId, setTheme, onOpenSettings, setLoginModalOpen]
   );
 
+  // Debounced asynchronous search for FTS5 slides and academic deadlines
+  useEffect(() => {
+    if (!isOpen || !searchQuery.trim() || searchQuery.trim().length < 2) {
+      setAsyncItems([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearchingAsync(true);
+      try {
+        const results = await FuzzySearchService.searchAsync(
+          searchQuery,
+          paletteContext
+        );
+        setAsyncItems(results);
+      } catch (err) {
+        console.warn("Async search failed:", err);
+      } finally {
+        setIsSearchingAsync(false);
+      }
+    }, 120);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, isOpen, paletteContext]);
+
   const allItems = useMemo(() => {
     return FuzzySearchService.getAllItems(paletteContext);
   }, [paletteContext]);
 
   const filteredItems = useMemo(() => {
-    return FuzzySearchService.search(allItems, searchQuery);
-  }, [allItems, searchQuery]);
+    const syncResults = FuzzySearchService.search(allItems, searchQuery);
+    if (asyncItems.length === 0) return syncResults;
+
+    const deadlines = asyncItems.filter((i) => i.category === "deadlines");
+    const slides = asyncItems.filter((i) => i.category === "slides");
+
+    return [...deadlines, ...syncResults, ...slides];
+  }, [allItems, searchQuery, asyncItems]);
 
   // Ensure selectedIndex is within bounds
   useEffect(() => {
@@ -163,6 +200,10 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ onOpenSettings }
         return <Store className="w-4 h-4 text-cyan-400" />;
       case "Settings":
         return <Settings className="w-4 h-4 text-[var(--tu-text-secondary)]" />;
+      case "Calendar":
+        return <Calendar className="w-4 h-4 text-amber-400" />;
+      case "FileText":
+        return <FileText className="w-4 h-4 text-sky-400" />;
       default:
         return <Puzzle className="w-4 h-4 text-[var(--tu-text-accent)]" />;
     }
@@ -191,6 +232,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ onOpenSettings }
             placeholder="Search campus rooms, portals, courses, actions..."
             className="flex-1 bg-transparent text-sm text-[var(--tu-text-primary)] placeholder-[var(--tu-text-muted)] focus:outline-none"
           />
+          {isSearchingAsync && (
+            <Loader2 className="w-4 h-4 animate-spin text-[var(--tu-accent)] shrink-0" />
+          )}
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}

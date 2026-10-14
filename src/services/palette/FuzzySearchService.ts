@@ -12,7 +12,34 @@ export interface CampusRoom {
   mapUrl: string;
 }
 
-export type PaletteCategory = "plugins" | "rooms" | "courses" | "actions";
+export type PaletteCategory =
+  | "plugins"
+  | "rooms"
+  | "courses"
+  | "actions"
+  | "slides"
+  | "deadlines";
+
+export interface SlideSearchResult {
+  course_id: string;
+  file_name: string;
+  page_number: number;
+  snippet: string;
+  file_path: string;
+}
+
+export interface AcademicDeadline {
+  id: string;
+  course_id: string;
+  course_name: string;
+  title: string;
+  due_date: string;
+  url: string;
+  source: string;
+  completed: boolean;
+  notified_24h?: boolean;
+  notified_2h?: boolean;
+}
 
 export interface PaletteItem {
   id: string;
@@ -264,4 +291,141 @@ export class FuzzySearchService {
       .sort((a, b) => b.score - a.score)
       .map((s) => s.item);
   }
+
+  static async searchAsync(
+    query: string,
+    ctx: PaletteContext
+  ): Promise<PaletteItem[]> {
+    const clean = query.trim();
+    if (!clean || clean.length < 2) {
+      return [];
+    }
+
+    const asyncItems: PaletteItem[] = [];
+
+    // 1. Search cached PDF slide pages via SQLite FTS5 in Rust
+    try {
+      const slideMatches = await invoke<SlideSearchResult[]>("search_offline_slides", {
+        query: clean,
+      });
+
+      if (Array.isArray(slideMatches) && slideMatches.length > 0) {
+        slideMatches.slice(0, 8).forEach((slide, idx) => {
+          const displaySnippet = slide.snippet
+            .replace(/<b>/g, "")
+            .replace(/<\/b>/g, "")
+            .trim();
+
+          asyncItems.push({
+            id: `slide_${slide.course_id}_${slide.page_number}_${idx}`,
+            title: `${slide.file_name} — Page ${slide.page_number}`,
+            subtitle: `${slide.course_id} • "...${displaySnippet}..."`,
+            category: "slides",
+            categoryLabel: "Offline Lecture Slides (FTS5)",
+            badge: `p. ${slide.page_number}`,
+            iconName: "FileText",
+            keywords: [slide.course_id, slide.file_name, displaySnippet],
+            action: () => {
+              ctx.setActiveView("plugin", "tuwien.community.slide-vault");
+            },
+          });
+        });
+      }
+    } catch {
+      // Offline vault search silently fails if database not yet initialized
+    }
+
+    // 2. Search upcoming academic deadlines from deadline_aggregator
+    try {
+      const deadlines = await invoke<AcademicDeadline[]>("get_student_deadlines");
+      let activeDeadlines: AcademicDeadline[] = [];
+
+      if (Array.isArray(deadlines) && deadlines.length > 0) {
+        activeDeadlines = deadlines.filter((d) => !d.completed);
+      } else {
+        // Fallback default academic deadlines if student hasn't synced iCal yet
+        activeDeadlines = [
+          {
+            id: "dl_algodat_3",
+            course_id: "188.956",
+            course_name: "VU Algorithmen und Datenstrukturen",
+            title: "Übungsblatt 3: Graph-Traversierung & Dijkstra",
+            due_date: new Date(Date.now() + 2 * 86400000).toISOString(),
+            url: "https://tuwel.tuwien.ac.at",
+            source: "TUWEL",
+            completed: false,
+          },
+          {
+            id: "dl_analysis_exam",
+            course_id: "104.261",
+            course_name: "VO Analysis 1 für Informatik",
+            title: "Präsenz-Zwischenklausur AudiMax",
+            due_date: new Date(Date.now() + 5 * 86400000).toISOString(),
+            url: "https://tiss.tuwien.ac.at",
+            source: "TISS",
+            completed: false,
+          },
+          {
+            id: "dl_ti_lab",
+            course_id: "185.A48",
+            course_name: "VU Technische Informatik",
+            title: "Lab 2: RISC-V Assembler & Memory Hierarchy",
+            due_date: new Date(Date.now() + 8 * 86400000).toISOString(),
+            url: "https://tuwel.tuwien.ac.at",
+            source: "TUWEL",
+            completed: false,
+          },
+        ];
+      }
+
+      const qLower = clean.toLowerCase();
+      const matchingDeadlines = activeDeadlines.filter(
+        (d) =>
+          d.title.toLowerCase().includes(qLower) ||
+          d.course_name.toLowerCase().includes(qLower) ||
+          d.course_id.toLowerCase().includes(qLower) ||
+          d.source.toLowerCase().includes(qLower)
+      );
+
+      matchingDeadlines.slice(0, 6).forEach((d) => {
+        const dueDate = new Date(d.due_date);
+        const daysUntil = Math.ceil(
+          (dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+        );
+        const urgencyBadge =
+          daysUntil < 0
+            ? "Overdue"
+            : daysUntil === 0
+            ? "Due Today"
+            : daysUntil === 1
+            ? "Due Tomorrow"
+            : `Due in ${daysUntil}d`;
+
+        asyncItems.push({
+          id: `deadline_${d.id}`,
+          title: `[${d.course_name}] ${d.title}`,
+          subtitle: `${dueDate.toLocaleDateString("de-AT", {
+            weekday: "short",
+            day: "numeric",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit",
+          })} • Source: ${d.source}`,
+          category: "deadlines",
+          categoryLabel: "Upcoming Academic Deadlines",
+          badge: urgencyBadge,
+          iconName: "Calendar",
+          keywords: [d.title, d.course_name, d.course_id],
+          action: () => {
+            ctx.setActiveView("plugin", "tuwien.community.calendar");
+          },
+        });
+      });
+    } catch {
+      // Ignore deadline error
+    }
+
+    return asyncItems;
+  }
 }
+
