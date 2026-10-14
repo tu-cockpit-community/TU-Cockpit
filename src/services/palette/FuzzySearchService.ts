@@ -1,8 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
 import TU_ROOMS_DATA from "@/data/tu_rooms_index.json";
-import { useDeadlineStore } from "@/store/useDeadlineStore";
-import { useSplitStore } from "@/store/useSplitStore";
-import { useVaultStore } from "@/store/useVaultStore";
 
 export interface CampusRoom {
   id: string;
@@ -220,48 +217,6 @@ export class FuzzySearchService {
       keywords: ["settings", "preferences", "config", "orientation", "tokens"],
       action: () => {
         ctx.openSettings();
-      },
-    });
-
-    items.push({
-      id: "action_open_deadlines",
-      title: "Open Academic Deadlines & Agenda",
-      subtitle: "Track TUWEL assignment deadlines and upcoming exams",
-      category: "actions",
-      categoryLabel: "Quick System Actions",
-      badge: "Schedule",
-      iconName: "Calendar",
-      keywords: ["deadline", "deadlines", "agenda", "calendar", "exam", "abgabe", "ics", "schedule"],
-      action: () => {
-        useDeadlineStore.getState().setAgendaOpen(true);
-      },
-    });
-
-    items.push({
-      id: "action_toggle_split",
-      title: "Toggle Multi-Webview Split Workstation",
-      subtitle: "Multitask side-by-side with dual university viewports",
-      category: "actions",
-      categoryLabel: "Quick System Actions",
-      badge: "Workspace",
-      iconName: "Columns2",
-      keywords: ["split", "dual", "side-by-side", "multitask", "vowi", "tuwel", "workstation"],
-      action: () => {
-        useSplitStore.getState().toggleSplit();
-      },
-    });
-
-    items.push({
-      id: "action_open_vault",
-      title: "Open Offline Lecture Material Vault",
-      subtitle: "Browse and full-text search cached course slides and PDFs",
-      category: "actions",
-      categoryLabel: "Quick System Actions",
-      badge: "Vault",
-      iconName: "FolderArchive",
-      keywords: ["vault", "offline", "slides", "pdf", "lecture", "folien", "fts", "search"],
-      action: () => {
-        useVaultStore.getState().setVaultModalOpen(true);
       },
     });
 

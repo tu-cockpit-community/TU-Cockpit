@@ -1,3 +1,8 @@
+/**
+ * @deprecated Decoupled from core desktop shell in Phase 6.
+ * See community repository: https://github.com/tu-cockpit-community/tu-slide-vault
+ * and docs/plugins/tu-slide-vault.md.
+ */
 import React, { useState } from "react";
 import { useVaultStore } from "@/store/useVaultStore";
 import {

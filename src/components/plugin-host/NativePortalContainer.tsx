@@ -8,9 +8,7 @@ import {
   Sparkles,
   Lock,
   Maximize2,
-  Columns2,
 } from "lucide-react";
-import { useSplitStore } from "@/store/useSplitStore";
 
 interface NativePortalContainerProps {
   portalId: string;
@@ -78,8 +76,6 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
     };
   }, [portalId, updateBounds]);
 
-  const { setLeftPortalId, setSplitActive } = useSplitStore();
-
   const handleDetachWindow = async () => {
     try {
       await invoke("detach_portal_window", { portalId, url });
@@ -87,11 +83,6 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
       console.error("detach_portal_window failed:", err);
       window.open(url, "_blank", "width=1024,height=768");
     }
-  };
-
-  const handleSplitMode = () => {
-    setLeftPortalId(portalId);
-    setSplitActive(true);
   };
 
   const handleReload = async () => {
@@ -136,15 +127,6 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
 
         {/* Controls */}
         <div className="flex items-center gap-1.5">
-          <button
-            onClick={handleSplitMode}
-            className="flex items-center gap-1 px-2 py-1 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] hover:bg-[var(--tu-bg-hover)] text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] transition-colors cursor-pointer text-[11px]"
-            title="Split screen with another portal"
-          >
-            <Columns2 className="w-3 h-3 text-[var(--tu-accent)]" />
-            <span className="hidden sm:inline">Split</span>
-          </button>
-
           <button
             onClick={handleDetachWindow}
             className="flex items-center gap-1 px-2 py-1 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] hover:bg-[var(--tu-bg-hover)] text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] transition-colors cursor-pointer text-[11px]"

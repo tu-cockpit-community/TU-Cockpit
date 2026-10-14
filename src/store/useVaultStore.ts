@@ -1,3 +1,8 @@
+/**
+ * @deprecated Slide Vault is decoupled from the core TU Cockpit binary in Phase 6.
+ * See community repository: https://github.com/tu-cockpit-community/tu-slide-vault
+ * and documentation in docs/plugins/tu-slide-vault.md.
+ */
 import { create } from "zustand";
 import { invoke } from "@tauri-apps/api/core";
 
