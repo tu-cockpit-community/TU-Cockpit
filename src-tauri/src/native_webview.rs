@@ -1,9 +1,51 @@
+use std::sync::Mutex;
 use tauri::{AppHandle, Manager, WebviewBuilder, WebviewUrl, WebviewWindowBuilder, LogicalPosition, LogicalSize};
+
+pub const KNOWN_PORTALS: [&str; 4] = [
+    "portal_tuwien_official_tuwel",
+    "portal_tuwien_official_tiss",
+    "portal_tuwien_official_vowi",
+    "portal_tuwien_official_tumaps",
+];
+
+static ACTIVE_PORTAL: Mutex<Option<String>> = Mutex::new(None);
 
 /// Sanitizes portal IDs (e.g. "tuwien.official.tuwel") into valid Tauri webview labels
 /// since Tauri strictly forbids '.' characters in window and webview labels.
 pub fn sanitize_portal_label(portal_id: &str) -> String {
     format!("portal_{}", portal_id.replace('.', "_"))
+}
+
+#[tauri::command]
+pub async fn set_portals_visibility(app: AppHandle, visible: bool) -> Result<(), String> {
+    if !visible {
+        for other in KNOWN_PORTALS {
+            if let Some(wv) = app.get_webview(other) {
+                let _ = wv.hide();
+            }
+        }
+    } else {
+        let active_label = ACTIVE_PORTAL.lock().ok().and_then(|guard| guard.clone());
+        if let Some(label) = active_label {
+            if let Some(wv) = app.get_webview(&label) {
+                let _ = wv.show();
+            }
+        }
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn hide_all_native_portals(app: AppHandle) -> Result<(), String> {
+    for other in KNOWN_PORTALS {
+        if let Some(wv) = app.get_webview(other) {
+            let _ = wv.hide();
+        }
+    }
+    if let Ok(mut active) = ACTIVE_PORTAL.lock() {
+        *active = None;
+    }
+    Ok(())
 }
 
 #[tauri::command]
@@ -19,14 +61,12 @@ pub async fn create_or_show_native_portal(
     let window = app.get_window("main").ok_or("Main window not found")?;
     let label = sanitize_portal_label(&portal_id);
 
+    if let Ok(mut active) = ACTIVE_PORTAL.lock() {
+        *active = Some(label.clone());
+    }
+
     // Defensively hide any other portal child webviews
-    let known_portals = [
-        "portal_tuwien_official_tuwel",
-        "portal_tuwien_official_tiss",
-        "portal_tuwien_official_vowi",
-        "portal_tuwien_official_tumaps",
-    ];
-    for other in known_portals {
+    for other in KNOWN_PORTALS {
         if other != label {
             if let Some(other_wv) = app.get_webview(other) {
                 let _ = other_wv.hide();
@@ -62,6 +102,11 @@ pub async fn hide_native_portal(app: AppHandle, portal_id: String) -> Result<(),
     let label = sanitize_portal_label(&portal_id);
     if let Some(existing) = app.get_webview(&label) {
         let _ = existing.hide();
+    }
+    if let Ok(mut active) = ACTIVE_PORTAL.lock() {
+        if active.as_deref() == Some(&label) {
+            *active = None;
+        }
     }
     Ok(())
 }

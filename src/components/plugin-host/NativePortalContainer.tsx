@@ -9,6 +9,7 @@ import {
   Lock,
   Maximize2,
 } from "lucide-react";
+import { useOverlayStore } from "@/store/useOverlayStore";
 
 interface NativePortalContainerProps {
   portalId: string;
@@ -23,6 +24,7 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isNative, setIsNative] = useState<boolean>(true);
+  const isAnyOverlayActive = useOverlayStore((state) => state.isAnyOverlayActive);
 
   const updateBounds = useCallback(async () => {
     if (!containerRef.current) return;
@@ -75,6 +77,19 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
       invoke("hide_native_portal", { portalId }).catch(() => {});
     };
   }, [portalId, updateBounds]);
+
+  // Invisibility Bus: Hide native child-webviews when any React modal/overlay is open
+  useEffect(() => {
+    if (isAnyOverlayActive) {
+      invoke("set_portals_visibility", { visible: false }).catch(() => {});
+    } else {
+      invoke("set_portals_visibility", { visible: true })
+        .then(() => {
+          updateBounds();
+        })
+        .catch(() => {});
+    }
+  }, [isAnyOverlayActive, updateBounds]);
 
   const handleDetachWindow = async () => {
     try {

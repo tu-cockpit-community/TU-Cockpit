@@ -3,6 +3,7 @@ import { usePaletteStore } from "@/store/usePaletteStore";
 import { useAppStore } from "@/store/useAppStore";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useOverlayStore } from "@/store/useOverlayStore";
 import {
   FuzzySearchService,
   PaletteItem,
@@ -46,9 +47,19 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ onOpenSettings }
 
   const { activeThemeId, setTheme } = useThemeStore();
   const { setLoginModalOpen } = useAuthStore();
+  const { openOverlay, closeOverlay } = useOverlayStore();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+
+  // Sync palette visibility with global overlay invisibility bus
+  useEffect(() => {
+    if (isOpen) {
+      openOverlay("palette");
+    } else {
+      closeOverlay("palette");
+    }
+  }, [isOpen, openOverlay, closeOverlay]);
 
   // Global shortcut listener: Cmd+K / Ctrl+K
   useEffect(() => {

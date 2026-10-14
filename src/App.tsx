@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { useAppStore } from "@/store/useAppStore";
 import { useThemeStore } from "@/store/useThemeStore";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useOverlayStore } from "@/store/useOverlayStore";
 import { PluginFrame } from "@/components/plugin-host/PluginFrame";
 import { NativePortalContainer } from "@/components/plugin-host/NativePortalContainer";
 import { ConfigurableNav } from "@/components/navigation/ConfigurableNav";
@@ -24,10 +27,41 @@ export const App: React.FC = () => {
     setSyncModalOpen,
     navOrientation,
     toggleSidebar,
+    isCategoryModalOpen,
   } = useAppStore();
 
+  const { isLoginModalOpen } = useAuthStore();
+  const { openOverlay, closeOverlay } = useOverlayStore();
   const { applyToRoot } = useThemeStore();
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false);
+
+  // Ensure native portals are hidden when navigating away from plugin view
+  useEffect(() => {
+    if (activeView !== "plugin") {
+      invoke("hide_all_native_portals").catch(() => {});
+    }
+  }, [activeView]);
+
+  // Connect React modals to global overlay coordinator (invisibility bus)
+  useEffect(() => {
+    if (isSettingsModalOpen) openOverlay("settings");
+    else closeOverlay("settings");
+  }, [isSettingsModalOpen, openOverlay, closeOverlay]);
+
+  useEffect(() => {
+    if (isSyncModalOpen) openOverlay("sync");
+    else closeOverlay("sync");
+  }, [isSyncModalOpen, openOverlay, closeOverlay]);
+
+  useEffect(() => {
+    if (isCategoryModalOpen) openOverlay("category");
+    else closeOverlay("category");
+  }, [isCategoryModalOpen, openOverlay, closeOverlay]);
+
+  useEffect(() => {
+    if (isLoginModalOpen) openOverlay("login");
+    else closeOverlay("login");
+  }, [isLoginModalOpen, openOverlay, closeOverlay]);
 
   // Ensure DOM has CSS custom properties on mount
   useEffect(() => {
