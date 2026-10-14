@@ -40,6 +40,10 @@ export const ThemeCustomizer: React.FC = () => {
         <p className="text-sm text-[var(--tu-text-secondary)] mt-1">
           Customize design tokens, typography, and display scaling. Changes propagate instantaneously to all sandboxed plugins.
         </p>
+        <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] text-xs text-[var(--tu-text-secondary)]">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+          <span>Cockpit Chrome Theme (Institutional websites render in authentic mode for exam and form stability).</span>
+        </div>
       </div>
 
       {/* Preset Picker */}
