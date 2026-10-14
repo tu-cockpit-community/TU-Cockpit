@@ -56,6 +56,9 @@ export class CommunityOrgService {
               if (manifestRes.ok) {
                 const manifest = await manifestRes.json();
                 if (manifest.id && manifest.name) {
+                  const defaultEntry = DEFAULT_STORE_REGISTRY.plugins.find(
+                    (p) => p.id === manifest.id
+                  );
                   const plugin: StoreRegistryPlugin = {
                     id: manifest.id,
                     name: manifest.name,
@@ -66,19 +69,20 @@ export class CommunityOrgService {
                       url: manifest.author?.url || repo.html_url,
                     },
                     description: manifest.description || repo.description || "Community Plugin",
-                    category: (manifest.category as any) || "Productivity",
-                    icon: manifest.icon,
+                    category: (manifest.category as any) || defaultEntry?.category || "Productivity",
+                    icon: manifest.icon || defaultEntry?.icon,
                     homepage: manifest.homepage || repo.html_url,
                     githubRepo: repo.html_url,
                     downloadUrl: `${repo.html_url}/archive/refs/heads/${defaultBranch}.zip`,
-                    capabilities: manifest.capabilities || {
+                    capabilities: manifest.capabilities || defaultEntry?.capabilities || {
                       network: ["https://tuwel.tuwien.ac.at/*"],
                       storage: { quotaBytes: 1048576 },
                       notifications: true,
                     },
                     verified: true,
-                    rating: 4.8,
-                    downloads: repo.stargazers_count ? repo.stargazers_count * 15 + 120 : 340,
+                    rating: defaultEntry?.rating || 4.8,
+                    downloads: repo.stargazers_count ? repo.stargazers_count * 15 + 120 : (defaultEntry?.downloads || 340),
+                    htmlContent: defaultEntry?.htmlContent,
                   };
                   return plugin;
                 }

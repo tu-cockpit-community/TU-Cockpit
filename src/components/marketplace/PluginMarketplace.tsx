@@ -3,6 +3,7 @@ import { useAppStore } from "@/store/useAppStore";
 import {
   GitHubPluginService,
   StoreRegistryPlugin,
+  DEFAULT_STORE_REGISTRY,
 } from "@/services/marketplace/GitHubPluginService";
 import { CommunityOrgService } from "@/services/marketplace/CommunityOrgService";
 import { OFFICIAL_PLUGINS } from "@/plugins/official/OfficialPlugins";
@@ -74,8 +75,11 @@ export const PluginMarketplace: React.FC = () => {
         }
       }
 
-      // Prioritize verified pre-bundled standalone application if present in registry
-      if (entry.htmlContent) {
+      // Check if entry has bundled HTML or if DEFAULT_STORE_REGISTRY has bundled HTML
+      const defaultEntry = DEFAULT_STORE_REGISTRY.plugins.find((p) => p.id === entry.id);
+      const resolvedHtml = entry.htmlContent || defaultEntry?.htmlContent;
+
+      if (resolvedHtml) {
         const manifest = {
           id: entry.id,
           name: entry.name,
@@ -86,7 +90,7 @@ export const PluginMarketplace: React.FC = () => {
           githubRepo: entry.githubRepo,
           capabilities: entry.capabilities,
         };
-        installPlugin(manifest, entry.htmlContent, "registry");
+        installPlugin(manifest, resolvedHtml, "registry");
         return;
       }
 
@@ -97,6 +101,12 @@ export const PluginMarketplace: React.FC = () => {
       installPlugin(result.manifest, result.htmlContent, "registry", result.installDir);
     } catch (err: any) {
       console.warn("Falling back to local registry install for:", entry.id);
+      const defaultEntry = DEFAULT_STORE_REGISTRY.plugins.find((p) => p.id === entry.id);
+      const fallbackHtml =
+        entry.htmlContent ||
+        defaultEntry?.htmlContent ||
+        `<!DOCTYPE html><html><head><style>body { font-family: var(--tu-font-sans); background: var(--tu-bg-base); color: var(--tu-text-primary); padding: 20px; } .card { background: var(--tu-bg-surface); border: 1px solid var(--tu-border); border-radius: var(--tu-radius); padding: 16px; } h2 { color: var(--tu-accent); font-size: 16px; margin-bottom: 8px; }</style></head><body><div class="card"><h2>${entry.name}</h2><p style="font-size: 12px; color: var(--tu-text-secondary);">${entry.description}</p><div style="margin-top: 12px; font-size: 11px; color: var(--tu-success);">✓ Sandboxed execution verified</div></div></body></html>`;
+
       const manifest = {
         id: entry.id,
         name: entry.name,
@@ -107,9 +117,6 @@ export const PluginMarketplace: React.FC = () => {
         githubRepo: entry.githubRepo,
         capabilities: entry.capabilities,
       };
-      const fallbackHtml =
-        entry.htmlContent ||
-        `<!DOCTYPE html><html><head><style>body { font-family: var(--tu-font-sans); background: var(--tu-bg-base); color: var(--tu-text-primary); padding: 20px; } .card { background: var(--tu-bg-surface); border: 1px solid var(--tu-border); border-radius: var(--tu-radius); padding: 16px; } h2 { color: var(--tu-accent); font-size: 16px; margin-bottom: 8px; }</style></head><body><div class="card"><h2>${entry.name}</h2><p style="font-size: 12px; color: var(--tu-text-secondary);">${entry.description}</p><div style="margin-top: 12px; font-size: 11px; color: var(--tu-success);">✓ Sandboxed execution verified</div></div></body></html>`;
       installPlugin(manifest, fallbackHtml, "registry");
     } finally {
       setLoadingMap((prev) => ({ ...prev, [entry.id]: false }));
