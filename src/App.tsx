@@ -87,7 +87,7 @@ export const App: React.FC = () => {
   const renderMainContent = () => {
     if (activeView === "plugin" && activePlugin) {
       const KNOWN_OFFICIAL_URLS: Record<string, string> = {
-        "tuwien.official.tuwel": "https://tuwel.tuwien.ac.at",
+        "tuwien.official.tuwel": "https://tuwel.tuwien.ac.at/login/index.php",
         "tuwien.official.tiss": "https://tiss.tuwien.ac.at",
         "tuwien.official.vowi": "https://vowi.fsinf.at",
         "tuwien.official.tumaps": "https://maps.tuwien.ac.at",

@@ -10,7 +10,7 @@ pub struct PortalInfo {
 
 pub fn get_default_portal_url(portal_id: &str) -> &'static str {
     match portal_id {
-        "tuwel" => "https://tuwel.tuwien.ac.at",
+        "tuwel" => "https://tuwel.tuwien.ac.at/login/index.php",
         "tiss" => "https://tiss.tuwien.ac.at",
         "vowi" => "https://vowi.fsinf.at",
         "tumaps" => "https://maps.tuwien.ac.at",
@@ -61,7 +61,7 @@ mod tests {
 
     #[test]
     fn test_portal_defaults() {
-        assert_eq!(get_default_portal_url("tuwel"), "https://tuwel.tuwien.ac.at");
+        assert_eq!(get_default_portal_url("tuwel"), "https://tuwel.tuwien.ac.at/login/index.php");
         assert_eq!(get_default_portal_url("tiss"), "https://tiss.tuwien.ac.at");
         assert_eq!(get_default_portal_url("vowi"), "https://vowi.fsinf.at");
         assert_eq!(get_default_portal_url("tumaps"), "https://maps.tuwien.ac.at");

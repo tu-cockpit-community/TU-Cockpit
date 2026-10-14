@@ -112,6 +112,97 @@ pub async fn inject_portal_theme(
 }
 
 #[tauri::command]
+pub async fn inject_portal_autofill(app: AppHandle, portal_id: String) -> Result<bool, String> {
+    let label = sanitize_portal_label(&portal_id);
+    let webview = match app.get_webview(&label) {
+        Some(wv) => wv,
+        None => return Ok(false),
+    };
+
+    let payload = match crate::totp_vault::get_autofill_payload() {
+        Ok(p) => p,
+        Err(_) => return Ok(false),
+    };
+
+    if !payload.auto_fill || (payload.username.is_empty() && payload.password.is_empty()) {
+        return Ok(false);
+    }
+
+    let u_json = serde_json::to_string(&payload.username).map_err(|e| e.to_string())?;
+    let p_json = serde_json::to_string(&payload.password).map_err(|e| e.to_string())?;
+    let t_json = serde_json::to_string(&payload.totp_code.unwrap_or_default()).map_err(|e| e.to_string())?;
+
+    let script = format!(
+        r#"(() => {{
+            const username = {u_json};
+            const password = {p_json};
+            const totpCode = {t_json};
+
+            let filled = false;
+
+            function triggerEvents(el) {{
+                el.dispatchEvent(new Event('input', {{ bubbles: true }}));
+                el.dispatchEvent(new Event('change', {{ bubbles: true }}));
+            }}
+
+            // Username detection (login.tuwien.ac.at uses j_username)
+            const uField = document.querySelector('input[name="j_username"], input#username, input[autocomplete="username"], input[name="username"]');
+            if (uField && username) {{
+                uField.value = username;
+                triggerEvents(uField);
+                filled = true;
+            }}
+
+            // Password detection (login.tuwien.ac.at uses j_password)
+            const pField = document.querySelector('input[name="j_password"], input#password, input[type="password"]');
+            if (pField && password) {{
+                pField.value = password;
+                triggerEvents(pField);
+                filled = true;
+            }}
+
+            // MFA / TOTP token detection (login.tuwien.ac.at uses token/totp/otp)
+            const tField = document.querySelector('input[name="token"], input[name="totp"], input[name="otp"], input#token');
+            if (tField && totpCode) {{
+                tField.value = totpCode;
+                triggerEvents(tField);
+                filled = true;
+            }}
+
+            if (filled) {{
+                const existingBadge = document.getElementById('tu-cockpit-autofill-badge');
+                if (!existingBadge) {{
+                    const badge = document.createElement('div');
+                    badge.id = 'tu-cockpit-autofill-badge';
+                    badge.innerText = '🔐 Autofilled by TU Cockpit';
+                    badge.style.position = 'fixed';
+                    badge.style.bottom = '20px';
+                    badge.style.right = '20px';
+                    badge.style.backgroundColor = '#006699';
+                    badge.style.color = '#ffffff';
+                    badge.style.padding = '8px 14px';
+                    badge.style.borderRadius = '8px';
+                    badge.style.fontFamily = 'system-ui, -apple-system, sans-serif';
+                    badge.style.fontSize = '12px';
+                    badge.style.fontWeight = '600';
+                    badge.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+                    badge.style.zIndex = '999999';
+                    badge.style.transition = 'opacity 0.5s ease';
+                    (document.body || document.documentElement).appendChild(badge);
+                    setTimeout(() => {{
+                        badge.style.opacity = '0';
+                        setTimeout(() => badge.remove(), 500);
+                    }}, 3000);
+                }}
+            }}
+        }})();"#
+    );
+
+    webview.eval(&script).map_err(|e| e.to_string())?;
+    Ok(true)
+}
+
+#[tauri::command]
 pub async fn hide_native_portal(app: AppHandle, portal_id: String) -> Result<(), String> {
     let label = sanitize_portal_label(&portal_id);
     if let Some(existing) = app.get_webview(&label) {

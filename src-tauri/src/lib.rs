@@ -20,7 +20,7 @@ use totp_vault::{
 use native_webview::{
     create_or_show_native_portal, hide_native_portal, resize_native_portal, navigate_native_portal,
     orchestrate_split_portals, detach_portal_window, set_portals_visibility, hide_all_native_portals,
-    inject_portal_theme, portal_go_back, portal_go_forward, portal_set_zoom,
+    inject_portal_theme, inject_portal_autofill, portal_go_back, portal_go_forward, portal_set_zoom,
 };
 use deadline_aggregator::{
     sync_tuwel_deadlines, get_student_deadlines, toggle_deadline_completed,
@@ -74,6 +74,7 @@ pub fn run() {
             set_portals_visibility,
             hide_all_native_portals,
             inject_portal_theme,
+            inject_portal_autofill,
             sync_tuwel_deadlines,
             get_student_deadlines,
             toggle_deadline_completed,

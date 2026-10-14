@@ -299,7 +299,7 @@ export const OFFICIAL_PLUGINS: Record<string, OfficialPluginDefinition> = {
       version: "1.0.0",
       description: "Official TU Wien Moodle learning management system for assignments, courses, and materials.",
       entrypoint: "index.html",
-      homepage: "https://tuwel.tuwien.ac.at",
+      homepage: "https://tuwel.tuwien.ac.at/login/index.php",
       type: "view",
       capabilities: {
         network: ["https://tuwel.tuwien.ac.at/*", "https://login.tuwien.ac.at/*"],
@@ -309,7 +309,7 @@ export const OFFICIAL_PLUGINS: Record<string, OfficialPluginDefinition> = {
     },
     htmlContent: createPortalHtml(
       "TUWEL Moodle",
-      "https://tuwel.tuwien.ac.at",
+      "https://tuwel.tuwien.ac.at/login/index.php",
       "TUWEL",
       "Moodle 4.x LMS"
     ),

@@ -51,7 +51,7 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
       },
       description: "Official TU Wien Moodle learning management system for assignments, courses, and materials.",
       category: "TU Essentials",
-      homepage: "https://tuwel.tuwien.ac.at",
+      homepage: "https://tuwel.tuwien.ac.at/login/index.php",
       githubRepo: "https://github.com/tu-cockpit-community/tuwel",
       capabilities: {
         network: ["https://tuwel.tuwien.ac.at/*", "https://login.tuwien.ac.at/*"],

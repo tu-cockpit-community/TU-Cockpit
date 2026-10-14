@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Minus,
   Plus,
+  KeyRound,
 } from "lucide-react";
 import { useOverlayStore } from "@/store/useOverlayStore";
 import { useAppStore } from "@/store/useAppStore";
@@ -217,6 +218,29 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
     }
   };
 
+  const handleAutofill = useCallback(async () => {
+    try {
+      await invoke("inject_portal_autofill", { portalId });
+    } catch (err) {
+      console.debug("inject_portal_autofill ignored or failed:", err);
+    }
+  }, [portalId]);
+
+  // Automatic post-mount autofill daemon for Shibboleth SSO (700ms and 2000ms after load)
+  useEffect(() => {
+    const t1 = setTimeout(() => {
+      handleAutofill();
+    }, 700);
+    const t2 = setTimeout(() => {
+      handleAutofill();
+    }, 2000);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [handleAutofill]);
+
   const handleOpenExternal = async () => {
     try {
       await open(url);
@@ -312,6 +336,15 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
               <Plus className="w-3 h-3" />
             </button>
           </div>
+
+          <button
+            onClick={handleAutofill}
+            className="flex items-center gap-1 px-2 py-1 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] hover:bg-[var(--tu-bg-hover)] text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] transition-colors cursor-pointer text-[11px]"
+            title="Autofill Shibboleth SSO & 2FA Code"
+          >
+            <KeyRound className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
+            <span className="hidden sm:inline">Autofill</span>
+          </button>
 
           <button
             onClick={handleDetachWindow}

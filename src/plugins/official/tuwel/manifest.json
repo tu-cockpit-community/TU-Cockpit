@@ -9,7 +9,7 @@
   "description": "Official TU Wien Moodle learning management system for assignments, courses, and materials.",
   "category": "Academic",
   "entrypoint": "index.html",
-  "homepage": "https://tuwel.tuwien.ac.at",
+  "homepage": "https://tuwel.tuwien.ac.at/login/index.php",
   "type": "view",
   "capabilities": {
     "network": [
