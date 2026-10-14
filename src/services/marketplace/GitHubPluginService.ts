@@ -150,6 +150,28 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
       rating: 4.9,
       downloads: 4200,
     },
+    {
+      id: "tuwien.community.slide-vault",
+      name: "TU Slide Vault",
+      version: "1.0.0",
+      author: {
+        name: "TU Cockpit Community Contributors",
+        github: "tu-cockpit-community",
+        url: "https://github.com/tu-cockpit-community",
+      },
+      description: "Offline lecture slide cache, instant full-text search across course PDF materials, and dark-mode slide viewer.",
+      category: "Academic",
+      homepage: "https://github.com/tu-cockpit-community/tu-slide-vault",
+      githubRepo: "https://github.com/tu-cockpit-community/tu-slide-vault",
+      capabilities: {
+        network: ["https://tuwel.tuwien.ac.at/*", "https://vowi.fsinf.at/*"],
+        storage: { quotaBytes: 104857600 },
+        notifications: true,
+      },
+      verified: true,
+      rating: 4.8,
+      downloads: 5100,
+    },
   ],
 };
 
