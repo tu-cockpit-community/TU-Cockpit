@@ -10,6 +10,7 @@ import {
   Maximize2,
 } from "lucide-react";
 import { useOverlayStore } from "@/store/useOverlayStore";
+import { useAppStore } from "@/store/useAppStore";
 
 interface NativePortalContainerProps {
   portalId: string;
@@ -25,20 +26,74 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isNative, setIsNative] = useState<boolean>(true);
   const isAnyOverlayActive = useOverlayStore((state) => state.isAnyOverlayActive);
+  const { isSidebarCollapsed, navOrientation } = useAppStore();
+
+  const lastBoundsRef = useRef<{ x: number; y: number; width: number; height: number }>({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  });
+  const rafIdRef = useRef<number | null>(null);
+
+  const syncBounds = useCallback(async () => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+
+    const x = Math.round(rect.left);
+    const y = Math.round(rect.top);
+    const width = Math.round(rect.width);
+    const height = Math.round(rect.height);
+
+    const last = lastBoundsRef.current;
+    if (last.x === x && last.y === y && last.width === width && last.height === height) {
+      return;
+    }
+
+    lastBoundsRef.current = { x, y, width, height };
+
+    try {
+      await invoke("resize_native_portal", {
+        portalId,
+        x,
+        y,
+        width,
+        height,
+      });
+    } catch {
+      // Ignore if webview not yet ready
+    }
+  }, [portalId]);
+
+  const scheduleSync = useCallback(() => {
+    if (rafIdRef.current !== null) return;
+    rafIdRef.current = requestAnimationFrame(() => {
+      rafIdRef.current = null;
+      syncBounds();
+    });
+  }, [syncBounds]);
 
   const updateBounds = useCallback(async () => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return;
 
+    const x = Math.round(rect.left);
+    const y = Math.round(rect.top);
+    const width = Math.round(rect.width);
+    const height = Math.round(rect.height);
+
+    lastBoundsRef.current = { x, y, width, height };
+
     try {
       await invoke("create_or_show_native_portal", {
         portalId,
         url,
-        x: Math.round(rect.left),
-        y: Math.round(rect.top),
-        width: Math.round(rect.width),
-        height: Math.round(rect.height),
+        x,
+        y,
+        width,
+        height,
       });
       setIsNative(true);
     } catch (err) {
@@ -52,31 +107,47 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
   useEffect(() => {
     updateBounds();
 
-    const handleResize = () => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      invoke("resize_native_portal", {
-        portalId,
-        x: Math.round(rect.left),
-        y: Math.round(rect.top),
-        width: Math.round(rect.width),
-        height: Math.round(rect.height),
-      }).catch(() => {});
-    };
-
-    const resizeObserver = new ResizeObserver(handleResize);
+    const resizeObserver = new ResizeObserver(() => {
+      scheduleSync();
+    });
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
 
-    window.addEventListener("resize", handleResize);
+    const handleWindowResize = () => {
+      scheduleSync();
+    };
+    window.addEventListener("resize", handleWindowResize);
 
     return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
       resizeObserver.disconnect();
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", handleWindowResize);
       invoke("hide_native_portal", { portalId }).catch(() => {});
     };
-  }, [portalId, updateBounds]);
+  }, [portalId, updateBounds, scheduleSync]);
+
+  // High-frequency RAF tracking loop during sidebar animation (220ms matches duration-200)
+  useEffect(() => {
+    let animId: number;
+    const startTime = performance.now();
+    const duration = 220;
+
+    const step = (now: number) => {
+      syncBounds();
+      if (now - startTime < duration) {
+        animId = requestAnimationFrame(step);
+      }
+    };
+    animId = requestAnimationFrame(step);
+
+    return () => {
+      if (animId) cancelAnimationFrame(animId);
+    };
+  }, [isSidebarCollapsed, navOrientation, syncBounds]);
 
   // Invisibility Bus: Hide native child-webviews when any React modal/overlay is open
   useEffect(() => {
@@ -101,11 +172,11 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
   };
 
   const handleReload = async () => {
+    updateBounds();
     try {
       await invoke("navigate_native_portal", { portalId, url });
     } catch {
-      // Browser fallback
-      updateBounds();
+      // Browser fallback handled by updateBounds
     }
   };
 

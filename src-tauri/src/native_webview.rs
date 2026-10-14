@@ -74,10 +74,13 @@ pub async fn create_or_show_native_portal(
         }
     }
 
+    let safe_width = width.max(10.0);
+    let safe_height = height.max(10.0);
+
     // If webview already exists, reposition, resize and show
     if let Some(existing) = app.get_webview(&label) {
         let _ = existing.set_position(LogicalPosition::new(x, y));
-        let _ = existing.set_size(LogicalSize::new(width, height));
+        let _ = existing.set_size(LogicalSize::new(safe_width, safe_height));
         let _ = existing.show();
         return Ok(());
     }
@@ -88,7 +91,7 @@ pub async fn create_or_show_native_portal(
     let webview_builder = WebviewBuilder::new(&label, webview_url).auto_resize();
 
     let pos = LogicalPosition::new(x, y);
-    let size = LogicalSize::new(width, height);
+    let size = LogicalSize::new(safe_width, safe_height);
 
     window
         .add_child(webview_builder, pos, size)
@@ -121,9 +124,11 @@ pub async fn resize_native_portal(
     height: f64,
 ) -> Result<(), String> {
     let label = sanitize_portal_label(&portal_id);
+    let safe_width = width.max(10.0);
+    let safe_height = height.max(10.0);
     if let Some(existing) = app.get_webview(&label) {
         let _ = existing.set_position(LogicalPosition::new(x, y));
-        let _ = existing.set_size(LogicalSize::new(width, height));
+        let _ = existing.set_size(LogicalSize::new(safe_width, safe_height));
     }
     Ok(())
 }
