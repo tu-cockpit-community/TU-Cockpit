@@ -11,164 +11,205 @@
 > - Milestones 34–37 (Phase 7): See [docs/archive/PHASE_7.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_7.md)  
 > - Milestones 38–41 (Phase 8): See [docs/archive/PHASE_8.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_8.md)  
 > - Milestone 42 (Phase 9): See [docs/archive/PHASE_9.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_9.md)  
+> - Milestone 43 (Phase 10): See [docs/archive/PHASE_10.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_10.md)  
 >
 > **Current Sprint Status:**
-> - 🟢 **PHASES 1–10 (COMPLETED & ACTIVE):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, Headless VoWi Reader, Autonomous `tu-calendar` Community Plugin, and Autonomous `tu-slide-vault` Community Plugin (Milestones 0–43).
-
+> - 🟢 **PHASES 1–10 (COMPLETED & ARCHIVED):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, Headless VoWi Reader, Autonomous `tu-calendar` Community Plugin, and Autonomous `tu-slide-vault` Community Plugin (Milestones 0–43).
+> - 🟡 **PHASE 11 (ACTIVE SPRINT):** Launching Reliability, Native Webview Stability & Community Plugin Bundle Invariants (Milestones 44–46).
 
 ---
 
 # ==============================================================================
-# 🟡 PART X: PHASE 10 — COMMUNITY SLIDE VAULT PLUGIN SCAFFOLDING & MARKETPLACE INTEGRATION
+# 🟡 PART XI: PHASE 11 — LAUNCHING RELIABILITY, NATIVE WEBVIEW STABILITY & COMMUNITY PLUGIN BUNDLE INVARIANTS
 # ==============================================================================
 
-> **Phase 10 Summary & Objective:**  
-> Phase 10 continues the expansion of the TU Cockpit community ecosystem by establishing the second major autonomous community plugin: **TU Slide Vault** ([`tu-cockpit-community/tu-slide-vault`](https://github.com/tu-cockpit-community/tu-slide-vault)).
-> 
-> **Core Deliverables:**
-> 1. **Autonomous Plugin Repository Setup:** Establish an isolated repository (`tu-slide-vault`) within `community-plugins/tu-slide-vault/` (ignored in the host `.gitignore`), linked to `https://github.com/tu-cockpit-community/tu-slide-vault`.
-> 2. **Externalized Plugin Planning Invariant:** The architecture, design, and execution milestones for the slide vault plugin itself are housed exclusively inside `community-plugins/tu-slide-vault/PLAN.md`.
-> 3. **Full Student Slide Vault Feature Spec:**
->    - **Offline Lecture Slide Indexer & Cache:** High-speed client-side storage for lecture slides and course documents.
->    - **Instant Full-Text Search Across Course Materials:** Instant search bar matching slide titles, course tags, keywords, and extracted notes.
->    - **Dark-Mode PDF Reader:** High-contrast reading mode with canvas tile inversion, page navigation, zoom, and fullscreen support.
->    - **Curated TU Wien Course Vaults:** Pre-configured course bundles (AlgoDat, Analysis 1, EPROG 1, LinAlg, DBS) with sample slides and upload capability.
-> 4. **Cockpit Marketplace Auto-Discovery:** Ensure the plugin declares a compliant `manifest.json` (`tuwien.community.slide-vault`) so that TU Cockpit's `CommunityOrgService` discovers it in the Community Store HUB for instant student installation.
+> **Phase 11 Summary & Objective:**  
+> Resolve all barriers preventing reliable launching and interactive execution of both official portals (TUWEL, TISS, VoWi, TU Maps) and community plugins (`tu-calendar`, `tu-slide-vault`).
+>
+> **Root Cause Breakdown & Architectural Invariants:**
+> 1. **Native Portal Window Label & Pointer Events:**
+>    - In `src-tauri/tauri.conf.json`, `"windows"` lacked an explicit `"label": "main"`. Rust `create_or_show_native_portal` calls `app.get_window("main")`, which can fail if the window label is omitted.
+>    - In `NativePortalContainer.tsx`, the webview anchor container had `pointer-events-none select-none`, which interfered with pointer event dispatching into the child webview on macOS WKWebView.
+> 2. **Installed Community Plugin Sidebar Disappearance:**
+>    - In `src/store/useAppStore.ts`, `installPlugin` attempted to add newly installed plugins to category `c.id === "tools"`. However, `INITIAL_CATEGORIES` only contained `id: "essentials"`. Consequently, newly installed plugins were never assigned to any category and never rendered in the navigation sidebar (`ConfigurableNav.tsx`).
+> 3. **Sandboxed Iframe Uncompiled Vite Modules in `srcDoc`:**
+>    - When installing a community plugin, GitHub source zipballs contain uncompiled `<script type="module" src="/src/main.tsx"></script>`. In `PluginFrame.tsx`, passing this raw HTML to `<iframe srcDoc={...}>` fails because `srcDoc` has no base host URL and browsers cannot compile JSX/TypeScript without a build step.
+>    - Furthermore, `DEFAULT_STORE_REGISTRY` in `GitHubPluginService.ts` lacked functional embedded HTML distributions for `tu-calendar` and `tu-slide-vault`, falling back to dummy placeholder cards.
+>    - **Resolution:** Provide bundled, standalone single-file HTML distributions in `DEFAULT_STORE_REGISTRY` and ensure `PluginMarketplace` installs launch rich, fully functional applications immediately.
 
 ---
 
-## 56. Workspace Subfolder & Multi-Repo Architecture
-
-```
-Tuwel-Tools/                                <--- [Host Repository: tu-cockpit-community/TU-Cockpit]
-├── .gitignore                              <--- Ignores /community-plugins/
-├── ARCHITECTURE.md
-├── PLAN.md                                 <--- Phase 10 active sprint
-├── src/                                    <--- Desktop Cockpit client
-└── community-plugins/                      <--- ISOLATED WORKSPACE ROOT
-    ├── tu-calendar/                        <--- [Standalone Repo: tu-cockpit-community/tu-calendar]
-    └── tu-slide-vault/                     <--- [Standalone Repo: tu-cockpit-community/tu-slide-vault]
-        ├── .git/                           <--- Separate Git history & remote origin
-        ├── .gitignore
-        ├── manifest.json                   <--- TU Cockpit Plugin Manifest (id: tuwien.community.slide-vault)
-        ├── PLAN.md                         <--- AUTONOMOUS SPRINT ROADMAP FOR SLIDE VAULT PLUGIN
-        ├── README.md                       <--- Plugin showcase & documentation
-        ├── package.json                    <--- Standalone React 19 + TypeScript + Vite SPA
-        ├── tsconfig.json
-        ├── vite.config.ts                  <--- base: './' for sandboxed iframe compatibility
-        ├── index.html
-        └── src/
-            ├── main.tsx
-            ├── App.tsx                     <--- Course Explorer, Search Bar, Slide Grid & Viewer
-            ├── index.css                   <--- Uses --tu-* CSS variables for adaptive theme syncing
-            ├── components/
-            │   ├── CourseSidebar.tsx       <--- Course selection & filter tree
-            │   ├── SlideSearchBar.tsx      <--- Instant fuzzy slide search input
-            │   ├── SlideDeckGrid.tsx       <--- Course slide decks with download/offline badges
-            │   └── PDFViewerModal.tsx      <--- Dark-mode slide reader with page controls
-            └── services/
-                ├── slideStorage.ts         <--- Offline slide metadata & IndexedDB/localStorage storage
-                └── pdfIndexer.ts           <--- Slide text extraction & fuzzy search indexing
-```
+## 58. Phase 11 AI Worker Agent Prompts & Step-by-Step Implementation Milestones
 
 ---
 
-## 57. Phase 10 AI Worker Agent Prompts & Step-by-Step Implementation Milestones
-
----
-
-### Milestone 43 Prompt: Scaffold Standalone `tu-slide-vault` Repository & Hook into Marketplace `[STATUS: COMPLETED ✅ - Commit 52f2111]`
+### Milestone 44 Prompt: Fix Native Webview Lifecycle, Container Pointer-Events & Window Label Invariant `[STATUS: READY FOR EXECUTION 🟡]`
 
 ```markdown
-You are a full-stack developer and community tools engineer working on the TU Cockpit ecosystem.
+You are a desktop systems engineer and Rust/React developer working on TU Cockpit.
 
 ### Objective:
-Create and scaffold the standalone `tu-slide-vault` community plugin repository inside `community-plugins/tu-slide-vault`, create the remote GitHub repository under `tu-cockpit-community/tu-slide-vault`, write its internal `PLAN.md` and feature implementation, and verify its auto-discovery by the TU Cockpit Community Store.
+Ensure official institutional portals (TUWEL, TISS, VoWi live mode, TU Maps) launch with 100% reliability, maintain proper hit testing (clicks, scrolls, typing), and remain synchronized during navigation.
 
-### Context & Rules:
-- The host repository (`Tuwel-Tools`) ignores `/community-plugins/` in `.gitignore`.
-- All plugin files, git commits, and planning for the slide vault plugin MUST live exclusively inside `community-plugins/tu-slide-vault/`.
-- The plugin runs inside TU Cockpit's sandboxed `<iframe>` (`PluginFrame.tsx`) and adapts to the host's themes via `--tu-*` CSS Custom Properties.
+### Context & Files:
+- [src-tauri/tauri.conf.json](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/tauri.conf.json)
+- [src/components/plugin-host/NativePortalContainer.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/plugin-host/NativePortalContainer.tsx)
+- [src-tauri/src/native_webview.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/native_webview.rs)
 
 ### Tasks:
 
-#### 1. Remote GitHub Repository Creation
-- Check if `https://github.com/tu-cockpit-community/tu-slide-vault` already exists using GitHub MCP tool `search_repositories` or `get_file_contents`.
-- If it does not exist, create the repository under the `tu-cockpit-community` organization using GitHub MCP tool `create_repository`:
-  - `name`: `"tu-slide-vault"`
-  - `description`: `"Offline lecture slide cache, full-text search and dark-mode viewer plugin for TU Cockpit"`
-  - `private`: `false`
-
-#### 2. Local Directory & Git Initialization
-- In `community-plugins/tu-slide-vault`:
-  - Initialize local git repo on `main` branch.
-  - Set remote origin to `https://github.com/tu-cockpit-community/tu-slide-vault.git`.
-
-#### 3. Author Plugin Specification & Dedicated `PLAN.md`
-- In `community-plugins/tu-slide-vault/manifest.json`:
+#### 1. Explicit Window Label Invariant in `tauri.conf.json`
+- In `src-tauri/tauri.conf.json`, verify that the primary window definition explicitly defines:
   ```json
-  {
-    "id": "tuwien.community.slide-vault",
-    "name": "TU Slide Vault",
-    "version": "1.0.0",
-    "description": "Offline lecture slide cache, instant full-text search across course PDF materials, and dark-mode slide viewer.",
-    "author": {
-      "name": "TU Cockpit Community Contributors",
-      "github": "tu-cockpit-community",
-      "url": "https://github.com/tu-cockpit-community"
-    },
-    "entrypoint": "index.html",
-    "category": "Academic",
-    "homepage": "https://github.com/tu-cockpit-community/tu-slide-vault",
-    "capabilities": {
-      "network": [
-        "https://tuwel.tuwien.ac.at/*",
-        "https://vowi.fsinf.at/*"
-      ],
-      "storage": {
-        "quotaBytes": 104857600
-      },
-      "notifications": true,
-      "systemClipboard": true
-    },
-    "permissions": [
-      "storage.localstorage",
-      "storage.indexeddb",
-      "network.fetch"
-    ]
-  }
+  "windows": [
+    {
+      "label": "main",
+      "title": "TU Cockpit",
+      "width": 1280,
+      "height": 840,
+      "minWidth": 900,
+      "minHeight": 600,
+      "decorations": true,
+      "transparent": false
+    }
+  ]
   ```
-- In `community-plugins/tu-slide-vault/PLAN.md`:
-  - Author the dedicated roadmap for the slide vault plugin covering:
-    - Milestone 1: App Shell, Course Navigation & Adaptive `--tu-*` Theming.
-    - Milestone 2: Slide Deck Grid & Offline Caching Engine.
-    - Milestone 3: Instant Full-Text Slide Search & Topic Filtering.
-    - Milestone 4: Dark-Mode Slide Viewer with Inversion, Zoom & Page Navigation.
 
-#### 4. Scaffolding the React + Vite Application
-- Create `package.json`, `tsconfig.json`, `vite.config.ts` (`base: "./"`), `index.html`.
-- Create `src/App.tsx` and UI components implementing:
-  - **Course Sidebar:** Filter slides by course (AlgoDat, Analysis 1, EPROG 1, LinAlg, DBS, etc.) or view all.
-  - **Slide Search Bar:** Real-time query input filtering across courses, titles, tags, and lecture topics.
-  - **Slide Deck Grid:** Displays slide cards showing lecture number, title, page count, date, file size, and cached status badge.
-  - **PDF Viewer Modal:** High-contrast reading viewer with dark mode toggle (canvas/content inversion), page flip controls (`<`, `>`), zoom slider, and download button.
-  - **Local Persistence & Cache:** Stores offline cached slide states and bookmarks in `localStorage`/IndexedDB.
+#### 2. Restore Pointer Events in `NativePortalContainer.tsx`
+- In `src/components/plugin-host/NativePortalContainer.tsx`:
+  - Locate line 379: `<div ref={containerRef} className="flex-1 w-full h-full relative bg-black/10 min-h-[500px] pointer-events-none select-none">`.
+  - Replace `pointer-events-none select-none` with `pointer-events-auto select-auto` on the child webview anchor area.
+  - Ensure the bounding rect calculations pass non-zero, valid dimensions to `create_or_show_native_portal`.
 
-#### 5. Commit, Push & Marketplace Verification
-- In `community-plugins/tu-slide-vault`:
-  - Push initial codebase to remote `main` branch.
-- In host TU Cockpit application:
-  - Register `tuwien.community.slide-vault` in `DEFAULT_STORE_REGISTRY` in `src/services/marketplace/GitHubPluginService.ts`.
-  - Verify auto-discovery and presence in Community Store.
+#### 3. Guard Portal Visibility & Label State Machine in `native_webview.rs`
+- In `src-tauri/src/native_webview.rs`:
+  - In `create_or_show_native_portal`, ensure that if `app.get_window("main")` is None, it provides a clear diagnostic error and falls back to inspecting available windows via `app.webview_windows()`.
+  - In `hide_native_portal`, verify that `ACTIVE_PORTAL` is only cleared if the portal being hidden matches the currently active portal label, preventing unmount race conditions when switching between portals.
 
 ### Verification:
-1. Inside `community-plugins/tu-slide-vault`: `npm install && npm run build` (or verify bundled dist).
-2. Inside host `Tuwel-Tools`: `npm run build` and `cargo check`.
-3. Verify `git status` in `Tuwel-Tools` shows clean working tree with `community-plugins/` uncommitted/ignored.
+1. `npm run build` passes with zero TypeScript errors.
+2. `SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk cargo check --manifest-path src-tauri/Cargo.toml` passes with zero errors.
 
 ### Git Hygiene:
-Commit message in `tu-slide-vault` repo:
-`feat(init): scaffold tu-slide-vault community plugin with slide search and dark-mode viewer`
-Commit message in `Tuwel-Tools` repo:
-`feat(marketplace): register tu-slide-vault community plugin in default store registry`
+Commit message: `fix(portals): enforce main window label and pointer-events in native child-webview container`
+```
+
+---
+
+### Milestone 45 Prompt: Fix Community Plugin Sidebar Categorization & Discovery `[STATUS: READY FOR EXECUTION 🟡]`
+
+```markdown
+You are a React and Zustand state architect working on TU Cockpit.
+
+### Objective:
+Ensure all newly installed community plugins appear immediately in the navigation sidebar (`ConfigurableNav.tsx`) under a dedicated "Community Tools" category rather than vanishing into an unassigned state.
+
+### Context & Files:
+- [src/store/useAppStore.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/store/useAppStore.ts)
+- [src/components/navigation/ConfigurableNav.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/navigation/ConfigurableNav.tsx)
+
+### Tasks:
+
+#### 1. Add "Community Tools" Category to `INITIAL_CATEGORIES`
+- In `src/store/useAppStore.ts`:
+  - Update `INITIAL_CATEGORIES` to declare both `essentials` and `community`:
+    ```typescript
+    const INITIAL_CATEGORIES: PluginCategory[] = [
+      {
+        id: "essentials",
+        name: "TU Essentials",
+        icon: "GraduationCap",
+        isDefault: true,
+        isCollapsed: false,
+        pluginIds: [
+          "tuwien.official.tuwel",
+          "tuwien.official.tiss",
+          "tuwien.official.vowi",
+          "tuwien.official.tumaps",
+        ],
+      },
+      {
+        id: "community",
+        name: "Community Tools",
+        icon: "Boxes",
+        isDefault: true,
+        isCollapsed: false,
+        pluginIds: [],
+      },
+    ];
+    ```
+
+#### 2. Update `installPlugin` Category Routing
+- In `src/store/useAppStore.ts` inside `installPlugin`:
+  - When a plugin is installed and is not already part of any category:
+    - If a category with `id === "community"` exists, append `manifest.id` to its `pluginIds`.
+    - If neither `"community"` nor `"tools"` exists in the user's custom categories, create the `"community"` category and add the plugin.
+  - This ensures that every installed plugin is guaranteed to be rendered in the sidebar accordion navigation.
+
+### Verification:
+1. `npm run build` compiles cleanly.
+2. In React app testing, installing a community plugin adds it directly to the "Community Tools" accordion in the sidebar.
+
+### Git Hygiene:
+Commit message: `fix(navigation): ensure installed community plugins are assigned to community category`
+```
+
+---
+
+### Milestone 46 Prompt: Bundle Standalone Single-File Distributions for `tu-calendar` and `tu-slide-vault` `[STATUS: READY FOR EXECUTION 🟡]`
+
+```markdown
+You are a frontend build engineer and plugin architect working on TU Cockpit.
+
+### Objective:
+Provide self-contained, fully functional HTML application bundles for `tu-calendar` and `tu-slide-vault` in `DEFAULT_STORE_REGISTRY` and ensure sandboxed iframes in `PluginFrame.tsx` execute without 404 module script errors or placeholder screens.
+
+### Context & Files:
+- [src/services/marketplace/GitHubPluginService.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/marketplace/GitHubPluginService.ts)
+- [src/components/marketplace/PluginMarketplace.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/marketplace/PluginMarketplace.tsx)
+- [src/components/plugin-host/PluginFrame.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/plugin-host/PluginFrame.tsx)
+- [community-plugins/tu-calendar/](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-calendar/)
+- [community-plugins/tu-slide-vault/](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-slide-vault/)
+
+### Tasks:
+
+#### 1. Rich Standalone HTML Distributions in `GitHubPluginService.ts`
+- In `src/services/marketplace/GitHubPluginService.ts`:
+  - Update `DEFAULT_STORE_REGISTRY` to associate complete, interactive, self-contained single-file HTML distributions for:
+    1. **`tuwien.community.calendar`:**
+       - Interactive Timetable & Weekly Grid (Lecture blocks, rooms, lecturers).
+       - TUWEL Deadlines Calendar with countdown badges and urgency styling.
+       - Google Tasks-style checklist with add, toggle, and filter capabilities.
+       - Adapts dynamically to `--tu-*` CSS design tokens.
+    2. **`tuwien.community.slide-vault`:**
+       - Course selector sidebar (AlgoDat, Analysis 1, EPROG 1, LinAlg, DBS).
+       - Instant fuzzy slide search input.
+       - Slide deck grid with lecture cards and offline cached badges.
+       - High-contrast Dark-Mode Slide Viewer modal with page controls and zoom.
+       - Adapts dynamically to `--tu-*` CSS design tokens.
+  - In `DEFAULT_STORE_REGISTRY`, expose an `htmlContent?: string` field on each `StoreRegistryPlugin` containing its verified standalone distribution.
+
+#### 2. Update `PluginMarketplace.tsx` Installation Flow
+- In `src/components/marketplace/PluginMarketplace.tsx`:
+  - When `handleInstall(entry)` is triggered:
+    - If `entry.htmlContent` is available from the registry, prioritize using `entry.htmlContent` so the rich app launches immediately without waiting for GitHub zipball compilation.
+    - If falling back, use `entry.htmlContent` instead of the generic "Sandboxed execution verified" placeholder.
+
+#### 3. Verification Across All Tools & Portals
+- Verify launching all official portals:
+  - TUWEL (`tuwien.official.tuwel`)
+  - TISS (`tuwien.official.tiss`)
+  - VoWi (`tuwien.official.vowi`) in both Reader and Live modes
+  - TU Maps (`tuwien.official.tumaps`)
+- Verify launching community plugins:
+  - TU Calendar (`tuwien.community.calendar`)
+  - TU Slide Vault (`tuwien.community.slide-vault`)
+- Ensure every tool can be opened, interacted with, switched between, and closed without freezes or blank screens.
+
+### Verification:
+1. `npm run build` passes with zero errors.
+2. `SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk cargo check --manifest-path src-tauri/Cargo.toml` passes.
+
+### Git Hygiene:
+Commit message: `feat(marketplace): bundle interactive standalone distributions for tu-calendar and tu-slide-vault`
 ```

@@ -112,17 +112,20 @@ TU Cockpit solves this using Tauri v2's native child webview API (`tauri::Webvie
 
 ### 4.2 Architecture & Lifecycle
 * **Native Windows:** Instead of rendering webviews in HTML, Rust creates a native OS child webview attached directly to the main window (`main_win.add_child(...)`).
+  - **Explicit Window Label Invariant:** In `src-tauri/tauri.conf.json`, the main window configuration MUST explicitly set `"label": "main"`. Rust native webview commands (`app.get_window("main")` / `app.get_webview_window("main")`) rely on this exact label to attach child webviews.
 * **Session Persistence:**
   - Each portal is assigned a dedicated data storage directory (e.g. `$APPDATA/tuwien-official-tuwel`, `$APPDATA/tuwien-official-tiss`).
   - Shibboleth SSO session cookies and credentials persist across application restarts.
-* **Dynamic Coordinate Synchronization:**
+* **Dynamic Coordinate Synchronization & Hit Testing:**
   - In React, `<NativePortalContainer />` places an invisible DOM anchor where the portal should appear.
   - A `ResizeObserver` measures bounding rectangles (`x, y, width, height`) and DPI scale factor.
   - When the sidebar expands, collapses, or changes orientation, React calls `update_webview_bounds(label, x, y, width, height)`.
   - Rust resizes the native child webview in real time with hardware-accelerated fluid motion.
-* **Visibility Management:**
+  - **Interactivity Invariant:** The container element must maintain `pointer-events: auto` for active native child-webview anchors so that OS click, drag, and scroll events route seamlessly through the desktop window hierarchy.
+* **Visibility Management & Synchronization:**
   - Switching between views calls `hide_all_child_webviews()` or `show_child_webview(label)`.
   - Webviews stay alive in memory to preserve student forms, open PDF assignments, and active TISS searches.
+  - **Atomic Transition Guard:** In `src-tauri/src/native_webview.rs`, `hide_native_portal` verifies whether the portal being hidden is currently the active one before clearing `ACTIVE_PORTAL`, preventing race conditions during rapid portal transitions.
 
 ### 4.3 Modal Overlay Coordinator & Z-Index Resolution
 Because native child-webviews operate as OS window surfaces, they naturally sit on top of the host HTML webview. To allow host modals (Command Palette `Cmd+K`, Settings, Login, Category Manager) and floating plugin overlays to display unobstructed:
@@ -196,6 +199,14 @@ Every plugin must declare a standard `manifest.json`:
    - Identifier prefix: `tuwien.community.*`
    - Rendered inside sandboxed iframes (`PluginFrame.tsx`) with `sandbox="allow-scripts allow-forms allow-same-origin"` and origin nullification.
    - Communicate with the host shell via an asynchronous `postMessage` RPC bridge with strict capability checking.
+   - **Self-Contained Bundle Invariant for Sandboxed `srcDoc` Iframes:**
+     Plugins rendered via `PluginFrame.tsx` (`srcDoc={themedHtml}`) execute in an isolated `srcDoc` document without a base URL.
+     Standard browser iframes cannot resolve relative uncompiled TypeScript/JSX modules (e.g., `<script type="module" src="/src/main.tsx">`) against the host dev server.
+     Therefore, community plugins must compile into self-contained single-file HTML distributions (e.g. using `vite-plugin-singlefile`) with inlined JavaScript and CSS.
+     The `DEFAULT_STORE_REGISTRY` in `GitHubPluginService.ts` provides fully functional bundled HTML fallbacks so plugins launch immediately both online and offline.
+   - **Sidebar Categorization Invariant:**
+     All installed plugins must appear in the sidebar accordion navigation (`ConfigurableNav.tsx`).
+     `INITIAL_CATEGORIES` in `useAppStore.ts` provides a pre-configured `"community"` category (`"Community Tools"`), and the `installPlugin` action guarantees that any newly installed plugin without an existing category is assigned to `"community"`.
 
 ### 5.4 Community Plugin Development Protocol & Isolated Subfolder Pattern
 To enable AI agent swarms and human contributors to develop separate community plugins without repository bloat:
