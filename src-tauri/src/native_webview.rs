@@ -58,7 +58,14 @@ pub async fn create_or_show_native_portal(
     width: f64,
     height: f64,
 ) -> Result<(), String> {
-    let window = app.get_window("main").ok_or("Main window not found")?;
+    let window = if let Some(w) = app.get_window("main") {
+        w
+    } else if let Some((lbl, w)) = app.windows().into_iter().next() {
+        eprintln!("[native_webview] Warning: window 'main' not found, falling back to window '{}'", lbl);
+        w
+    } else {
+        return Err("Main window not found to attach native child webview".to_string());
+    };
     let label = sanitize_portal_label(&portal_id);
 
     if let Ok(mut active) = ACTIVE_PORTAL.lock() {

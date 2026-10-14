@@ -376,7 +376,7 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
       {/* Child Webview Anchor Area */}
       <div
         ref={containerRef}
-        className="flex-1 w-full h-full relative bg-black/10 min-h-[500px] pointer-events-none select-none"
+        className="flex-1 w-full h-full relative bg-black/10 min-h-[500px] pointer-events-auto select-auto"
       >
         {!isNative && (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center space-y-3 pointer-events-auto select-auto">
