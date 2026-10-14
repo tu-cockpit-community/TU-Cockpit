@@ -17,8 +17,7 @@
 > - Milestones 50–52 (Phase 13): See [docs/archive/PHASE_13.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_13.md)  
 >
 > **Current Sprint Status:**
-> - 🟢 **PHASES 1–13 (COMPLETED & ARCHIVED):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, Headless VoWi Reader, Autonomous `tu-calendar`, Autonomous `tu-slide-vault`, Autonomous `tu-mensa`, Launching Reliability & Bundling Invariants, Single-File Inlining, Store Registry Hardening, and Unified Academic Spotlight (Milestones 0–52).
-> - 🟡 **PHASE 14 (ACTIVE SPRINT):** Campus Study Spot & Room Radar (`tu-room-radar`), Workstation Status Bar & ICS Calendar Export (Milestones 53–55).
+> - 🟢 **PHASES 1–14 (COMPLETED ✅):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, Headless VoWi Reader, Autonomous `tu-calendar`, Autonomous `tu-slide-vault`, Autonomous `tu-mensa`, Autonomous `tu-room-radar`, Launching Reliability, Single-File Inlining, Unified Academic Spotlight, Workstation Status Bar & ICS Calendar Export (Milestones 0–55).
 
 ---
 
@@ -37,7 +36,7 @@
 
 ---
 
-### Milestone 53 Prompt: Academic Workstation Status Bar & 1-Click ICS Export `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 53 Prompt: Academic Workstation Status Bar & 1-Click ICS Export `[STATUS: COMPLETED ✅ - Commit 7a73a5d]`
 
 ```markdown
 You are a React and Tauri desktop integration engineer working on TU Cockpit.
@@ -76,7 +75,7 @@ Commit message in `Tuwel-Tools`:
 
 ---
 
-### Milestone 54 Prompt: Autonomous `tu-room-radar` Community Plugin Scaffolding & Single-File Bundler `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 54 Prompt: Autonomous `tu-room-radar` Community Plugin Scaffolding & Single-File Bundler `[STATUS: COMPLETED ✅ - Commit c901de0 (tu-cockpit-community/tu-room-radar)]`
 
 ```markdown
 You are a React 19 and frontend systems developer building the autonomous `tu-room-radar` plugin.
@@ -119,7 +118,7 @@ Commit in `community-plugins/tu-room-radar`:
 
 ---
 
-### Milestone 55 Prompt: Host Registry Integration & Command Palette Room Routing for Room Radar `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 55 Prompt: Host Registry Integration & Command Palette Room Routing for Room Radar `[STATUS: COMPLETED ✅ - Commit ca24fe1]`
 
 ```markdown
 You are a TypeScript and desktop integration engineer working on TU Cockpit.
