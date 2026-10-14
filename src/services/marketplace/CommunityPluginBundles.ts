@@ -748,3 +748,245 @@ export const COMMUNITY_SLIDE_VAULT_HTML = `<!DOCTYPE html>
   </script>
 </body>
 </html>`;
+
+export const COMMUNITY_MENSA_HTML = `<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TU Mensa Radar</title>
+  <style>
+    :root {
+      --tu-bg-canvas: #090d16;
+      --tu-bg-surface: #111827;
+      --tu-bg-card: rgba(31, 41, 55, 0.6);
+      --tu-bg-elevated: #1f2937;
+      --tu-border: #374151;
+      --tu-border-subtle: #1f2937;
+      --tu-border-focus: #006699;
+      --tu-text-primary: #f9fafb;
+      --tu-text-secondary: #9ca3af;
+      --tu-text-muted: #6b7280;
+      --tu-accent: #006699;
+      --tu-accent-subtle: rgba(0, 102, 153, 0.15);
+      --tu-accent-text: #ffffff;
+      --tu-status-success: #10b981;
+      --tu-status-warning: #f59e0b;
+      --tu-status-error: #ef4444;
+      --tu-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --tu-font-mono: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--tu-font-sans);
+      background-color: var(--tu-bg-canvas);
+      color: var(--tu-text-primary);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+    header {
+      height: 52px;
+      background: var(--tu-bg-surface);
+      border-bottom: 1px solid var(--tu-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      flex-shrink: 0;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 14px; }
+    .brand-icon { width: 28px; height: 28px; border-radius: 6px; background: var(--tu-accent); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+    .badge-live { font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 10px; background: rgba(16, 185, 129, 0.15); color: var(--tu-status-success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .student-discount { display: flex; align-items: center; gap: 6px; font-size: 11px; padding: 4px 10px; border-radius: 6px; background: var(--tu-accent-subtle); border: 1px solid rgba(0, 102, 153, 0.3); color: #38bdf8; }
+    .share-btn { padding: 5px 12px; border-radius: 6px; background: var(--tu-bg-elevated); border: 1px solid var(--tu-border); color: var(--tu-text-primary); font-size: 11px; font-weight: 600; cursor: pointer; }
+    .layout { display: flex; flex: 1; overflow: hidden; }
+    .sidebar { width: 270px; background: var(--tu-bg-surface); border-right: 1px solid var(--tu-border); padding: 16px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+    .loc-card { padding: 12px; border-radius: 8px; background: var(--tu-bg-canvas); border: 1px solid var(--tu-border); cursor: pointer; transition: all 0.15s ease; }
+    .loc-card.active { border-color: var(--tu-accent); background: var(--tu-accent-subtle); }
+    .loc-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+    .loc-card.active .loc-title { color: #38bdf8; }
+    .loc-addr { font-size: 11px; color: var(--tu-text-secondary); margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .loc-meta { display: flex; justify-content: space-between; align-items: center; font-size: 10px; }
+    .queue-pill { padding: 1px 6px; border-radius: 4px; font-weight: 600; }
+    .queue-low { background: rgba(16, 185, 129, 0.15); color: var(--tu-status-success); }
+    .queue-med { background: rgba(245, 158, 11, 0.15); color: var(--tu-status-warning); }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 16px 20px; }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--tu-border); flex-wrap: wrap; }
+    .tabs { display: flex; gap: 4px; background: var(--tu-bg-surface); padding: 3px; border-radius: 8px; border: 1px solid var(--tu-border); }
+    .tab-btn { padding: 5px 14px; border-radius: 6px; border: none; background: transparent; color: var(--tu-text-secondary); font-size: 12px; font-weight: 600; cursor: pointer; }
+    .tab-btn.active { background: var(--tu-accent); color: #fff; }
+    .filters { display: flex; gap: 6px; align-items: center; }
+    .filter-btn { padding: 4px 10px; border-radius: 12px; border: 1px solid var(--tu-border); background: var(--tu-bg-surface); color: var(--tu-text-secondary); font-size: 11px; cursor: pointer; }
+    .filter-btn.active { border-color: var(--tu-accent); background: var(--tu-accent-subtle); color: #38bdf8; }
+    .grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; padding-right: 4px; }
+    .dish-card { background: var(--tu-bg-surface); border: 1px solid var(--tu-border); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; }
+    .dish-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .tag { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; }
+    .tag-classic { background: rgba(245, 158, 11, 0.15); color: var(--tu-status-warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .tag-veggie, .tag-vegan { background: rgba(16, 185, 129, 0.15); color: var(--tu-status-success); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .tag-special { background: rgba(0, 102, 153, 0.2); color: #38bdf8; border: 1px solid rgba(0, 102, 153, 0.4); }
+    .dish-name { font-size: 13px; font-weight: 700; line-height: 1.4; margin-bottom: 4px; }
+    .dish-soup { font-size: 11px; color: var(--tu-text-secondary); margin-bottom: 10px; }
+    .dish-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--tu-border); padding-top: 10px; }
+    .price-stud { font-size: 16px; font-weight: 800; }
+    .price-reg { font-size: 10px; color: var(--tu-text-muted); text-decoration: line-through; margin-left: 4px; }
+    .allergens { display: flex; gap: 3px; }
+    .allergen-chip { font-size: 9px; font-weight: 700; font-family: var(--tu-font-mono); width: 17px; height: 17px; border-radius: 3px; background: var(--tu-bg-card); color: var(--tu-text-secondary); display: flex; align-items: center; justify-content: center; border: 1px solid var(--tu-border); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🍽️</div>
+      <div>TU Mensa Radar <span class="badge-live">Live WS 2026</span></div>
+    </div>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <div class="student-discount">✓ TU Card Rabatt (-€0.80) aktiv</div>
+      <button class="share-btn" onclick="shareMenu()">Menü Teilen</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--tu-text-muted);">Mensa Standorte</div>
+      <div class="loc-card active" onclick="selectLoc('freihaus')">
+        <div class="loc-title">TU Mensa Freihaus</div>
+        <div class="loc-addr">Wiedner Hauptstraße 8-10, Turm Gelb</div>
+        <div class="loc-meta">
+          <span style="color: var(--tu-text-muted);">11:00 – 14:00 Uhr</span>
+          <span class="queue-pill queue-low">3-5 min</span>
+        </div>
+      </div>
+
+      <div class="loc-card" onclick="selectLoc('markt')">
+        <div class="loc-title">TU Mensa Markt</div>
+        <div class="loc-addr">Campus Gußhausstraße 27-29</div>
+        <div class="loc-meta">
+          <span style="color: var(--tu-text-muted);">11:30 – 14:00 Uhr</span>
+          <span class="queue-pill queue-med">8-12 min</span>
+        </div>
+      </div>
+
+      <div class="loc-card" onclick="selectLoc('cafe')">
+        <div class="loc-title">Cafeteria Gußhaus</div>
+        <div class="loc-addr">Altes EI-Gebäude, Gußhausstr. 25</div>
+        <div class="loc-meta">
+          <span style="color: var(--tu-text-muted);">08:30 – 15:30 Uhr</span>
+          <span class="queue-pill queue-low">Keine Wartezeit</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="toolbar">
+        <div class="tabs">
+          <button class="tab-btn active" onclick="selectDay('today')">Heute (Mittwoch)</button>
+          <button class="tab-btn" onclick="selectDay('tomorrow')">Morgen (Donnerstag)</button>
+          <button class="tab-btn" onclick="selectDay('friday')">Freitag</button>
+        </div>
+
+        <div class="filters">
+          <span style="font-size: 11px; color: var(--tu-text-muted);">Filter:</span>
+          <button class="filter-btn active" onclick="setFilter('all')">Alle Menüs</button>
+          <button class="filter-btn" onclick="setFilter('veggie')">Vegetarisch</button>
+          <button class="filter-btn" onclick="setFilter('vegan')">Vegan</button>
+          <button class="filter-btn" onclick="setFilter('budget')">Unter €6</button>
+        </div>
+      </div>
+
+      <div class="grid" id="dishes-grid"></div>
+    </div>
+  </div>
+
+  <script>
+    const MENUS = {
+      today: [
+        { id: 1, name: "Knuspriges Hühnerschnitzel mit Petersilerdäpfeln & Zitrone", soup: "Klare Rindsuppe mit Frittaten", cat: "classic", priceStud: 6.9, priceReg: 8.9, allergens: ["A","C","G"], kcal: 780 },
+        { id: 2, name: "Kürbis-Spinat-Lasagne mit Grana Padano & Blattsalat", soup: "Karotten-Ingwer-Cremesuppe", cat: "veggie", priceStud: 6.2, priceReg: 7.9, allergens: ["A","G","L"], kcal: 620 },
+        { id: 3, name: "Rotes Linsen-Süßkartoffel-Dal mit Basmatireis & Naan", soup: "Kokos-Koriander-Brühe", cat: "vegan", priceStud: 5.8, priceReg: 7.4, allergens: ["A","F"], kcal: 540 },
+        { id: 4, name: "Gegrilltes Lachsforellenfilet auf mediterranem Zucchinigemüse", soup: "Kräuterkartoffeln & Rucola", cat: "special", priceStud: 8.4, priceReg: 10.5, allergens: ["D","G"], kcal: 590 }
+      ],
+      tomorrow: [
+        { id: 5, name: "Rindsgulasch mit Butternockerln & Essiggurkerl", soup: "Grießnockerlsuppe", cat: "classic", priceStud: 6.9, priceReg: 8.9, allergens: ["A","C","G","L"], kcal: 820 },
+        { id: 6, name: "Pikantes Kichererbsen-Chili sin Carne mit Guacamole & Tacos", soup: "Maiscremesuppe mit Koriander", cat: "vegan", priceStud: 5.9, priceReg: 7.5, allergens: ["F","L"], kcal: 560 },
+        { id: 7, name: "Tiroler Kaspressknödel auf warmem Fasskrautsalat", soup: "Kräftige Gemüsesuppe", cat: "veggie", priceStud: 6.1, priceReg: 7.8, allergens: ["A","C","G"], kcal: 680 }
+      ],
+      friday: [
+        { id: 8, name: "Kabeljaufilet im Backteig mit hausgemachtem Erdäpfelsalat", soup: "Sauce Remoulade & Zitrone", cat: "classic", priceStud: 7.2, priceReg: 9.2, allergens: ["A","C","D","M"], kcal: 710 },
+        { id: 9, name: "Süßkartoffel-Gnocchi mit Salbeibutter & Pinienkernen", soup: "Kürbiscremesuppe", cat: "veggie", priceStud: 6.4, priceReg: 8.1, allergens: ["A","G"], kcal: 590 }
+      ]
+    };
+
+    let activeDay = 'today';
+    let activeFilter = 'all';
+
+    function selectLoc(loc) {
+      document.querySelectorAll('.loc-card').forEach(c => c.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+    }
+
+    function selectDay(day) {
+      activeDay = day;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      render();
+    }
+
+    function setFilter(f) {
+      activeFilter = f;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      render();
+    }
+
+    function shareMenu() {
+      const items = MENUS[activeDay] || [];
+      const text = "TU Mensa Menü:\\n" + items.map(d => "• " + d.name + " (€" + d.priceStud.toFixed(2) + ")").join("\\n");
+      navigator.clipboard?.writeText(text);
+      alert("Menü in Zwischenablage kopiert! 👍");
+    }
+
+    function render() {
+      const items = (MENUS[activeDay] || []).filter(d => {
+        if (activeFilter === 'veggie') return d.cat === 'veggie' || d.cat === 'vegan';
+        if (activeFilter === 'vegan') return d.cat === 'vegan';
+        if (activeFilter === 'budget') return d.priceStud <= 6.0;
+        return true;
+      });
+
+      const grid = document.getElementById('dishes-grid');
+      grid.innerHTML = items.map(d => {
+        const catClass = d.cat === 'classic' ? 'tag-classic' : d.cat === 'veggie' ? 'tag-veggie' : d.cat === 'vegan' ? 'tag-vegan' : 'tag-special';
+        const catLabel = d.cat === 'classic' ? 'Menü Classic' : d.cat === 'veggie' ? 'Veggie' : d.cat === 'vegan' ? 'Vegan' : 'Special';
+        return \`
+          <div class="dish-card">
+            <div>
+              <div class="dish-header">
+                <span class="tag \${catClass}">\${catLabel}</span>
+                <span style="font-size: 11px; color: var(--tu-text-muted);">\${d.kcal} kcal</span>
+              </div>
+              <div class="dish-name">\${d.name}</div>
+              <div class="dish-soup"><strong style="color: var(--tu-accent);">Inklusive:</strong> \${d.soup}</div>
+            </div>
+            <div class="dish-footer">
+              <div>
+                <span class="price-stud">€ \${d.priceStud.toFixed(2)}</span>
+                <span class="price-reg">€ \${d.priceReg.toFixed(2)}</span>
+              </div>
+              <div class="allergens">
+                \${d.allergens.map(a => \`<span class="allergen-chip">\${a}</span>\`).join('')}
+              </div>
+            </div>
+          </div>
+        \`;
+      }).join('');
+    }
+
+    render();
+  </script>
+</body>
+</html>`;
+

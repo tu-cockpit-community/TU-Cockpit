@@ -25,6 +25,7 @@ import {
   Calendar,
   FileText,
   Loader2,
+  Utensils,
 } from "lucide-react";
 
 interface CommandPaletteProps {
@@ -204,6 +205,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ onOpenSettings }
         return <Calendar className="w-4 h-4 text-amber-400" />;
       case "FileText":
         return <FileText className="w-4 h-4 text-sky-400" />;
+      case "Utensils":
+        return <Utensils className="w-4 h-4 text-emerald-400" />;
       default:
         return <Puzzle className="w-4 h-4 text-[var(--tu-text-accent)]" />;
     }
@@ -229,7 +232,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ onOpenSettings }
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search campus rooms, portals, courses, actions..."
+            placeholder="Search campus rooms, slides, deadlines, mensa menus, actions..."
             className="flex-1 bg-transparent text-sm text-[var(--tu-text-primary)] placeholder-[var(--tu-text-muted)] focus:outline-none"
           />
           {isSearchingAsync && (

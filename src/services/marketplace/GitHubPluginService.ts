@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { PluginManifest } from "@/store/useAppStore";
 import {
   COMMUNITY_CALENDAR_HTML,
+  COMMUNITY_MENSA_HTML,
   COMMUNITY_SLIDE_VAULT_HTML,
 } from "./CommunityPluginBundles";
 
@@ -178,6 +179,29 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
       rating: 4.8,
       downloads: 5100,
       htmlContent: COMMUNITY_SLIDE_VAULT_HTML,
+    },
+    {
+      id: "tuwien.community.mensa",
+      name: "TU Mensa Radar",
+      version: "1.0.0",
+      author: {
+        name: "TU Cockpit Community Contributors",
+        github: "tu-cockpit-community",
+        url: "https://github.com/tu-cockpit-community",
+      },
+      description: "Daily cafeteria menus, student meal prices, allergen filters, and opening hours for TU Wien campus mensas.",
+      category: "Campus Life",
+      homepage: "https://github.com/tu-cockpit-community/tu-mensa",
+      githubRepo: "https://github.com/tu-cockpit-community/tu-mensa",
+      capabilities: {
+        network: ["https://www.mensen.at/*", "https://menu.mensen.at/*"],
+        storage: { quotaBytes: 10485760 },
+        notifications: false,
+      },
+      verified: true,
+      rating: 4.9,
+      downloads: 3800,
+      htmlContent: COMMUNITY_MENSA_HTML,
     },
   ],
 };

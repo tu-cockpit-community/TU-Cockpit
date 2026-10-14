@@ -247,6 +247,20 @@ export class FuzzySearchService {
       },
     });
 
+    items.push({
+      id: "action_open_mensa",
+      title: "View Today's Mensa Menu (Freihaus & Markt)",
+      subtitle: "Check daily dishes, student prices, allergens, and cafeteria opening hours",
+      category: "actions",
+      categoryLabel: "Quick System Actions",
+      badge: "Mensa",
+      iconName: "Utensils",
+      keywords: ["mensa", "food", "essen", "mittagessen", "lunch", "freihaus", "markt", "cafeteria", "speiseplan"],
+      action: () => {
+        ctx.setActiveView("plugin", "tuwien.community.mensa");
+      },
+    });
+
     return items;
   }
 
