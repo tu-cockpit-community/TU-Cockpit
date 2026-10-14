@@ -14,56 +14,56 @@
 > - Milestone 43 (Phase 10): See [docs/archive/PHASE_10.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_10.md)  
 > - Milestones 44–46 (Phase 11): See [docs/archive/PHASE_11.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_11.md)  
 > - Milestones 47–49 (Phase 12): See [docs/archive/PHASE_12.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_12.md)  
+> - Milestones 50–52 (Phase 13): See [docs/archive/PHASE_13.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_13.md)  
 >
 > **Current Sprint Status:**
-> - 🟢 **PHASES 1–12 (COMPLETED & ARCHIVED):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, Headless VoWi Reader, Autonomous `tu-calendar`, Autonomous `tu-slide-vault`, Launching Reliability & Bundling Invariants, Single-File Inlining, and Store Registry Hardening (Milestones 0–49).
-> - 🟡 **PHASE 13 (ACTIVE SPRINT):** Unified Spotlight Search (FTS5 Slides & Deadlines) & `tu-mensa` Community Plugin (Milestones 50–52).
+> - 🟢 **PHASES 1–13 (COMPLETED & ARCHIVED):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, Headless VoWi Reader, Autonomous `tu-calendar`, Autonomous `tu-slide-vault`, Autonomous `tu-mensa`, Launching Reliability & Bundling Invariants, Single-File Inlining, Store Registry Hardening, and Unified Academic Spotlight (Milestones 0–52).
+> - 🟡 **PHASE 14 (ACTIVE SPRINT):** Campus Study Spot & Room Radar (`tu-room-radar`), Workstation Status Bar & ICS Calendar Export (Milestones 53–55).
 
 ---
 
 # ==============================================================================
-# 🟡 PART XIII: PHASE 13 — UNIFIED SPOTLIGHT SEARCH & TU MENSA COMMUNITY PLUGIN
+# 🟡 PART XIV: PHASE 14 — CAMPUS ROOM RADAR, WORKSTATION STATUS BAR & ICS SYNC
 # ==============================================================================
 
-> **Phase 13 Summary & Objective:**  
-> 1. Transform the Global Command Palette (`Cmd+K`) into an instantaneous academic spotlight by surfacing full-text search across cached PDF lecture slides (`offline_vault.rs` with SQLite FTS5) and upcoming course deadlines (`deadline_aggregator.rs`).
-> 2. Engineer and scaffold the 3rd autonomous community plugin: `tu-mensa` (TU Wien Campus Mensa Daily Menu, Price Radar & Dietary Filter), pre-bundled with `vite-plugin-singlefile` and published to `tu-cockpit-community/tu-mensa`.
-> 3. Register `tuwien.community.mensa` in `DEFAULT_STORE_REGISTRY` and add instant Command Palette navigation shortcuts.
+> **Phase 14 Summary & Objective:**  
+> 1. Implement an unobtrusive, native `WorkstationStatusBar` (24px bottom rail) displaying real-time university network reachability, pending academic deadline count, and a 1-click Apple/Google Calendar export (`export_local_ics_feed`).
+> 2. Engineer and scaffold the 4th autonomous community plugin: `tu-room-radar` (TU Wien Free Lecture Hall Finder & Quiet Study Spot Radar), pre-bundled with `vite-plugin-singlefile` and published to `tu-cockpit-community/tu-room-radar`.
+> 3. Register `tuwien.community.room-radar` in `DEFAULT_STORE_REGISTRY` and connect Global Command Palette room searches directly to the interactive room navigator.
 
 ---
 
-## 60. Phase 13 AI Worker Agent Prompts & Step-by-Step Implementation Milestones
+## 61. Phase 14 AI Worker Agent Prompts & Step-by-Step Implementation Milestones
 
 ---
 
-### Milestone 50 Prompt: Command Palette (`Cmd+K`) Unified Search Deepening (FTS5 Slides & Deadlines) `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 53 Prompt: Academic Workstation Status Bar & 1-Click ICS Export `[STATUS: READY FOR EXECUTION 🟡]`
 
 ```markdown
-You are a React and Tauri frontend engineer working on TU Cockpit's Global Command Palette.
+You are a React and Tauri desktop integration engineer working on TU Cockpit.
 
 ### Objective:
-Integrate Rust backend search engines into `FuzzySearchService.ts` and `CommandPalette.tsx`:
-1. Search cached lecture slide pages using SQLite FTS5 (`search_offline_slides`).
-2. Search and display upcoming academic deadlines (`get_academic_deadlines`).
+Build an executive `WorkstationStatusBar` anchored at the bottom of the desktop client that displays real-time connectivity status, pending deadlines countdown, and provides 1-click ICS export.
 
 ### Context & Files:
-- [src-tauri/src/offline_vault.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/offline_vault.rs)
 - [src-tauri/src/deadline_aggregator.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/deadline_aggregator.rs)
-- [src/services/palette/FuzzySearchService.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/palette/FuzzySearchService.ts)
-- [src/components/palette/CommandPalette.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/palette/CommandPalette.tsx)
+- [src/App.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/App.tsx)
+- Create: [src/components/layout/WorkstationStatusBar.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/layout/WorkstationStatusBar.tsx)
 
 ### Tasks:
-1. In `src/services/palette/FuzzySearchService.ts`:
-   - Add new `PaletteCategory` types: `"slides"` and `"deadlines"`.
-   - Add asynchronous search method `searchAsync(query: string, ctx: PaletteContext): Promise<PaletteItem[]>`.
-   - Query `invoke<SlideSearchResult[]>("search_offline_slides", { query })` and map matches into `"slides"` items with file name, page number badge, and highlighted snippet.
-   - Query `invoke<AcademicDeadline[]>("get_academic_deadlines")` (or cached deadlines) and match against course code, title, or description with `"deadlines"` category and urgency badge.
-   - Selecting a slide item switches active view to `tuwien.community.slide-vault`.
-   - Selecting a deadline switches active view to `tuwien.community.calendar`.
-2. In `src/components/palette/CommandPalette.tsx`:
-   - Debounce and trigger asynchronous search when user types in the input.
-   - Render distinct category icons for slides (`BookOpen` / `FileText`) and deadlines (`Calendar` / `Clock`).
-   - Display snippets and urgency badges seamlessly.
+1. Create `src/components/layout/WorkstationStatusBar.tsx`:
+   - Height: 24px (`h-6`), border-t border-[var(--tu-border)], bg-[var(--tu-bg-surface)], text-[11px].
+   - Left section:
+     - Online / Connected indicator dot (green pulse for active TU connection).
+     - Active view badge (e.g. `Portal: TUWEL`, `Plugin: TU Mensa`, or `Marketplace`).
+   - Center section:
+     - Pending deadlines counter (e.g. `invoke("get_student_deadlines")` -> "📅 X deadlines pending"), clicking triggers navigation to `tuwien.community.calendar`.
+   - Right section:
+     - "Export Calendar (ICS)" button invoking `export_local_ics_feed` with a brief success confirmation tooltip.
+     - Academic term info (`WS 2026/27`).
+2. In `src/App.tsx`:
+   - Mount `WorkstationStatusBar` at the bottom of the main viewport across all layout orientations (`left`, `right`, `top`, `bottom`).
+3. Run verification runbook (`npm run build`, `cargo check`).
 
 ### Verification:
 1. `npm run build` passes with zero errors.
@@ -71,60 +71,61 @@ Integrate Rust backend search engines into `FuzzySearchService.ts` and `CommandP
 
 ### Git Hygiene:
 Commit message in `Tuwel-Tools`:
-`feat(palette): integrate FTS5 slide search and live academic deadlines in command palette`
+`feat(layout): implement workstation status bar with live deadline count and ICS export`
 ```
 
 ---
 
-### Milestone 51 Prompt: Autonomous `tu-mensa` Community Plugin Scaffolding & Single-File Bundler `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 54 Prompt: Autonomous `tu-room-radar` Community Plugin Scaffolding & Single-File Bundler `[STATUS: READY FOR EXECUTION 🟡]`
 
 ```markdown
-You are a React 19 and frontend systems developer building the autonomous `tu-mensa` plugin.
+You are a React 19 and frontend systems developer building the autonomous `tu-room-radar` plugin.
 
 ### Objective:
-Scaffold and build `community-plugins/tu-mensa` as an interactive, zero-dependency TU Wien Mensa Menu & Cafeteria Radar, configured with `vite-plugin-singlefile` and ready for sandboxed iframe execution.
+Scaffold and build `community-plugins/tu-room-radar` as an interactive, zero-dependency TU Wien Campus Room & Study Spot Radar, configured with `vite-plugin-singlefile` and ready for sandboxed iframe execution.
 
 ### Context & Subfolder:
-- `community-plugins/tu-mensa/`
-- Target Remote: `https://github.com/tu-cockpit-community/tu-mensa`
+- `community-plugins/tu-room-radar/`
+- Target Remote: `https://github.com/tu-cockpit-community/tu-room-radar`
 
 ### Tasks:
-1. Initialize `community-plugins/tu-mensa/`:
-   - `package.json` with React 19, TypeScript, Lucide, Tailwind/CSS variables, and `"vite-plugin-singlefile": "^2.1.0"`.
+1. Initialize `community-plugins/tu-room-radar/`:
+   - `package.json` with React 19, TypeScript, Lucide, and `"vite-plugin-singlefile": "^2.1.0"`.
    - `vite.config.ts` using `viteSingleFile()`.
-   - `manifest.json` (`tuwien.community.mensa`, version 1.0.0, category "Campus Life").
+   - `manifest.json` (`tuwien.community.room-radar`, version 1.0.0, category "Campus Life").
    - `.github/workflows/release-plugin.yml` for automated release packaging on `v*` tags.
 2. Build interactive UI in `src/App.tsx`:
-   - Mensa Location Selector:
-     - "TU Mensa Freihaus" (Wiedner Hauptstraße 8-10)
-     - "TU Mensa Markt" (Campus Gußhausstraße)
-     - "Cafeteria Gußhaus"
-   - Date Tabs: "Today", "Tomorrow", "Weekly View".
-   - Dishes & Menus:
-     - Menü Classic (Traditional Austrian dish + soup/salad, €6.90 student)
-     - Menü Veggie / Vegan (Plant-based hearty dish, €6.20 student)
-     - Daily Vital Bowl / Salad Bar
-   - Allergen badges (A: Gluten, C: Egg, G: Milk, L: Celery) and dietary filters (All, Vegetarian, Vegan).
-   - "TU Student Discount Active" indicator.
+   - Building Filters:
+     - "Freihaus" (Wiedner Hauptstr. 8-10, Turm Grün/Gelb/Rot)
+     - "Hauptgebäude" (Karlsplatz 13, Audimax, Boecklsaal, HS 11-18)
+     - "Campus Gußhaus" (Gußhausstraße 25-29, EI 1-7)
+     - "Getreidemarkt" (Plus-Energie-Hochhaus, GM 1-4)
+   - Study Space Types:
+     - Free Lecture Halls ("Frei für Selbststudium bis 14:00")
+     - Quiet Study Zones ("Lernraum Bibliothek", "Silent Study Area")
+     - Group Study Rooms (Project tables, whiteboards)
+   - Room Amenities:
+     - Power outlets (🔌), High-speed eduroam (📶), Capacity (Seats).
+   - Instant Search & Room Code Resolver (e.g. "EI 7", "HS 1", "FH 2").
 3. Build and verify:
    - Run `npm install && npm run build`.
    - Verify `dist/index.html` has all assets inlined and no external file references.
-4. Commit and push to `tu-cockpit-community/tu-mensa`.
+4. Commit and push to `tu-cockpit-community/tu-room-radar`.
 
 ### Git Hygiene:
-Commit in `community-plugins/tu-mensa`:
-`feat(mensa): scaffold autonomous tu-mensa single-file community plugin`
+Commit in `community-plugins/tu-room-radar`:
+`feat(room-radar): scaffold autonomous tu-room-radar single-file community plugin`
 ```
 
 ---
 
-### Milestone 52 Prompt: Host Registry Integration & Command Palette Shortcuts for TU Mensa `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 55 Prompt: Host Registry Integration & Command Palette Room Routing for Room Radar `[STATUS: READY FOR EXECUTION 🟡]`
 
 ```markdown
 You are a TypeScript and desktop integration engineer working on TU Cockpit.
 
 ### Objective:
-Integrate `tuwien.community.mensa` into `DEFAULT_STORE_REGISTRY`, bundle its interactive standalone HTML distribution into `CommunityPluginBundles.ts`, and add direct Command Palette shortcuts.
+Integrate `tuwien.community.room-radar` into `DEFAULT_STORE_REGISTRY`, bundle its interactive standalone HTML distribution into `CommunityPluginBundles.ts`, and link Command Palette room searches directly to the Room Radar.
 
 ### Context & Files:
 - [src/services/marketplace/CommunityPluginBundles.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/marketplace/CommunityPluginBundles.ts)
@@ -133,19 +134,20 @@ Integrate `tuwien.community.mensa` into `DEFAULT_STORE_REGISTRY`, bundle its int
 
 ### Tasks:
 1. In `src/services/marketplace/CommunityPluginBundles.ts`:
-   - Export `COMMUNITY_MENSA_HTML` containing the interactive standalone TU Mensa application.
+   - Export `COMMUNITY_ROOM_RADAR_HTML` containing the interactive standalone TU Room Radar application.
 2. In `src/services/marketplace/GitHubPluginService.ts`:
-   - Register `tuwien.community.mensa` in `DEFAULT_STORE_REGISTRY.plugins` with category `"Campus Life"`, rating `4.9`, and `htmlContent: COMMUNITY_MENSA_HTML`.
+   - Register `tuwien.community.room-radar` in `DEFAULT_STORE_REGISTRY.plugins` with category `"Campus Life"`, rating `4.9`, and `htmlContent: COMMUNITY_ROOM_RADAR_HTML`.
 3. In `src/services/palette/FuzzySearchService.ts`:
-   - Add direct action: "Open Mensa Menus" (`Cmd+K -> Mensa`), opening `tuwien.community.mensa`.
+   - Add direct action: "Find Free Lecture Halls & Study Spots" (`Cmd+K -> Room Radar`).
+   - When user clicks a room search item, route into `tuwien.community.room-radar`.
 4. Run standard verification runbook (`npm run build`, `cargo check`).
 
 ### Verification:
 1. `npm run build` passes.
 2. `cargo check` passes.
-3. In Community Store HUB, `tuwien.community.mensa` appears with 1-click install.
+3. In Community Store HUB, `tuwien.community.room-radar` appears with 1-click install.
 
 ### Git Hygiene:
 Commit message in `Tuwel-Tools`:
-`feat(marketplace): catalog tu-mensa community plugin and add spotlight shortcuts`
+`feat(marketplace): catalog tu-room-radar community plugin and connect room search routing`
 ```
