@@ -23,6 +23,8 @@ import {
   Code2,
 } from "lucide-react";
 
+const CATEGORIES = ["All", "TU Essentials"] as const;
+
 export const PluginMarketplace: React.FC = () => {
   const {
     installedPlugins,
@@ -207,7 +209,7 @@ export const PluginMarketplace: React.FC = () => {
       {/* Filter & Search Bar */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
         <div className="flex gap-1.5 p-1 bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] rounded-[var(--tu-radius)]">
-          {["All", "Academic", "Campus Life", "Productivity"].map((cat) => (
+          {CATEGORIES.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}

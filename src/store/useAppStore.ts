@@ -104,8 +104,8 @@ const INITIAL_INSTALLED_PLUGINS: Record<string, InstalledPlugin> = Object.entrie
 
 const INITIAL_CATEGORIES: PluginCategory[] = [
   {
-    id: "portals",
-    name: "University Portals",
+    id: "essentials",
+    name: "TU Essentials",
     icon: "GraduationCap",
     isDefault: true,
     isCollapsed: false,
@@ -115,14 +115,6 @@ const INITIAL_CATEGORIES: PluginCategory[] = [
       "tuwien.official.vowi",
       "tuwien.official.tumaps",
     ],
-  },
-  {
-    id: "tools",
-    name: "Community Tools",
-    icon: "Puzzle",
-    isDefault: true,
-    isCollapsed: false,
-    pluginIds: [],
   },
 ];
 

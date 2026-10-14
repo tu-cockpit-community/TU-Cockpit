@@ -12,7 +12,7 @@ export interface StoreRegistryPlugin {
     matriculationNumber?: string;
   };
   description: string;
-  category: "Academic" | "Campus Life" | "Productivity";
+  category: "TU Essentials" | "Academic" | "Campus Life" | "Productivity" | string;
   icon?: string;
   homepage?: string;
   githubRepo?: string;
@@ -38,7 +38,7 @@ export interface StoreRegistry {
 // Fallback embedded verified catalogue mirroring official community registry
 export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
   version: "1.0.0",
-  updatedAt: "2026-10-13T20:00:00.000Z",
+  updatedAt: "2026-10-14T00:00:00.000Z",
   plugins: [
     {
       id: "tuwien.official.tuwel",
@@ -50,7 +50,8 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
         url: "https://tuwel.tuwien.ac.at",
       },
       description: "Official TU Wien Moodle learning management system for assignments, courses, and materials.",
-      category: "Academic",
+      category: "TU Essentials",
+      homepage: "https://tuwel.tuwien.ac.at",
       githubRepo: "https://github.com/tu-cockpit-community/tuwel",
       capabilities: {
         network: ["https://tuwel.tuwien.ac.at/*", "https://login.tuwien.ac.at/*"],
@@ -71,7 +72,8 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
         url: "https://tiss.tuwien.ac.at",
       },
       description: "Official TU Wien Information Systems for course registration, grades, certificates, and exam seats.",
-      category: "Academic",
+      category: "TU Essentials",
+      homepage: "https://tiss.tuwien.ac.at",
       githubRepo: "https://github.com/tu-cockpit-community/tiss",
       capabilities: {
         network: ["https://tiss.tuwien.ac.at/*", "https://login.tuwien.ac.at/*"],
@@ -92,7 +94,8 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
         url: "https://vowi.fsinf.at",
       },
       description: "Student-maintained course wiki with lecture notes, exam reviews, professor feedback, and study tips.",
-      category: "Academic",
+      category: "TU Essentials",
+      homepage: "https://vowi.fsinf.at",
       githubRepo: "https://github.com/tu-cockpit-community/vowi",
       capabilities: {
         network: ["https://vowi.fsinf.at/*"],
@@ -113,7 +116,8 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
         url: "https://maps.tuwien.ac.at",
       },
       description: "Interactive campus navigation and floor plans for Karlsplatz, Freihaus, and Gußhaus.",
-      category: "Campus Life",
+      category: "TU Essentials",
+      homepage: "https://maps.tuwien.ac.at",
       githubRepo: "https://github.com/tu-cockpit-community/tumaps",
       capabilities: {
         network: ["https://maps.tuwien.ac.at/*"],
@@ -123,130 +127,6 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
       verified: true,
       rating: 4.7,
       downloads: 7300,
-    },
-    {
-      id: "tuwien.community.smart-tuwel",
-      name: "Smart TUWEL Companion",
-      version: "1.2.0",
-      author: {
-        name: "TU Student Dev Group",
-        github: "tuwien-community",
-        url: "https://github.com/tuwien-community",
-      },
-      description: "Auto-syncs assignment submission deadlines, course announcements, and upcoming quizzes.",
-      category: "Academic",
-      githubRepo: "https://github.com/tuwien-community/smart-tuwel",
-      capabilities: {
-        network: ["https://tuwel.tuwien.ac.at/*"],
-        storage: { quotaBytes: 2097152 },
-        notifications: true,
-      },
-      verified: true,
-      rating: 4.9,
-      downloads: 4820,
-    },
-    {
-      id: "tuwien.community.tiss-schedule",
-      name: "TISS Exam & Timetable Sync",
-      version: "1.1.4",
-      author: {
-        name: "FSInf Student Union",
-        github: "fsinf",
-        url: "https://fsinf.at",
-      },
-      description: "Live exam registration alert, room notifications, and semester syllabus calendar.",
-      category: "Academic",
-      githubRepo: "https://github.com/fsinf/tiss-schedule",
-      capabilities: {
-        network: ["https://tiss.tuwien.ac.at/api/*"],
-        storage: { quotaBytes: 1048576 },
-        notifications: true,
-      },
-      verified: true,
-      rating: 4.8,
-      downloads: 3210,
-    },
-    {
-      id: "tuwien.community.vowi-companion",
-      name: "VoWi Wiki Fast Search",
-      version: "2.0.1",
-      author: {
-        name: "VoWi Maintainers",
-        github: "vowi-team",
-        url: "https://vowi.fsinf.at",
-      },
-      description: "Search lecture notes, previous exam ratings, and professor feedback instantly from Cockpit.",
-      category: "Academic",
-      githubRepo: "https://github.com/vowi-team/vowi-companion",
-      capabilities: {
-        network: ["https://vowi.fsinf.at/*"],
-        storage: { quotaBytes: 5242880 },
-        notifications: false,
-      },
-      verified: true,
-      rating: 4.9,
-      downloads: 5190,
-    },
-    {
-      id: "tuwien.campus.mensa-today",
-      name: "TU Mensa Daily Specials",
-      version: "1.3.0",
-      author: {
-        name: "Wien Mensen Open Data",
-        github: "vienna-mensen",
-      },
-      description: "Real-time lunch specials, allergy info, and student discounts for Freihaus & Resselgasse.",
-      category: "Campus Life",
-      githubRepo: "https://github.com/vienna-mensen/tu-cockpit-mensa",
-      capabilities: {
-        network: ["https://www.mensen.at/*"],
-        storage: { quotaBytes: 524288 },
-        notifications: false,
-      },
-      verified: true,
-      rating: 4.7,
-      downloads: 6420,
-    },
-    {
-      id: "tuwien.campus.room-locator",
-      name: "TU Room Locator & Maps",
-      version: "1.0.8",
-      author: {
-        name: "TU Geo Devs",
-        github: "tu-geo",
-      },
-      description: "Quickly locate Hörsäle, institutes, and study zones across Freihaus, Karlsplatz, and Gußhaus.",
-      category: "Productivity",
-      githubRepo: "https://github.com/tu-geo/tu-rooms",
-      capabilities: {
-        network: ["https://maps.tuwien.ac.at/*"],
-        storage: { quotaBytes: 1048576 },
-        notifications: false,
-      },
-      verified: true,
-      rating: 4.6,
-      downloads: 2890,
-    },
-    {
-      id: "tuwien.community.freihaus-timer",
-      name: "Freihaus Focus Timer",
-      version: "1.0.0",
-      author: {
-        name: "Stefan Weber",
-        github: "stefanweber",
-        matriculationNumber: "11823456",
-      },
-      description: "Custom study pomodoro timer designed for Freihaus library work blocks with break notifications.",
-      category: "Productivity",
-      githubRepo: "https://github.com/tu-cockpit-community/freihaus-focus-timer",
-      capabilities: {
-        network: [],
-        storage: { quotaBytes: 524288 },
-        notifications: true,
-      },
-      verified: true,
-      rating: 5.0,
-      downloads: 1240,
     },
   ],
 };
