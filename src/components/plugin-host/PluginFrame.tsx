@@ -156,7 +156,7 @@ export const PluginFrame: React.FC<PluginFrameProps> = ({
       <iframe
         ref={iframeRef}
         srcDoc={themedHtml}
-        sandbox="allow-scripts"
+        sandbox="allow-scripts allow-forms allow-same-origin"
         className="w-full h-full border-none bg-transparent"
         title={`Plugin: ${pluginId}`}
       />

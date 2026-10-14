@@ -1,5 +1,9 @@
 import { invoke } from "@tauri-apps/api/core";
 import { PluginManifest } from "@/store/useAppStore";
+import {
+  COMMUNITY_CALENDAR_HTML,
+  COMMUNITY_SLIDE_VAULT_HTML,
+} from "./CommunityPluginBundles";
 
 export interface StoreRegistryPlugin {
   id: string;
@@ -27,6 +31,7 @@ export interface StoreRegistryPlugin {
   verified: boolean;
   rating: number;
   downloads: number;
+  htmlContent?: string;
 }
 
 export interface StoreRegistry {
@@ -149,6 +154,7 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
       verified: true,
       rating: 4.9,
       downloads: 4200,
+      htmlContent: COMMUNITY_CALENDAR_HTML,
     },
     {
       id: "tuwien.community.slide-vault",
@@ -171,6 +177,7 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
       verified: true,
       rating: 4.8,
       downloads: 5100,
+      htmlContent: COMMUNITY_SLIDE_VAULT_HTML,
     },
   ],
 };
