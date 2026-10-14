@@ -16,7 +16,8 @@ import { LoginModal } from "@/components/auth/LoginModal";
 import { CommandPalette } from "@/components/palette/CommandPalette";
 import { UpdaterToast } from "@/components/updater/UpdaterToast";
 import { SyncSettings } from "@/components/settings/SyncSettings";
-import { X } from "lucide-react";
+import { VoWiReader } from "@/components/vowi/VoWiReader";
+import { X, BookOpen } from "lucide-react";
 
 export const App: React.FC = () => {
   const {
@@ -34,6 +35,7 @@ export const App: React.FC = () => {
   const { openOverlay, closeOverlay } = useOverlayStore();
   const { applyToRoot } = useThemeStore();
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false);
+  const [vowiMode, setVowiMode] = useState<"reader" | "live">("reader");
 
   // Ensure native portals are hidden when navigating away from plugin view
   useEffect(() => {
@@ -98,6 +100,14 @@ export const App: React.FC = () => {
         activePlugin.manifest.homepage || KNOWN_OFFICIAL_URLS[activePlugin.manifest.id];
 
       if (isOfficialPortal && portalUrl) {
+        if (activePlugin.manifest.id === "tuwien.official.vowi" && vowiMode === "reader") {
+          return (
+            <main className="flex-1 w-full h-full relative overflow-hidden p-0 m-0">
+              <VoWiReader onOpenLivePortal={() => setVowiMode("live")} />
+            </main>
+          );
+        }
+
         return (
           <main className="flex-1 w-full h-full relative overflow-hidden p-0 m-0">
             <NativePortalContainer
@@ -105,6 +115,18 @@ export const App: React.FC = () => {
               portalId={activePlugin.manifest.id}
               url={portalUrl}
               title={activePlugin.manifest.name}
+              extraActions={
+                activePlugin.manifest.id === "tuwien.official.vowi" ? (
+                  <button
+                    onClick={() => setVowiMode("reader")}
+                    className="flex items-center gap-1 px-2 py-1 rounded-[var(--tu-radius-sm)] bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/25 transition-colors cursor-pointer text-[11px] font-medium"
+                    title="Switch to Headless MediaWiki Reader"
+                  >
+                    <BookOpen className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Reader Mode</span>
+                  </button>
+                ) : undefined
+              }
             />
           </main>
         );

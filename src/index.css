@@ -19,3 +19,110 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--tu-bg-hover);
 }
+
+/* MediaWiki Article Content Styling for VoWi Reader */
+.vowi-article-content {
+  color: var(--tu-text-primary);
+  line-height: 1.65;
+}
+
+.vowi-article-content h1,
+.vowi-article-content h2,
+.vowi-article-content h3,
+.vowi-article-content h4 {
+  color: var(--tu-text-primary);
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.vowi-article-content h2 {
+  font-size: 1.25rem;
+  border-bottom: 1px solid var(--tu-border);
+  padding-bottom: 0.35rem;
+}
+
+.vowi-article-content h3 {
+  font-size: 1.1rem;
+}
+
+.vowi-article-content p {
+  margin-bottom: 0.85rem;
+}
+
+.vowi-article-content a {
+  color: var(--tu-text-accent);
+  text-decoration: none;
+}
+
+.vowi-article-content a:hover {
+  text-decoration: underline;
+}
+
+.vowi-article-content ul,
+.vowi-article-content ol {
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.vowi-article-content li {
+  margin-bottom: 0.25rem;
+}
+
+.vowi-article-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  border-radius: var(--tu-radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--tu-border);
+  background-color: var(--tu-bg-surface);
+}
+
+.vowi-article-content th,
+.vowi-article-content td {
+  padding: 0.6rem 0.85rem;
+  border: 1px solid var(--tu-border);
+  text-align: left;
+}
+
+.vowi-article-content th {
+  background-color: var(--tu-bg-card);
+  font-weight: 600;
+  color: var(--tu-text-primary);
+}
+
+.vowi-article-content tr:nth-child(even) {
+  background-color: var(--tu-bg-base);
+}
+
+.vowi-article-content blockquote {
+  border-left: 3px solid var(--tu-accent);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: var(--tu-text-secondary);
+  font-style: italic;
+}
+
+.vowi-article-content pre,
+.vowi-article-content code {
+  background-color: var(--tu-bg-card);
+  color: var(--tu-text-accent);
+  border-radius: var(--tu-radius-sm);
+  padding: 0.15rem 0.35rem;
+  font-family: var(--tu-font-mono);
+}
+
+.vowi-article-content pre {
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+}
+
+.vowi-article-content .toc {
+  background-color: var(--tu-bg-surface);
+  border: 1px solid var(--tu-border);
+  border-radius: var(--tu-radius);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  max-width: 400px;
+}

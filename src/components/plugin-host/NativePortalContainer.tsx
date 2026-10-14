@@ -21,12 +21,14 @@ interface NativePortalContainerProps {
   portalId: string;
   url: string;
   title?: string;
+  extraActions?: React.ReactNode;
 }
 
 export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
   portalId,
   url,
   title,
+  extraActions,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isNative, setIsNative] = useState<boolean>(true);
@@ -336,6 +338,8 @@ export const NativePortalContainer: React.FC<NativePortalContainerProps> = ({
               <Plus className="w-3 h-3" />
             </button>
           </div>
+
+          {extraActions}
 
           <button
             onClick={handleAutofill}
