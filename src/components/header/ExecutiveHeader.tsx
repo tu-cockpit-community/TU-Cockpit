@@ -2,9 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { usePaletteStore } from "@/store/usePaletteStore";
-import { useSplitStore } from "@/store/useSplitStore";
-import { useDeadlineStore } from "@/store/useDeadlineStore";
-import { useVaultStore } from "@/store/useVaultStore";
 import {
   GraduationCap,
   Clock,
@@ -12,12 +9,7 @@ import {
   ChevronRight,
   Github,
   User,
-  PanelLeftClose,
-  PanelLeftOpen,
   Search,
-  Columns2,
-  Calendar,
-  FolderArchive,
 } from "lucide-react";
 
 interface ExecutiveHeaderProps {
@@ -32,22 +24,10 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
     activePluginId,
     installedPlugins,
     setActiveView,
-    navOrientation,
-    isSidebarCollapsed,
-    toggleSidebar,
   } = useAppStore();
   const { currentUser, setLoginModalOpen } = useAuthStore();
   const { openPalette } = usePaletteStore();
-  const { isSplitActive, toggleSplit } = useSplitStore();
-  const { setAgendaOpen, getUpcomingCount24h, fetchDeadlines } = useDeadlineStore();
-  const { setVaultModalOpen } = useVaultStore();
   const [currentTime, setCurrentTime] = useState<string>("");
-
-  useEffect(() => {
-    fetchDeadlines();
-  }, [fetchDeadlines]);
-
-  const upcomingCount = getUpcomingCount24h();
 
   useEffect(() => {
     const update = () => {
@@ -67,20 +47,6 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
     <header className="h-12 border-b border-[var(--tu-border)] bg-[var(--tu-bg-surface)] px-4 flex items-center justify-between shrink-0 select-none z-30 shadow-sm text-[var(--tu-text-primary)]">
       {/* Left: Branding & Dynamic Breadcrumb */}
       <div className="flex items-center gap-2.5">
-        {(navOrientation === "left" || navOrientation === "right") && (
-          <button
-            onClick={toggleSidebar}
-            className="p-1.5 rounded-[var(--tu-radius-sm)] text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] transition-colors cursor-pointer"
-            title={isSidebarCollapsed ? "Expand Sidebar (Cmd+B)" : "Collapse Sidebar (Cmd+B)"}
-          >
-            {isSidebarCollapsed ? (
-              <PanelLeftOpen className="w-4 h-4" />
-            ) : (
-              <PanelLeftClose className="w-4 h-4" />
-            )}
-          </button>
-        )}
-
         <button
           onClick={() => setActiveView("marketplace")}
           className="flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer group"
@@ -126,47 +92,8 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
         </div>
       </div>
 
-      {/* Right: Split Screen, Student Profile Pill, Live Clock & Settings Gear */}
+      {/* Right: Student Profile Pill, Live Clock & Settings Gear */}
       <div className="flex items-center gap-2.5 text-xs">
-        {/* Deadlines Agenda Button & <24h Badge */}
-        <button
-          onClick={() => setAgendaOpen(true)}
-          className="relative flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-card)] border border-[var(--tu-border)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] text-[11px] font-medium transition-all cursor-pointer text-[var(--tu-text-secondary)] shadow-xs"
-          title="Open Academic Deadlines & Agenda"
-        >
-          <Calendar className="w-3.5 h-3.5 text-[var(--tu-accent)]" />
-          <span className="hidden lg:inline">Deadlines</span>
-          {upcomingCount > 0 && (
-            <span className="flex items-center justify-center px-1.5 py-0.2 rounded-full bg-amber-500 text-black font-extrabold text-[10px] leading-tight animate-pulse shadow-xs">
-              {upcomingCount}
-            </span>
-          )}
-        </button>
-
-        {/* Offline Lecture Vault Button */}
-        <button
-          onClick={() => setVaultModalOpen(true)}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-card)] border border-[var(--tu-border)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] text-[11px] font-medium transition-all cursor-pointer text-[var(--tu-text-secondary)] shadow-xs"
-          title="Open Offline Lecture Material Vault & Slide Search"
-        >
-          <FolderArchive className="w-3.5 h-3.5 text-[var(--tu-accent)]" />
-          <span className="hidden xl:inline">Slide Vault</span>
-        </button>
-
-        {/* Split Screen Workstation Toggle */}
-        <button
-          onClick={toggleSplit}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[var(--tu-radius-sm)] border text-[11px] font-medium transition-all cursor-pointer ${
-            isSplitActive
-              ? "bg-[var(--tu-accent)] text-[var(--tu-accent-contrast)] border-[var(--tu-accent)] shadow-sm"
-              : "bg-[var(--tu-bg-card)] text-[var(--tu-text-secondary)] border-[var(--tu-border)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)]"
-          }`}
-          title="Toggle Multi-Webview Split Workstation"
-        >
-          <Columns2 className="w-3.5 h-3.5" />
-          <span className="hidden md:inline">{isSplitActive ? "Exit Split" : "Split View"}</span>
-        </button>
-
         {/* Student Profile Pill */}
         <button
           onClick={() => setLoginModalOpen(true)}
