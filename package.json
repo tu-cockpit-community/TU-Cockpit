@@ -12,7 +12,15 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "build:all": "tsc && vite build && tauri build",
+    "build:mac": "tsc && vite build && tauri build --bundles dmg,app",
+    "build:mac:universal": "tsc && vite build && tauri build --target universal-apple-darwin",
+    "build:win": "tsc && vite build && tauri build --bundles nsis,msi",
+    "build:win:exe": "tsc && vite build && tauri build --bundles nsis",
+    "build:linux": "tsc && vite build && tauri build --bundles deb,appimage",
+    "build:linux:deb": "tsc && vite build && tauri build --bundles deb",
+    "build:linux:appimage": "tsc && vite build && tauri build --bundles appimage"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.60.0",
