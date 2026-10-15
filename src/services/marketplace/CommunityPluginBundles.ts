@@ -1,7 +1,7 @@
 /**
  * TU Cockpit Community Plugin Bundles
  * Self-contained, single-file interactive standalone HTML distributions
- * compiled directly from community-plugins source repositories.
+ * compiled directly from dev-plugins source repositories.
  */
 
 export const COMMUNITY_CALENDAR_HTML = `<!DOCTYPE html>

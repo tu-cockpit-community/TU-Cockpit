@@ -14,7 +14,7 @@ To prevent context window bloat, cognitive drift, and tool edit failures, all AI
 ├── AGENTS.md                   <-- READ FIRST: Swarm rules, verification commands, agent roles
 ├── PROJECT_MAP.md              <-- FAST LOOKUP: "Where is X?" - File & symbol index for AI agents
 ├── ARCHITECTURE.md             <-- LIVING SPECIFICATIONS: Ground truth for IPC, CSS tokens, Webviews, Security
-├── PLAN.md                     <-- ACTIVE SPRINT ONLY: Phase 16 tasks and milestones (< 600 lines)
+├── PLAN.md                     <-- ACTIVE SPRINT ONLY: Phase 17 tasks and milestones (< 600 lines)
 ├── README.md                   <-- USER DOCUMENTATION: End-user feature showcase and setup guide
 └── docs/
     └── archive/
@@ -27,7 +27,8 @@ To prevent context window bloat, cognitive drift, and tool edit failures, all AI
         ├── PHASE_12.md         <-- COLD STORAGE: Completed milestones 47–49 (Phase 12)
         ├── PHASE_13.md         <-- COLD STORAGE: Completed milestones 50–52 (Phase 13)
         ├── PHASE_14.md         <-- COLD STORAGE: Completed milestones 53–55 (Phase 14)
-        └── PHASE_15.md         <-- COLD STORAGE: Completed milestones 56–58 (Phase 15)
+        ├── PHASE_15.md         <-- COLD STORAGE: Completed milestones 56–58 (Phase 15)
+        └── PHASE_16.md         <-- COLD STORAGE: Completed milestones 59–64 (Phase 16)
 ```
 
 ---

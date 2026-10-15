@@ -440,9 +440,9 @@ pub async fn delete_installed_plugin(app: AppHandle, plugin_id: String) -> Resul
             return Err("Security Violation: Target path is outside downloaded plugins folder.".to_string());
         }
 
-        // Protected workspace invariant: Never touch community-plugins/ or project source
+        // Protected workspace invariant: Never touch dev-plugins/ or project source
         let target_str = target_canon.to_string_lossy();
-        if target_str.contains("community-plugins") {
+        if target_str.contains("dev-plugins") || target_str.contains("community-plugins") {
             return Err("Security Violation: Cannot delete local community dev workspaces.".to_string());
         }
 

@@ -215,7 +215,7 @@ Every plugin must declare a standard `manifest.json`:
    - **Registry Fallback Preservation Invariant:**
      When `CommunityOrgService.ts` discovers repositories via the GitHub Organization API, it must preserve any bundled `htmlContent` already registered in `DEFAULT_STORE_REGISTRY`. It must never overwrite working HTML with `undefined`, which would force the application to download raw uncompiled source trees.
    - **Local Development Loader Invariant:**
-     To allow seamless local development within the workspace, TU Cockpit can load compiled single-file bundles directly from `community-plugins/<plugin-id>/dist/index.html` via local disk reading, bypassing remote GitHub downloads.
+     To allow seamless local development within the workspace, TU Cockpit can load compiled single-file bundles directly from `dev-plugins/<plugin-id>/dist/index.html` via local disk reading, bypassing remote GitHub downloads.
    - **Production Release Asset Specification (`plugin.zip`):**
      Plugin repositories run a GitHub Actions release workflow on tags (`v*`). The workflow runs `npm run build` with `vite-plugin-singlefile` and packages `dist/index.html` + `manifest.json` into a compressed release artifact `plugin.zip`. The Rust downloader (`plugin_downloader.rs`) checks for release asset `plugin.zip` to ensure only compiled artifacts are installed.
    - **Live GitHub Telemetry Invariant:**
@@ -232,12 +232,12 @@ Every plugin must declare a standard `manifest.json`:
 
 ### 5.4 Community Plugin Development Protocol & Isolated Subfolder Pattern
 To enable AI agent swarms and human contributors to develop separate community plugins without repository bloat:
-* **The Subfolder Pattern (`community-plugins/<plugin-repo>`):**
-  - Community repositories are cloned or scaffolded into `/community-plugins/` within the workspace root.
-  - The host repo (`Tuwel-Tools`) strictly ignores `/community-plugins/` in `.gitignore`.
-  - Agents operate with full filesystem and terminal privileges within the subfolder, running `git -C community-plugins/<repo>` to commit and push to their respective `tu-cockpit-community` GitHub remotes.
+* **The Subfolder Pattern (`dev-plugins/<plugin-repo>`):**
+  - Community repositories are cloned or scaffolded into `/dev-plugins/` within the workspace root.
+  - The host repo (`Tuwel-Tools`) strictly ignores `/dev-plugins/` in `.gitignore`.
+  - Agents operate with full filesystem and terminal privileges within the subfolder, running `git -C dev-plugins/<repo>` to commit and push to their respective `tu-cockpit-community` GitHub remotes.
 * **Strict Externalized Planning Invariant:**
-  - Feature roadmaps, milestone prompts, and domain tasks for a community plugin (e.g. `tu-calendar`, `tu-slide-vault`) reside exclusively within the plugin's own `PLAN.md` (`community-plugins/<plugin-repo>/PLAN.md`).
+  - Feature roadmaps, milestone prompts, and domain tasks for a community plugin (e.g. `tu-calendar`, `tu-slide-vault`) reside exclusively within the plugin's own `PLAN.md` (`dev-plugins/<plugin-repo>/PLAN.md`).
   - The host `PLAN.md` tracks only host-level integration, orchestration, and marketplace discovery.
 * **Auto-Discovery by `CommunityOrgService`:**
   - When a plugin repo is pushed to `tu-cockpit-community` with a valid root `manifest.json`, TU Cockpit's Community Store HUB automatically discovers it via the GitHub Organization API, merges with pre-bundled registry assets, and lists it for instant student installation.
@@ -266,7 +266,7 @@ To ensure the application delivers authentic utility rather than hollow demonstr
 ### 5.7 Plugin Layout Formatting & Resilient In-Frame Styling
 * **Self-Contained Layout Baseline:**
   - Sandboxed `srcDoc` iframes in `PluginFrame.tsx` execute without host CSS stylesheet inheritances.
-  - Plugins (`community-plugins/*/src/App.tsx` and compiled bundles) MUST declare self-contained layout baselines:
+  - Plugins (`dev-plugins/*/src/App.tsx` and compiled bundles) MUST declare self-contained layout baselines:
     - CSS Box-Sizing: `*, *::before, *::after { box-sizing: border-box; }`
     - Full-height flex column layout: `html, body, #root { height: 100%; margin: 0; padding: 0; }`
     - Host CSS custom property bindings (`--tu-bg-canvas`, `--tu-bg-surface`, `--tu-text-primary`, `--tu-border`, `--tu-accent`, etc.).
@@ -275,7 +275,7 @@ To ensure the application delivers authentic utility rather than hollow demonstr
 ### 5.8 DevStudio: Local Plugin Staging & Protected Workspace Invariant
 * **Dedicated Local Staging Environment:**
   - Integrated into the Marketplace HUB as "DevStudio" (replacing static developer guides).
-  - Displays locally installed community plugin workspaces (`community-plugins/*` or configured local directories) with `sourceType: "local"`.
+  - Displays locally installed community plugin workspaces (`dev-plugins/*` or configured local directories) with `sourceType: "local"`.
   - Empowers student developers to inspect manifests, verify permissions, preview single-file builds, and test plugins in the live sandboxed host before publishing releases to GitHub.
 * **Protected Local Workspace Invariant:**
   - Local dev plugins are repositories with working code on the user's filesystem.

@@ -34,7 +34,7 @@ interface LocalWorkspace {
 
 const LOCAL_WORKSPACES: LocalWorkspace[] = [
   {
-    folder: "community-plugins/tu-calendar",
+    folder: "dev-plugins/tu-calendar",
     category: "Academic",
     manifest: {
       id: "tuwien.community.calendar",
@@ -53,7 +53,7 @@ const LOCAL_WORKSPACES: LocalWorkspace[] = [
     htmlContent: COMMUNITY_CALENDAR_HTML,
   },
   {
-    folder: "community-plugins/tu-slide-vault",
+    folder: "dev-plugins/tu-slide-vault",
     category: "Academic",
     manifest: {
       id: "tuwien.community.slide-vault",
@@ -72,7 +72,7 @@ const LOCAL_WORKSPACES: LocalWorkspace[] = [
     htmlContent: COMMUNITY_SLIDE_VAULT_HTML,
   },
   {
-    folder: "community-plugins/tu-mensa",
+    folder: "dev-plugins/tu-mensa",
     category: "Campus Life",
     manifest: {
       id: "tuwien.community.mensa",
@@ -91,7 +91,7 @@ const LOCAL_WORKSPACES: LocalWorkspace[] = [
     htmlContent: COMMUNITY_MENSA_HTML,
   },
   {
-    folder: "community-plugins/tu-room-radar",
+    folder: "dev-plugins/tu-room-radar",
     category: "Campus Life",
     manifest: {
       id: "tuwien.community.room-radar",
@@ -264,7 +264,7 @@ export const DevStudioTab: React.FC = () => {
             <div className="text-xs font-bold text-amber-400 font-mono">
               {LOCAL_WORKSPACES.length} Workspaces
             </div>
-            <div className="text-[10px] text-[var(--tu-text-muted)]">community-plugins/*</div>
+            <div className="text-[10px] text-[var(--tu-text-muted)]">dev-plugins/*</div>
           </div>
         </div>
       </div>
@@ -313,7 +313,7 @@ export const DevStudioTab: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between text-xs text-[var(--tu-text-muted)]">
             <span>
-              Detected repositories inside <code className="font-mono text-amber-300">community-plugins/</code>
+              Detected repositories inside <code className="font-mono text-amber-300">dev-plugins/</code>
             </span>
             <span className="flex items-center gap-1.5 text-emerald-400">
               <ShieldCheck className="w-3.5 h-3.5" />

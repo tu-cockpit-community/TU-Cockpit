@@ -67,7 +67,7 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
               <strong className="block text-amber-200 font-semibold mb-1">
                 Protected Dev Workspace Invariant:
               </strong>
-              This plugin is staged from your local repository (<code>community-plugins/</code>).
+              This plugin is staged from your local repository (<code>dev-plugins/</code>).
               Unlinking will remove it from the TU Cockpit active view, but all your source code,
               git history, and disk files will remain completely intact.
             </div>
