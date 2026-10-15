@@ -16,6 +16,8 @@ pub struct SlideFileRecord {
     pub modified_timestamp: u64,
     #[serde(default)]
     pub subfolder: Option<String>,
+    #[serde(default)]
+    pub page_count: Option<u32>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -122,6 +124,13 @@ pub fn sanitize_subpath(input: &str) -> (Option<String>, String) {
     (Some(dir_parts.join("/")), file_part)
 }
 
+fn get_pdf_page_count(path: &std::path::Path) -> Option<u32> {
+    lopdf::Document::load(path)
+        .ok()
+        .map(|doc| doc.get_pages().len() as u32)
+        .filter(|&c| c > 0)
+}
+
 fn collect_pdf_files_recursive(
     current_dir: &std::path::Path,
     course_name: &str,
@@ -181,6 +190,7 @@ fn collect_pdf_files_recursive(
                         size_bytes,
                         modified_timestamp,
                         subfolder,
+                        page_count: get_pdf_page_count(&path),
                     });
                 }
             }
@@ -330,6 +340,7 @@ pub async fn list_slide_vault_files(app: AppHandle) -> Result<Vec<SlideFileRecor
                     size_bytes,
                     modified_timestamp,
                     subfolder: None,
+                    page_count: get_pdf_page_count(&path),
                 });
             }
         }
@@ -438,6 +449,7 @@ mod tests {
             size_bytes: 1024,
             modified_timestamp: 1729000000,
             subfolder: Some("Kapitel 1/Teil A".to_string()),
+            page_count: Some(25),
         };
 
         let json = serde_json::to_string(&rec).unwrap();
