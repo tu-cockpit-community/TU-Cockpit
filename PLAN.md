@@ -19,136 +19,154 @@
 > - Milestones 56–58 (Phase 15): See [docs/archive/PHASE_15.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_15.md)  
 > - Milestones 59–64 (Phase 16): See [docs/archive/PHASE_16.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_16.md)  
 > - Milestones 65–66 (Phase 17): See [docs/archive/PHASE_17.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_17.md)  
+> - Milestones 67–69 (Phase 18): See [docs/archive/PHASE_18.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_18.md)  
 >
 > **Current Sprint Status:**
-> - 🟢 **PHASES 1–17 (COMPLETED & ARCHIVED):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, Headless VoWi Reader, Autonomous Plugins (`tu-calendar`, `tu-slide-vault`, `tu-mensa`, `tu-room-radar`), Launching Reliability, Single-File Inlining, Unified Academic Spotlight, Workstation Status Bar & ICS Calendar Export, Live Functional Plugin Depth, Real GitHub Marketplace Telemetry, Physical Filesystem Slide Vault, DevStudio Staging Environment, Real GitHub Plugin Download & Safe Deletion Engine, `dev-plugins/` Consolidation & Storage Configuration (Milestones 0–66).
-> - 🟡 **PHASE 18 (ACTIVE SPRINT):** Multi-Platform Target Build Suite: Dedicated Windows (.exe / NSIS), macOS (.dmg / .app), and Linux (.deb / .AppImage) Build Pipelines & CI/CD Tooling (Milestones 67–69).
+> - 🟢 **PHASES 1–18 (COMPLETED & ARCHIVED):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, Headless VoWi Reader, Autonomous Plugins (`tu-calendar`, `tu-slide-vault`, `tu-mensa`, `tu-room-radar`), Launching Reliability, Single-File Inlining, Unified Academic Spotlight, Workstation Status Bar & ICS Calendar Export, Live Functional Plugin Depth, Real GitHub Marketplace Telemetry, Physical Filesystem Slide Vault, DevStudio Staging Environment, Real GitHub Plugin Download & Safe Deletion Engine, `dev-plugins/` Consolidation & Storage Configuration, Multi-Platform Target Build Suite & 1-Click CI/CD Artifact Builder (Milestones 0–69).
+> - 🟡 **PHASE 19 (ACTIVE SPRINT):** Academic Calendar Engine, Real-Time Campus Sentinel & Power-User Desktop Shortcuts Suite (Milestones 70–72).
 
 ---
 
 # ==============================================================================
-# 🟡 PART XVIII: PHASE 18 — MULTI-PLATFORM TARGET BUILD SUITE (WINDOWS, MACOS, LINUX)
+# 🟡 PART XIX: PHASE 19 — ACADEMIC CALENDAR ENGINE, REAL-TIME CAMPUS SENTINEL & POWER-USER SHORTCUTS SUITE
 # ==============================================================================
 
-> **Phase 18 Summary & Objective:**  
-> 1. **Windows `.exe` & NSIS Packaging:** Configure Tauri v2 to output standalone Windows `.exe` installers via NSIS alongside standard `.msi` installers, specifying per-user install modes and proper icon embedding.
-> 2. **Linux Packaging Hardening:** Eliminate Linux packaging clunkiness by declaring precise dependency manifests for WebKitGTK 4.1/4.0 and bundling media frameworks for AppImages.
-> 3. **Dedicated Platform Build Commands:** Provide clean, discrete npm commands in `package.json` (`build:win`, `build:win:exe`, `build:mac`, `build:linux`) for targeted, error-free compiling.
-> 4. **1-Click Multi-Platform Artifact Builder:** Create a GitHub Actions workflow (`build-artifacts.yml`) that can be manually dispatched to build native Windows `.exe`, Linux `.deb`/`.AppImage`, and macOS `.dmg` binaries in parallel on clean cloud runners.
+> **Phase 19 Summary & Objective:**  
+> 1. **Dynamic TU Wien Academic Calendar & Live Deadline Progression:** Replace static term indicators with a mathematical TU Wien semester engine (computes WS/SS, current lecture week 1–15, vacation/exam phase, and percentage completion) coupled with live countdown tickers for upcoming assignments.
+> 2. **Power-User Desktop Shortcuts Suite & Keyboard Cheat Sheet Modal (`Cmd+/` / `?`):** Implement full keyboard ergonomics (`Cmd+,` for Settings, `Cmd+1..5` for portal and marketplace hopping, `Cmd+Shift+V` for Slide Vault, `Cmd+Shift+D` for DevStudio) and a styled interactive shortcut cheat sheet modal.
+> 3. **Campus Network Sentinel & Graceful Offline Fallback Banner:** Proactively detect connectivity drops or disconnects from TU Wien services, gracefully showing an intelligent offline banner providing immediate 1-click jumps to local cached Slide Vault PDFs and offline FTS5 notes.
 
 ---
 
-## 65. Phase 18 AI Worker Agent Prompts & Step-by-Step Implementation Milestones
+## 70. Phase 19 AI Worker Agent Prompts & Step-by-Step Implementation Milestones
 
 ---
 
-### Milestone 67 Prompt: Multi-Platform Bundle Configuration in `tauri.conf.json` & Dedicated npm Build Scripts `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 70 Prompt: Dynamic TU Wien Academic Calendar & Live Deadline Progression Engine `[STATUS: READY FOR EXECUTION 🟡]`
 
 ```markdown
-You are a senior DevOps and Tauri v2 desktop tooling engineer.
+You are a senior frontend architect specializing in academic time calculation and student productivity interfaces.
 
 ### Objective:
-Update `tauri.conf.json` with comprehensive multi-platform bundle configurations (Windows NSIS `.exe`, Linux `.deb` dependencies, macOS targets) and add dedicated platform build scripts to `package.json`.
+Build `src/services/calendar/AcademicCalendarEngine.ts` to calculate real-time TU Wien academic terms, lecture weeks, break periods, and semester progress, and integrate live upcoming deadline tickers into `ExecutiveHeader.tsx` and `WorkstationStatusBar.tsx`.
 
 ### Context & Files:
-- [src-tauri/tauri.conf.json](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/tauri.conf.json)
-- [package.json](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/package.json)
-- Specifications: [ARCHITECTURE.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/ARCHITECTURE.md) Section 9.1
+- [src/components/header/ExecutiveHeader.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/header/ExecutiveHeader.tsx)
+- [src/components/layout/WorkstationStatusBar.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/layout/WorkstationStatusBar.tsx)
+- Create: `src/services/calendar/AcademicCalendarEngine.ts`
 
 ### Detailed Implementation Tasks:
 
-1. **Configure `tauri.conf.json` Bundle Matrix:**
-   - Under `bundle`, add explicit platform configuration blocks:
-     - `windows`:
-       - `nsis`: `{"installerIcon": "icons/icon.ico", "headerImage": "icons/128x128.png", "sidebarImage": "icons/128x128@2x.png", "installMode": "currentUser"}`
-       - `wix`: `{"language": "en-US"}`
-     - `linux`:
-       - `deb`: `{"depends": ["libwebkit2gtk-4.1-0 | libwebkit2gtk-4.0-37", "libappindicator3-1", "librsvg2-2", "libssl3 | libssl1.1"]}`
-       - `appimage`: `{"bundleMediaFramework": true}`
-     - `macOS`:
-       - `minimumSystemVersion": "10.15"`
+1. **Build `AcademicCalendarEngine.ts`:**
+   - Define TU Wien academic periods:
+     - Wintersemester (WS): Oct 1 to Jan 31 (Lecture phase: ~15 weeks), Feb (Semester break / Exam phase).
+     - Sommersemester (SS): Mar 1 to Jun 30 (Lecture phase: ~15 weeks), Jul to Sep (Summer break / September exam phase).
+   - Export helper functions:
+     - `getCurrentSemester(date?: Date)`: Returns label (e.g. "WS 2026/27"), code (`WS26`), isLecturePeriod (`boolean`), currentWeek (`number | null`), phaseLabel (`"Week 4"` | `"Vorlesungsfreie Zeit"` | `"Prüfungsphase"`).
+     - `getSemesterProgress(date?: Date)`: Returns number from `0` to `100` representing elapsed semester percentage.
+     - `formatTimeRemaining(dueDateStr: string)`: Returns concise student-friendly countdown (e.g., `"in 4h"`, `"tomorrow at 23:55"`, `"in 2d"`, `"Overdue"`).
 
-2. **Add Dedicated Platform Build Scripts to `package.json`:**
-   - `build:mac`: `"tsc && vite build && tauri build --bundles dmg,app"`
-   - `build:mac:universal`: `"tsc && vite build && tauri build --target universal-apple-darwin"`
-   - `build:win`: `"tsc && vite build && tauri build --bundles nsis,msi"`
-   - `build:win:exe`: `"tsc && vite build && tauri build --bundles nsis"`
-   - `build:linux`: `"tsc && vite build && tauri build --bundles deb,appimage"`
-   - `build:linux:deb`: `"tsc && vite build && tauri build --bundles deb"`
-   - `build:linux:appimage`: `"tsc && vite build && tauri build --bundles appimage"`
-   - `build:all`: `"tsc && vite build && tauri build"`
+2. **Update `ExecutiveHeader.tsx`:**
+   - Replace static `"WS 2026/27"` pill with dynamic badge:
+     - Shows current term + lecture week (e.g., `WS 2026/27 • Week 3` or `SS 2027 • Prüfungsphase`).
+     - Tooltip showing exact semester start, end, and % completed with mini visual progress bar.
 
-### Verification Runbook:
-1. Validate `tauri.conf.json` syntax via `npm run build`
-2. `cargo check --manifest-path src-tauri/Cargo.toml`
-3. Git hygiene commit: `feat(build): add multi-platform bundle targets and dedicated npm build commands`
-```
-
----
-
-### Milestone 68 Prompt: Windows Executable & Cross-Platform Filesystem Compatibility Audit `[STATUS: READY FOR EXECUTION 🟡]`
-
-```markdown
-You are a systems compatibility engineer auditing Rust desktop code for cross-platform robustness across Windows 10/11, macOS, and Linux.
-
-### Objective:
-Audit all path manipulations, directory resolvers, and external process spawns across the Rust backend to ensure flawless execution on Windows (`.exe` binary) and Linux desktop distributions.
-
-### Context & Files:
-- [src-tauri/src/slide_vault.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/slide_vault.rs)
-- [src-tauri/src/plugin_downloader.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/plugin_downloader.rs)
-- [src-tauri/src/offline_vault.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/offline_vault.rs)
-- [src-tauri/src/native_webview.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/native_webview.rs)
-
-### Detailed Implementation Tasks:
-
-1. **Audit Windows Explorer & Linux Process Launchers:**
-   - Verify `reveal_slide_vault_folder`, `reveal_downloaded_plugins_folder`, and `reveal_dev_plugins_folder` correctly launch `explorer.exe` with quote escaping on Windows and `xdg-open` on Linux.
-   - Verify `open_slide_file` invokes `cmd /c start ""` on Windows and handles backslashes properly.
-
-2. **Windows Path Separators & Case-Insensitivity:**
-   - Ensure paths use `PathBuf` components or normalized forward slashes instead of raw string splitting with `/`.
-   - Ensure `dirs::document_dir()` fallbacks properly resolve `%USERPROFILE%\Documents` on Windows.
-
-3. **Verify Windows Icon & Assets:**
-   - Confirm `src-tauri/icons/icon.ico` is present and valid for embedding into the Windows `.exe` PE header.
+3. **Update `WorkstationStatusBar.tsx`:**
+   - Replace static term display with semester progress percentage pill (`XX%`).
+   - Add imminent deadline ticker next to pending count:
+     - If pending deadlines exist, find earliest non-completed deadline.
+     - Display: `⏳ Next: [Course] [Title] ([Time remaining])`.
+     - Clicking the ticker jumps directly to the course in TUWEL or TU Calendar.
 
 ### Verification Runbook:
 1. `npm run build`
-2. `cargo check --manifest-path src-tauri/Cargo.toml`
-3. Git hygiene commit: `fix(windows): audit cross-platform process spawns and path separators`
+2. `SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk cargo check --manifest-path src-tauri/Cargo.toml`
+3. Git hygiene commit: `feat(calendar): implement dynamic academic term engine and live deadline progression ticker`
 ```
 
 ---
 
-### Milestone 69 Prompt: GitHub Actions 1-Click Multi-Platform Artifact Builder Workflow `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 71 Prompt: Power-User Desktop Shortcuts Suite & Keyboard Cheat Sheet Modal `[STATUS: READY FOR EXECUTION 🟡]`
 
 ```markdown
-You are a CI/CD specialist maintaining the build and release pipelines for the TU Cockpit repository.
+You are a desktop UX engineer designing fluent keyboard ergonomics for the TU Cockpit workstation.
 
 ### Objective:
-Create a dedicated GitHub Actions workflow (`.github/workflows/build-artifacts.yml`) that can be manually dispatched to build native Windows `.exe` / `.msi`, Linux `.deb` / `.AppImage`, and macOS `.dmg` / `.app` on clean cloud runners, attaching the compiled binaries as downloadable workflow artifacts.
+Implement comprehensive keyboard navigation shortcuts across the application and create an interactive Keyboard Shortcuts Cheat Sheet modal triggered by `Cmd+/` or `?`.
 
 ### Context & Files:
-- [.github/workflows/release.yml](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/.github/workflows/release.yml)
-- Create: `.github/workflows/build-artifacts.yml`
+- [src/App.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/App.tsx)
+- [src/store/useAppStore.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/store/useAppStore.ts)
+- Create: `src/components/navigation/KeyboardShortcutsModal.tsx`
 
 ### Detailed Implementation Tasks:
 
-1. **Create `build-artifacts.yml` Workflow:**
-   - Trigger on: `workflow_dispatch` (manual button with optional build profile input: `debug` vs `release`).
-   - Matrix runners:
-     - `windows-latest`: Builds Windows standalone `.exe` (NSIS) and `.msi`.
-     - `ubuntu-22.04`: Installs WebKitGTK 4.1 + GTK3 dependencies, builds `.deb` and `.AppImage`.
-     - `macos-latest`: Installs universal targets (`aarch64` and `x86_64`), builds `.dmg` and `.app`.
-   - Actions:
-     - Use `actions/upload-artifact@v4` to bundle all resulting platform installers into easily downloadable zip files (`tu-cockpit-windows-x64.zip`, `tu-cockpit-linux-x64.zip`, `tu-cockpit-macos-universal.zip`).
+1. **Implement Keyboard Event Bus in `App.tsx`:**
+   - `Cmd+,` / `Ctrl+,`: Open Settings modal directly.
+   - `Cmd+1` / `Ctrl+1`: Switch to TUWEL portal (`tuwien.official.tuwel`).
+   - `Cmd+2` / `Ctrl+2`: Switch to TISS portal (`tuwien.official.tiss`).
+   - `Cmd+3` / `Ctrl+3`: Switch to VoWi reader (`tuwien.official.vowi`).
+   - `Cmd+4` / `Ctrl+4`: Switch to TU Maps (`tuwien.official.tumaps`).
+   - `Cmd+5` / `Ctrl+5`: Switch to Marketplace Hub (`marketplace`).
+   - `Cmd+Shift+V` / `Ctrl+Shift+V`: Switch to Slide Vault plugin (`tuwien.community.slide-vault`).
+   - `Cmd+Shift+D` / `Ctrl+Shift+D`: Jump to DevStudio tab in Marketplace.
+   - `Cmd+/` / `Ctrl+/` or `?` (when not typing in an input/textarea): Toggle Keyboard Shortcuts Cheat Sheet modal.
 
-2. **Local Developer Instructions:**
-   - Provide clear instructions in README and documentation on how a developer on macOS or Linux can trigger this workflow with 1 click in GitHub to get Windows `.exe` and Linux packages.
+2. **Create `KeyboardShortcutsModal.tsx`:**
+   - Display cleanly organized shortcut categories:
+     - **Navigation:** `Cmd+1..5`, `Cmd+K` (Spotlight), `Cmd+B` (Toggle Sidebar).
+     - **Study & Portals:** `Cmd+Shift+V` (Slide Vault), `Cmd+Shift+D` (DevStudio).
+     - **System:** `Cmd+,` (Settings), `Cmd+/` (Cheat Sheet), `Esc` (Close modals).
+   - Render styled keyboard keycaps (`<kbd>`) with modern dark/light glass aesthetics matching `--tu-*` tokens.
+   - Register with `useOverlayStore` so native webviews hide while the cheat sheet modal is open.
 
 ### Verification Runbook:
-1. Validate GitHub Actions YAML syntax.
-2. `npm run build`
-3. Git hygiene commit: `ci(build): add 1-click multi-platform artifact builder workflow`
+1. `npm run build`
+2. `SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk cargo check --manifest-path src-tauri/Cargo.toml`
+3. Git hygiene commit: `feat(shortcuts): add power-user keyboard shortcuts and interactive cheat sheet modal`
+```
+
+---
+
+### Milestone 72 Prompt: Real-Time Campus Network Sentinel & Graceful Offline Fallback Banner `[STATUS: READY FOR EXECUTION 🟡]`
+
+```markdown
+You are a networking and offline-first resilience engineer.
+
+### Objective:
+Implement a real-time network connectivity sentinel and an intelligent offline fallback banner that guides students to locally cached materials when disconnected from campus Wi-Fi or internet.
+
+### Context & Files:
+- Create: `src/services/network/CampusNetworkSentinel.ts`
+- Create: `src/store/useNetworkStore.ts`
+- Create: `src/components/layout/OfflineNoticeBanner.tsx`
+- [src/components/layout/WorkstationStatusBar.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/layout/WorkstationStatusBar.tsx)
+- [src/App.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/App.tsx)
+
+### Detailed Implementation Tasks:
+
+1. **Build `CampusNetworkSentinel.ts` & `useNetworkStore.ts`:**
+   - Monitor `window.addEventListener('online')` and `window.addEventListener('offline')`.
+   - Perform lightweight periodic HEAD/fetch probe to detect whether TU Wien endpoints (`tuwel.tuwien.ac.at`) are reachable.
+   - State properties: `isOnline: boolean`, `isTuwienReachable: boolean`, `lastChecked: number`.
+
+2. **Build `OfflineNoticeBanner.tsx`:**
+   - Appears at the top of the canvas below the header when `!isOnline`.
+   - Non-intrusive amber/orange banner with Wi-Fi off icon:
+     - Message: *"Offline Mode Active — You are disconnected from campus networks."*
+     - Quick Action Buttons:
+       - **"Open Slide Vault"**: Switches to `tuwien.community.slide-vault` to access physical cached PDFs.
+       - **"Search Offline Slides"**: Opens Cmd+K or FTS5 search.
+       - **Dismiss (X)**.
+
+3. **Update `WorkstationStatusBar.tsx`:**
+   - Reflect real connectivity in the status bar pill:
+     - Green: *"TU Services Online"* (when TU services reachable).
+     - Blue: *"Internet Connected"* (when general internet reachable but TU Wien slow/degraded).
+     - Amber/Red: *"Offline Mode"* (when disconnected).
+
+### Verification Runbook:
+1. `npm run build`
+2. `SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk cargo check --manifest-path src-tauri/Cargo.toml`
+3. Git hygiene commit: `feat(network): add campus network sentinel and offline resilience banner`
 ```
