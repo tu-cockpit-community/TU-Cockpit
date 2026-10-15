@@ -27,6 +27,7 @@ import {
   Store,
   Code2,
   Check,
+  FolderOpen,
 } from "lucide-react";
 
 function formatRelativeTime(dateString?: string): string {
@@ -55,6 +56,7 @@ export const PluginMarketplace: React.FC = () => {
     uninstallPlugin,
     setActiveView,
     communityOrgName,
+    openSettings,
   } = useAppStore();
 
   const [registryPlugins, setRegistryPlugins] = useState<StoreRegistryPlugin[]>([]);
@@ -234,6 +236,14 @@ export const PluginMarketplace: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => openSettings("plugins")}
+            className="px-3 py-2 text-xs font-semibold rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] hover:bg-[var(--tu-bg-hover)] text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+            title="Configure storage locations for plugins and slide vault"
+          >
+            <FolderOpen className="w-3.5 h-3.5 text-amber-400" />
+            <span>Storage Folders</span>
+          </button>
           <button
             onClick={() => loadPlugins(true)}
             disabled={isRefreshing}

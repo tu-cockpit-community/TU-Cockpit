@@ -33,6 +33,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     "themes" | "sync" | "layout" | "account" | "autofill" | "updates" | "plugins"
   >(initialTab);
 
+  React.useEffect(() => {
+    if (isOpen) {
+      setActiveTab(initialTab);
+    }
+  }, [isOpen, initialTab]);
+
   if (!isOpen) return null;
 
   return (

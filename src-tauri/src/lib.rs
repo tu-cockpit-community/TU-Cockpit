@@ -12,6 +12,7 @@ use plugin_gateway::execute_plugin_network_request;
 use plugin_downloader::{
     install_plugin_from_github, get_downloaded_plugins_path, set_downloaded_plugins_path,
     reveal_downloaded_plugins_folder, delete_installed_plugin,
+    get_dev_plugins_path, set_dev_plugins_path, reveal_dev_plugins_folder,
 };
 use embedded_portals::{
     get_portal_url, navigate_portal, reload_portal, inject_theme_css,
@@ -105,7 +106,10 @@ pub fn run() {
             get_downloaded_plugins_path,
             set_downloaded_plugins_path,
             reveal_downloaded_plugins_folder,
-            delete_installed_plugin
+            delete_installed_plugin,
+            get_dev_plugins_path,
+            set_dev_plugins_path,
+            reveal_dev_plugins_folder
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

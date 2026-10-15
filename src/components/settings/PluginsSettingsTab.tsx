@@ -12,6 +12,8 @@ import {
   Sparkles,
   Boxes,
   Package,
+  Code2,
+  FolderGit2,
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -31,6 +33,8 @@ export const PluginsSettingsTab: React.FC = () => {
     setSlideVaultPath,
     downloadedPluginsPath,
     setDownloadedPluginsPath,
+    devPluginsPath,
+    setDevPluginsPath,
     tuwelInterceptionEnabled,
     setTuwelInterceptionEnabled,
     tissAutoSyncEnabled,
@@ -39,11 +43,17 @@ export const PluginsSettingsTab: React.FC = () => {
 
   const [currentPath, setCurrentPath] = useState<string>(slideVaultPath);
   const [currentPluginsPath, setCurrentPluginsPath] = useState<string>(downloadedPluginsPath);
+  const [currentDevPath, setCurrentDevPath] = useState<string>(devPluginsPath);
+
   const [totalFiles, setTotalFiles] = useState<number>(0);
   const [totalBytes, setTotalBytes] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [pluginsLoading, setPluginsLoading] = useState<boolean>(true);
+  const [devLoading, setDevLoading] = useState<boolean>(true);
   const [recentFiles, setRecentFiles] = useState<SlideFileRecord[]>([]);
+
+  const isMac = typeof navigator !== "undefined" && navigator.userAgent.toLowerCase().includes("mac");
+  const fileManagerLabel = isMac ? "Im Finder anzeigen" : "Im Explorer öffnen";
 
   const loadVaultStats = useCallback(async () => {
     try {
@@ -59,7 +69,6 @@ export const PluginsSettingsTab: React.FC = () => {
       setRecentFiles(files.slice(0, 4));
     } catch (err) {
       console.warn("Failed to query slide vault from backend:", err);
-      // Fallback display if running in non-tauri or mock environment
       if (!currentPath) {
         const fallback = "~/Documents/TU-Cockpit/Slide-Vault";
         setCurrentPath(fallback);
@@ -88,10 +97,29 @@ export const PluginsSettingsTab: React.FC = () => {
     }
   }, [currentPluginsPath, setDownloadedPluginsPath]);
 
+  const loadDevStats = useCallback(async () => {
+    try {
+      setDevLoading(true);
+      const path = await invoke<string>("get_dev_plugins_path");
+      setCurrentDevPath(path);
+      setDevPluginsPath(path);
+    } catch (err) {
+      console.warn("Failed to query dev plugins path from backend:", err);
+      if (!currentDevPath) {
+        const fallback = "dev-plugins";
+        setCurrentDevPath(fallback);
+        setDevPluginsPath(fallback);
+      }
+    } finally {
+      setDevLoading(false);
+    }
+  }, [currentDevPath, setDevPluginsPath]);
+
   useEffect(() => {
     loadVaultStats();
     loadPluginsStats();
-  }, [loadVaultStats, loadPluginsStats]);
+    loadDevStats();
+  }, [loadVaultStats, loadPluginsStats, loadDevStats]);
 
   const handleChangeDirectory = async () => {
     try {
@@ -137,6 +165,26 @@ export const PluginsSettingsTab: React.FC = () => {
     }
   };
 
+  const handleChangeDevDirectory = async () => {
+    try {
+      const selected = await open({
+        directory: true,
+        multiple: false,
+        title: "Select DevStudio Plugins Workspace Folder",
+        defaultPath: currentDevPath || undefined,
+      });
+
+      if (selected && typeof selected === "string") {
+        await invoke("set_dev_plugins_path", { newPath: selected });
+        setCurrentDevPath(selected);
+        setDevPluginsPath(selected);
+        await loadDevStats();
+      }
+    } catch (err) {
+      console.error("Failed to select dev plugins directory:", err);
+    }
+  };
+
   const handleRevealFolder = async () => {
     try {
       await invoke("reveal_slide_vault_folder");
@@ -150,6 +198,14 @@ export const PluginsSettingsTab: React.FC = () => {
       await invoke("reveal_downloaded_plugins_folder");
     } catch (err) {
       console.error("Failed to open downloaded plugins folder in OS file manager:", err);
+    }
+  };
+
+  const handleRevealDevFolder = async () => {
+    try {
+      await invoke("reveal_dev_plugins_folder");
+    } catch (err) {
+      console.error("Failed to open dev plugins folder in OS file manager:", err);
     }
   };
 
@@ -220,10 +276,10 @@ export const PluginsSettingsTab: React.FC = () => {
               <button
                 onClick={handleRevealFolder}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-[var(--tu-accent)] text-white hover:bg-[var(--tu-accent-hover)] transition-all cursor-pointer shadow-xs"
-                title="Im Finder / Explorer anzeigen"
+                title={`Ordner ${fileManagerLabel}`}
               >
                 <ExternalLink className="w-3.5 h-3.5" />
-                Im Explorer öffnen
+                {fileManagerLabel}
               </button>
             </div>
           </div>
@@ -339,10 +395,71 @@ export const PluginsSettingsTab: React.FC = () => {
               <button
                 onClick={handleRevealPluginsFolder}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-[var(--tu-accent)] text-white hover:bg-[var(--tu-accent-hover)] transition-all cursor-pointer shadow-xs"
-                title="Im Finder / Explorer anzeigen"
+                title={`Ordner ${fileManagerLabel}`}
               >
                 <ExternalLink className="w-3.5 h-3.5" />
-                Im Explorer öffnen
+                {fileManagerLabel}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Section 3: DevStudio Local Plugin Workspaces */}
+      <div className="bg-[var(--tu-bg-card)] border border-[var(--tu-border)] rounded-[var(--tu-radius)] p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center">
+              <Code2 className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs font-bold tracking-tight flex items-center gap-2">
+                <span>DevStudio Local Workspaces Storage</span>
+                <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                  Protected Dev Mode 🔒
+                </span>
+              </div>
+              <div className="text-[11px] text-[var(--tu-text-muted)]">
+                Local directory containing community plugin repositories staged in DevStudio. Source code is strictly protected from deletion.
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={loadDevStats}
+            disabled={devLoading}
+            className="p-1.5 rounded text-[var(--tu-text-muted)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] transition-colors cursor-pointer"
+            title="Aktualisieren"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${devLoading ? "animate-spin" : ""}`} />
+          </button>
+        </div>
+
+        {/* Path Display & Action Buttons */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-[var(--tu-bg-surface)] border border-[var(--tu-border)]">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <FolderGit2 className="w-4 h-4 text-amber-400 shrink-0" />
+              <span className="font-mono text-xs text-[var(--tu-text-primary)] truncate select-all">
+                {currentDevPath || "dev-plugins"}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={handleChangeDevDirectory}
+                className="px-3 py-1.5 text-xs font-semibold rounded bg-[var(--tu-bg-elevated)] border border-[var(--tu-border)] hover:bg-[var(--tu-accent)] hover:text-white transition-all cursor-pointer shadow-xs"
+              >
+                Ordner wählen...
+              </button>
+
+              <button
+                onClick={handleRevealDevFolder}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-[var(--tu-accent)] text-white hover:bg-[var(--tu-accent-hover)] transition-all cursor-pointer shadow-xs"
+                title={`Ordner ${fileManagerLabel}`}
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                {fileManagerLabel}
               </button>
             </div>
           </div>

@@ -31,12 +31,15 @@ export const App: React.FC = () => {
     navOrientation,
     toggleSidebar,
     isCategoryModalOpen,
+    isSettingsModalOpen,
+    settingsInitialTab,
+    openSettings,
+    closeSettings,
   } = useAppStore();
 
   const { isLoginModalOpen } = useAuthStore();
   const { openOverlay, closeOverlay } = useOverlayStore();
   const { applyToRoot } = useThemeStore();
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false);
   const [vowiMode, setVowiMode] = useState<"reader" | "live">("reader");
 
   // Ensure native portals are hidden when navigating away from plugin view
@@ -168,7 +171,7 @@ export const App: React.FC = () => {
         <div className="flex h-full w-full">
           <ConfigurableNav />
           <div className="flex-1 flex flex-col h-full overflow-hidden">
-            <ExecutiveHeader onOpenSettings={() => setIsSettingsModalOpen(true)} />
+            <ExecutiveHeader onOpenSettings={() => openSettings("themes")} />
             {renderMainContent()}
             <WorkstationStatusBar />
           </div>
@@ -179,7 +182,7 @@ export const App: React.FC = () => {
       {navOrientation === "right" && (
         <div className="flex h-full w-full">
           <div className="flex-1 flex flex-col h-full overflow-hidden">
-            <ExecutiveHeader onOpenSettings={() => setIsSettingsModalOpen(true)} />
+            <ExecutiveHeader onOpenSettings={() => openSettings("themes")} />
             {renderMainContent()}
             <WorkstationStatusBar />
           </div>
@@ -190,7 +193,7 @@ export const App: React.FC = () => {
       {/* Bottom or Top Floating Navigation Layout */}
       {(navOrientation === "bottom" || navOrientation === "top") && (
         <div className="flex flex-col h-full w-full">
-          <ExecutiveHeader onOpenSettings={() => setIsSettingsModalOpen(true)} />
+          <ExecutiveHeader onOpenSettings={() => openSettings("themes")} />
           <ConfigurableNav />
           {renderMainContent()}
           <WorkstationStatusBar />
@@ -198,13 +201,14 @@ export const App: React.FC = () => {
       )}
 
       {/* Modals & Dialogs */}
-      <CommandPalette onOpenSettings={() => setIsSettingsModalOpen(true)} />
+      <CommandPalette onOpenSettings={() => openSettings("themes")} />
       <UpdaterToast />
       <LoginModal />
       <CategoryManagerModal />
       <SettingsModal
         isOpen={isSettingsModalOpen}
-        onClose={() => setIsSettingsModalOpen(false)}
+        initialTab={settingsInitialTab}
+        onClose={closeSettings}
       />
 
       {/* E2EE Sync Modal */}

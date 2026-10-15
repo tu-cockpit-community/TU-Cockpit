@@ -71,12 +71,19 @@ export interface AppState {
   
   slideVaultPath: string;
   downloadedPluginsPath: string;
+  devPluginsPath: string;
   tuwelInterceptionEnabled: boolean;
   tissAutoSyncEnabled: boolean;
   setSlideVaultPath: (path: string) => void;
   setDownloadedPluginsPath: (path: string) => void;
+  setDevPluginsPath: (path: string) => void;
   setTuwelInterceptionEnabled: (enabled: boolean) => void;
   setTissAutoSyncEnabled: (enabled: boolean) => void;
+
+  isSettingsModalOpen: boolean;
+  settingsInitialTab: "themes" | "sync" | "layout" | "account" | "autofill" | "updates" | "plugins";
+  openSettings: (tab?: "themes" | "sync" | "layout" | "account" | "autofill" | "updates" | "plugins") => void;
+  closeSettings: () => void;
 
   setActiveView: (view: SystemView | "plugin", pluginId?: string) => void;
   toggleSidebar: () => void;
@@ -157,8 +164,15 @@ export const useAppStore = create<AppState>((set, get) => ({
   isCategoryModalOpen: false,
   slideVaultPath: localStorage.getItem("tu_setting_slide_vault_path") || "",
   downloadedPluginsPath: localStorage.getItem("tu_setting_downloaded_plugins_path") || "",
+  devPluginsPath: localStorage.getItem("tu_setting_dev_plugins_path") || "dev-plugins",
   tuwelInterceptionEnabled: localStorage.getItem("tu_setting_tuwel_interception") !== "false",
   tissAutoSyncEnabled: localStorage.getItem("tu_setting_tiss_autosync") !== "false",
+
+  isSettingsModalOpen: false,
+  settingsInitialTab: "themes",
+  openSettings: (tab = "themes") =>
+    set({ isSettingsModalOpen: true, settingsInitialTab: tab }),
+  closeSettings: () => set({ isSettingsModalOpen: false }),
 
   setSlideVaultPath: (path: string) => {
     set({ slideVaultPath: path });
@@ -167,6 +181,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   setDownloadedPluginsPath: (path: string) => {
     set({ downloadedPluginsPath: path });
     localStorage.setItem("tu_setting_downloaded_plugins_path", path);
+  },
+  setDevPluginsPath: (path: string) => {
+    set({ devPluginsPath: path });
+    localStorage.setItem("tu_setting_dev_plugins_path", path);
   },
   setTuwelInterceptionEnabled: (enabled: boolean) => {
     set({ tuwelInterceptionEnabled: enabled });

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { useAppStore, PluginManifest } from "@/store/useAppStore";
 import {
   COMMUNITY_CALENDAR_HTML,
@@ -23,6 +24,8 @@ import {
   Package,
   Lock,
   Trash2,
+  FolderOpen,
+  ExternalLink,
 } from "lucide-react";
 
 interface LocalWorkspace {
@@ -134,7 +137,13 @@ const DEFAULT_MANIFEST_SNIPPET = `{
 }`;
 
 export const DevStudioTab: React.FC = () => {
-  const { installedPlugins, installPlugin, uninstallPlugin, setActiveView } = useAppStore();
+  const {
+    installedPlugins,
+    installPlugin,
+    uninstallPlugin,
+    setActiveView,
+    openSettings,
+  } = useAppStore();
 
   const [activeSection, setActiveSection] = useState<"workspaces" | "validator" | "standards">(
     "workspaces"
@@ -260,6 +269,14 @@ export const DevStudioTab: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => openSettings("plugins")}
+            className="px-3 py-2 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] hover:bg-[var(--tu-bg-hover)] text-xs font-semibold text-[var(--tu-text-primary)] flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+            title="Configure storage locations for plugins in Settings"
+          >
+            <FolderOpen className="w-3.5 h-3.5 text-amber-400" />
+            <span>Configure Storage</span>
+          </button>
           <div className="px-3 py-1.5 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-surface)] border border-[var(--tu-border)] text-center">
             <div className="text-xs font-bold text-amber-400 font-mono">
               {LOCAL_WORKSPACES.length} Workspaces
@@ -312,9 +329,25 @@ export const DevStudioTab: React.FC = () => {
       {activeSection === "workspaces" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between text-xs text-[var(--tu-text-muted)]">
-            <span>
-              Detected repositories inside <code className="font-mono text-amber-300">dev-plugins/</code>
-            </span>
+            <div className="flex items-center gap-2">
+              <span>
+                Detected repositories inside <code className="font-mono text-amber-300">dev-plugins/</code>
+              </span>
+              <button
+                onClick={async () => {
+                  try {
+                    await invoke("reveal_dev_plugins_folder");
+                  } catch (err) {
+                    console.error("Failed to open dev plugins folder:", err);
+                  }
+                }}
+                className="flex items-center gap-1 text-[11px] text-[var(--tu-accent)] hover:underline cursor-pointer"
+                title="Open dev-plugins folder in Finder / Explorer"
+              >
+                <ExternalLink className="w-3 h-3" />
+                <span>Reveal in Finder</span>
+              </button>
+            </div>
             <span className="flex items-center gap-1.5 text-emerald-400">
               <ShieldCheck className="w-3.5 h-3.5" />
               Protected from filesystem deletion

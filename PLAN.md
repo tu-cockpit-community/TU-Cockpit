@@ -40,77 +40,42 @@
 
 ---
 
-### Milestone 65 Prompt: Migrate Workspace Subfolder Architecture to `dev-plugins/` & Align DevStudio `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 65 Prompt: Migrate Workspace Subfolder Architecture to `dev-plugins/` & Align DevStudio `[STATUS: COMPLETED ✅ - Commit 66d2c09]`
 
 ```markdown
-You are a senior full-stack desktop software engineer specializing in workspace architecture, Git subfolder patterns, and React component integration.
-
-### Objective:
-Solidify the migration of local community plugin workspaces to `dev-plugins/`, verify all internal references and ignore configurations, and ensure DevStudio smoothly accesses local development repositories.
-
-### Context & Files:
-- Directory: `dev-plugins/` (containing `tu-calendar`, `tu-slide-vault`, `tu-mensa`, `tu-room-radar`)
-- [.gitignore](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/.gitignore)
-- [src/components/marketplace/DevStudioTab.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/marketplace/DevStudioTab.tsx)
-- [src/components/marketplace/ConfirmDeleteModal.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/marketplace/ConfirmDeleteModal.tsx)
-- [src/services/marketplace/CommunityPluginBundles.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/marketplace/CommunityPluginBundles.ts)
-- Specifications: [ARCHITECTURE.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/ARCHITECTURE.md) Sections 5.4 & 5.8
-
-### Detailed Implementation Tasks:
-
-1. **Verify Folder Integrity:**
-   - Confirm that all 4 local plugin repositories exist under `dev-plugins/`:
-     - `dev-plugins/tu-calendar`
-     - `dev-plugins/tu-slide-vault`
-     - `dev-plugins/tu-mensa`
-     - `dev-plugins/tu-room-radar`
-   - Confirm that git remotes (`https://github.com/tu-cockpit-community/*`) inside each subfolder are preserved.
-
-2. **Verify Ignore Rules & DevStudio Alignment:**
-   - Confirm `.gitignore` has `/dev-plugins/` ignored so subfolder git repositories do not pollute host git index.
-   - Verify `DevStudioTab.tsx` points folder badges to `dev-plugins/*` and tests local single-file bundles.
-   - Verify `ConfirmDeleteModal.tsx` references `dev-plugins/` in the protected workspace notice.
-
-3. **Check Build Pipeline for Local Workspaces:**
-   - Test `npm run build` inside each `dev-plugins/<plugin>` to verify single-file compilation still succeeds smoothly.
-
-### Verification Runbook:
-1. `npm run build`
-2. `cargo check --manifest-path src-tauri/Cargo.toml`
-3. Git hygiene commit: `refactor(plugins): consolidate local workspaces under dev-plugins directory`
+Migrated physical local repositories from community-plugins to dev-plugins, aligned ignore rules, DevStudio references, and safe deletion invariants.
 ```
 
 ---
 
-### Milestone 66 Prompt: End-to-End Verification of Local Dev Workspaces & Marketplace Sandbox `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 66 Prompt: Configurable Plugin Storage & Direct In-App Navigation `[STATUS: COMPLETED ✅ - Commit Pending]`
 
 ```markdown
-You are a QA automation and integration specialist working on the TU Cockpit desktop workstation.
+You are a senior desktop systems engineer working on the TU Cockpit application.
 
 ### Objective:
-Perform end-to-end verification of local plugin staging in DevStudio, ensure the protected dev invariant prevents deletion of `dev-plugins/` files, and verify that marketplace downloads correctly route to the dedicated downloads directory.
+Implement in-app configuration and direct navigation for all external storage locations: Slide Vault, Downloaded Marketplace Plugins, and DevStudio Local Workspaces.
 
 ### Context & Files:
+- [src-tauri/src/plugin_downloader.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/plugin_downloader.rs)
+- [src-tauri/src/lib.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/lib.rs)
+- [src/store/useAppStore.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/store/useAppStore.ts)
+- [src/components/settings/SettingsModal.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/settings/SettingsModal.tsx)
+- [src/components/settings/PluginsSettingsTab.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/settings/PluginsSettingsTab.tsx)
 - [src/components/marketplace/PluginMarketplace.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/marketplace/PluginMarketplace.tsx)
 - [src/components/marketplace/DevStudioTab.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/marketplace/DevStudioTab.tsx)
-- [src/components/marketplace/ConfirmDeleteModal.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/marketplace/ConfirmDeleteModal.tsx)
-- [src/store/useAppStore.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/store/useAppStore.ts)
+- [ARCHITECTURE.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/ARCHITECTURE.md) Section 5.10
 
 ### Detailed Implementation Tasks:
-
-1. **Test DevStudio Staging:**
-   - In DevStudio, verify all 4 local workspaces can be staged into the Cockpit navigation dock with `sourceType: "local"`.
-   - Verify that clicking "Unlink" on a staged local plugin displays the protective notice and unlinks without deleting disk files.
-
-2. **Test Marketplace Download vs Local Separation:**
-   - Verify that marketplace plugins are installed with `sourceType: "github"` to the dedicated downloads folder.
-   - Verify that clicking uninstall on marketplace plugins triggers `ConfirmDeleteModal` and invokes physical deletion.
-
-3. **Full Desktop Test Suite:**
-   - Run typecheck and unit tests to ensure zero regressions across the codebase.
-
-### Verification Runbook:
-1. `npm run build`
-2. `cargo check --manifest-path src-tauri/Cargo.toml`
-3. Git hygiene commit: `test(marketplace): verify end-to-end devstudio staging and safe deletion invariant`
+1. **Rust IPC Backend:**
+   - Implemented `get_dev_plugins_path`, `set_dev_plugins_path`, and `reveal_dev_plugins_folder`.
+   - Registered commands in `tauri::generate_handler!`.
+2. **Global Store & Settings Routing:**
+   - Added `devPluginsPath`, `setDevPluginsPath`, `isSettingsModalOpen`, `settingsInitialTab`, `openSettings(tab)`, `closeSettings()` to `useAppStore`.
+   - Connected `openSettings("plugins")` across the Marketplace and DevStudio toolbars.
+3. **Dedicated Storage Settings Tab:**
+   - Visualized all 3 external directories: TU Slide Vault, Downloaded Community Plugins, and DevStudio Local Workspaces.
+   - Added directory pickers (`open({ directory: true })`) and OS-aware "Im Finder anzeigen" / "Im Explorer öffnen" reveal actions.
+4. **Verification:**
+   - Verified clean frontend build (`npm run build`) and Rust backend check (`cargo check`).
 ```

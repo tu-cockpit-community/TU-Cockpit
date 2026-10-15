@@ -50,6 +50,13 @@ struct DownloadedPluginsConfig {
     custom_path: Option<String>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct DevPluginsConfig {
+    custom_path: Option<String>,
+}
+
+static CUSTOM_DEV_PLUGINS_PATH: Mutex<Option<String>> = Mutex::new(None);
+
 fn default_entrypoint() -> String {
     "index.html".to_string()
 }
@@ -63,9 +70,29 @@ fn get_config_file_path(app: &AppHandle) -> Result<PathBuf, String> {
     Ok(app_dir.join("downloaded_plugins_config.json"))
 }
 
+fn get_dev_config_file_path(app: &AppHandle) -> Result<PathBuf, String> {
+    let app_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| format!("Failed to resolve app data dir: {}", e))?;
+    fs::create_dir_all(&app_dir).map_err(|e| format!("Failed to create app data dir: {}", e))?;
+    Ok(app_dir.join("dev_plugins_config.json"))
+}
+
 pub fn get_default_downloaded_plugins_path() -> PathBuf {
     let base = dirs::document_dir().unwrap_or_else(|| PathBuf::from("."));
     base.join("TU-Cockpit").join("Plugins")
+}
+
+pub fn get_default_dev_plugins_path() -> PathBuf {
+    if let Ok(cwd) = std::env::current_dir() {
+        let candidate = cwd.join("dev-plugins");
+        if candidate.exists() {
+            return candidate;
+        }
+    }
+    let base = dirs::document_dir().unwrap_or_else(|| PathBuf::from("."));
+    base.join("TU-Cockpit").join("dev-plugins")
 }
 
 pub fn get_active_downloaded_plugins_path(app: &AppHandle) -> Result<PathBuf, String> {
@@ -103,6 +130,40 @@ pub fn get_active_downloaded_plugins_path(app: &AppHandle) -> Result<PathBuf, St
     Ok(default_path)
 }
 
+pub fn get_active_dev_plugins_path(app: &AppHandle) -> Result<PathBuf, String> {
+    // 1. Check in-memory cache
+    if let Ok(guard) = CUSTOM_DEV_PLUGINS_PATH.lock() {
+        if let Some(ref p) = *guard {
+            let path = PathBuf::from(p);
+            let _ = fs::create_dir_all(&path);
+            return Ok(path);
+        }
+    }
+
+    // 2. Check saved config file on disk
+    if let Ok(cfg_path) = get_dev_config_file_path(app) {
+        if cfg_path.exists() {
+            if let Ok(content) = fs::read_to_string(&cfg_path) {
+                if let Ok(cfg) = serde_json::from_str::<DevPluginsConfig>(&content) {
+                    if let Some(custom) = cfg.custom_path {
+                        let path = PathBuf::from(&custom);
+                        let _ = fs::create_dir_all(&path);
+                        if let Ok(mut guard) = CUSTOM_DEV_PLUGINS_PATH.lock() {
+                            *guard = Some(custom);
+                        }
+                        return Ok(path);
+                    }
+                }
+            }
+        }
+    }
+
+    // 3. Fallback to default dev-plugins location
+    let default_path = get_default_dev_plugins_path();
+    let _ = fs::create_dir_all(&default_path);
+    Ok(default_path)
+}
+
 #[tauri::command]
 pub async fn get_downloaded_plugins_path(app: AppHandle) -> Result<String, String> {
     let path = get_active_downloaded_plugins_path(&app)?;
@@ -137,9 +198,74 @@ pub async fn set_downloaded_plugins_path(app: AppHandle, new_path: String) -> Re
 }
 
 #[tauri::command]
+pub async fn get_dev_plugins_path(app: AppHandle) -> Result<String, String> {
+    let path = get_active_dev_plugins_path(&app)?;
+    Ok(path.to_string_lossy().to_string())
+}
+
+#[tauri::command]
+pub async fn set_dev_plugins_path(app: AppHandle, new_path: String) -> Result<(), String> {
+    let trimmed = new_path.trim();
+    if trimmed.is_empty() {
+        return Err("Dev plugins directory path cannot be empty".to_string());
+    }
+
+    let p = PathBuf::from(trimmed);
+    fs::create_dir_all(&p)
+        .map_err(|e| format!("Failed to create directory at '{:?}': {}", p, e))?;
+
+    if let Ok(mut guard) = CUSTOM_DEV_PLUGINS_PATH.lock() {
+        *guard = Some(trimmed.to_string());
+    }
+
+    if let Ok(cfg_path) = get_dev_config_file_path(&app) {
+        let cfg = DevPluginsConfig {
+            custom_path: Some(trimmed.to_string()),
+        };
+        if let Ok(json) = serde_json::to_string_pretty(&cfg) {
+            let _ = fs::write(cfg_path, json);
+        }
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn reveal_downloaded_plugins_folder(app: AppHandle) -> Result<(), String> {
     let plugins_path = get_active_downloaded_plugins_path(&app)?;
     let path_str = plugins_path.to_string_lossy().to_string();
+
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open")
+            .arg(&path_str)
+            .spawn()
+            .map_err(|e| format!("Failed to open Finder for {}: {}", path_str, e))?;
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("explorer")
+            .arg(&path_str)
+            .spawn()
+            .map_err(|e| format!("Failed to open Explorer for {}: {}", path_str, e))?;
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        std::process::Command::new("xdg-open")
+            .arg(&path_str)
+            .spawn()
+            .map_err(|e| format!("Failed to open file manager for {}: {}", path_str, e))?;
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn reveal_dev_plugins_folder(app: AppHandle) -> Result<(), String> {
+    let dev_path = get_active_dev_plugins_path(&app)?;
+    let path_str = dev_path.to_string_lossy().to_string();
 
     #[cfg(target_os = "macos")]
     {

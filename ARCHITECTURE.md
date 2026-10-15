@@ -296,6 +296,22 @@ To ensure the application delivers authentic utility rather than hollow demonstr
   - Upon student confirmation, Rust IPC command `delete_installed_plugin(plugin_id: String) -> Result<(), String>` physically removes the directory from disk and cleans up store state.
   - Deletion command validates that the target path resides inside the designated downloaded plugins directory to prevent arbitrary directory removal.
 
+### 5.10 Storage Configuration, Directory Routing & In-App Navigation
+* **Three Dedicated External Storage Engines:**
+  1. **TU Slide Vault (`~/Documents/TU-Cockpit/Slide-Vault`):**
+     - IPC: `get_slide_vault_path`, `set_slide_vault_path`, `reveal_slide_vault_folder`.
+     - Stores course folders, offline PDFs, and lecture materials ingested from TUWEL.
+  2. **Downloaded Marketplace Plugins (`~/Documents/TU-Cockpit/Plugins`):**
+     - IPC: `get_downloaded_plugins_path`, `set_downloaded_plugins_path`, `reveal_downloaded_plugins_folder`.
+     - Stores verified single-file plugins extracted from GitHub Releases.
+  3. **DevStudio Local Workspaces (`<WorkspaceRoot>/dev-plugins` or custom path):**
+     - IPC: `get_dev_plugins_path`, `set_dev_plugins_path`, `reveal_dev_plugins_folder`.
+     - Staged development repositories protected from deletion.
+* **Global Navigation & OS Integration:**
+  - `useAppStore` exposes `openSettings(tab)` allowing any component to route directly to Settings (e.g. `openSettings("plugins")`).
+  - Quick-access "Storage Folders" action buttons are integrated into the Marketplace header and DevStudio banner.
+  - File manager actions detect platform: "Im Finder anzeigen" on macOS, "Im Explorer öffnen" on Windows.
+
 ---
 
 
