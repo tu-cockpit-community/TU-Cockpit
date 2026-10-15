@@ -18,6 +18,7 @@ import { UpdaterToast } from "@/components/updater/UpdaterToast";
 import { SyncSettings } from "@/components/settings/SyncSettings";
 import { VoWiReader } from "@/components/vowi/VoWiReader";
 import { WorkstationStatusBar } from "@/components/layout/WorkstationStatusBar";
+import { DEFAULT_STORE_REGISTRY } from "@/services/marketplace/GitHubPluginService";
 import { X, BookOpen } from "lucide-react";
 
 export const App: React.FC = () => {
@@ -133,11 +134,16 @@ export const App: React.FC = () => {
         );
       }
 
+      const registryEntry = DEFAULT_STORE_REGISTRY.plugins.find(
+        (p) => p.id === activePlugin.manifest.id
+      );
+      const effectiveHtml = registryEntry?.htmlContent || activePlugin.htmlContent;
+
       return (
         <main className="flex-1 w-full h-full relative overflow-hidden p-0 m-0">
           <PluginFrame
             pluginId={activePlugin.manifest.id}
-            htmlContent={activePlugin.htmlContent}
+            htmlContent={effectiveHtml}
             allowedGlobs={activePlugin.manifest.capabilities?.network || []}
           />
         </main>
