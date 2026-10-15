@@ -16,6 +16,144 @@ pub fn sanitize_portal_label(portal_id: &str) -> String {
     format!("portal_{}", portal_id.replace('.', "_"))
 }
 
+pub const TUWEL_SLIDE_VAULT_INTERCEPT_SCRIPT: &str = r#"
+(() => {
+  function injectButtons() {
+    if (!window.location.hostname.includes('tuwel.tuwien.ac.at')) return;
+
+    const links = document.querySelectorAll(
+      'a[href*="/mod/resource/view.php"], a[href*="/mod/folder/"], a[href$=".pdf"], a[href*=".pdf?"]'
+    );
+
+    links.forEach(link => {
+      if (link.dataset.tuSlideVaultInjected) return;
+      link.dataset.tuSlideVaultInjected = 'true';
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'tu-slide-vault-btn';
+      btn.innerHTML = '📥 Add to Slide Vault';
+      btn.style.cssText = 'display:inline-flex;align-items:center;gap:4px;margin-left:8px;padding:3px 9px;font-size:11px;font-family:system-ui,-apple-system,sans-serif;font-weight:600;background-color:#006699;color:#ffffff;border:1px solid rgba(0,102,153,0.4);border-radius:12px;cursor:pointer;vertical-align:middle;box-shadow:0 1px 3px rgba(0,0,0,0.15);transition:all 0.15s ease;';
+
+      btn.addEventListener('mouseenter', () => {
+        btn.style.backgroundColor = '#00527c';
+        btn.style.transform = 'translateY(-1px)';
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.backgroundColor = '#006699';
+        btn.style.transform = 'none';
+      });
+
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Saving...';
+        btn.style.backgroundColor = '#64748b';
+
+        try {
+          const courseHeading = document.querySelector('.page-header-headings h1, .breadcrumb-item:nth-last-child(2), .breadcrumb li:nth-last-child(2)');
+          const courseName = courseHeading?.textContent?.trim() || 'General';
+
+          let filename = link.textContent?.trim() || 'Lecture_Slide.pdf';
+          filename = filename.replace(/\s*Download\s*$/i, '').trim();
+          if (!filename.toLowerCase().endsWith('.pdf')) {
+            filename += '.pdf';
+          }
+
+          const resp = await fetch(link.href, { credentials: 'include' });
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          const buffer = await resp.arrayBuffer();
+          const bytes = Array.from(new Uint8Array(buffer));
+
+          if (window.__TAURI__ && window.__TAURI__.core) {
+            await window.__TAURI__.core.invoke('save_slide_to_vault', {
+              courseName: courseName,
+              filename: filename,
+              bytes: bytes
+            });
+          }
+
+          btn.innerHTML = '✅ Saved to Vault';
+          btn.style.backgroundColor = '#10b981';
+          btn.style.borderColor = '#059669';
+
+          const toast = document.createElement('div');
+          toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#006699;color:#fff;padding:10px 16px;border-radius:8px;font-size:12px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,0.3);z-index:999999;';
+          toast.textContent = '📥 Saved "' + filename + '" to Slide Vault!';
+          document.body.appendChild(toast);
+          setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.4s ease';
+            setTimeout(() => toast.remove(), 400);
+          }, 3000);
+        } catch (err) {
+          console.error('[TU-Cockpit] Failed to save slide to vault:', err);
+          btn.disabled = false;
+          btn.innerHTML = '❌ Error';
+          btn.style.backgroundColor = '#ef4444';
+        }
+      });
+
+      if (link.parentNode) {
+        link.parentNode.insertBefore(btn, link.nextSibling);
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectButtons);
+  } else {
+    injectButtons();
+  }
+
+  const observer = new MutationObserver(() => injectButtons());
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+})();
+"#;
+
+pub const TISS_AUTOSYNC_SCRIPT: &str = r#"
+(() => {
+  let hasSynced = false;
+
+  async function checkAndSyncTissCalendar() {
+    if (hasSynced) return;
+    if (!window.location.hostname.includes('tiss.tuwien.ac.at')) return;
+
+    const isLoggedIn = document.querySelector('a[href*="/logout"], .user-profile, .user-name, a[href*="/personal/"]') !== null;
+    if (!isLoggedIn) return;
+
+    const icalLink = document.querySelector('a[href*="/personal/termin/ical"], a[href*="/events/ical"], a[href*="ical"]');
+    const icalUrl = icalLink ? icalLink.href : '/personal/termin/ical';
+
+    try {
+      const resp = await fetch(icalUrl, { credentials: 'include' });
+      if (resp.ok) {
+        const text = await resp.text();
+        if (text && text.includes('BEGIN:VCALENDAR')) {
+          hasSynced = true;
+          if (window.__TAURI__ && window.__TAURI__.core) {
+            await window.__TAURI__.core.invoke('sync_tiss_ical', { icalContent: text });
+          }
+          console.log('[TU-Cockpit] TISS Timetable Auto-Synced successfully!');
+        }
+      }
+    } catch (err) {
+      console.warn('[TU-Cockpit] TISS Calendar background fetch:', err);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkAndSyncTissCalendar);
+  } else {
+    checkAndSyncTissCalendar();
+  }
+
+  window.addEventListener('popstate', checkAndSyncTissCalendar);
+})();
+"#;
+
 #[tauri::command]
 pub async fn set_portals_visibility(app: AppHandle, visible: bool) -> Result<(), String> {
     if !visible {
@@ -95,7 +233,13 @@ pub async fn create_or_show_native_portal(
     // Build native child webview attached to the main window
     let parsed_url = url.parse().map_err(|e: url::ParseError| e.to_string())?;
     let webview_url = WebviewUrl::External(parsed_url);
-    let webview_builder = WebviewBuilder::new(&label, webview_url).auto_resize();
+    let mut webview_builder = WebviewBuilder::new(&label, webview_url).auto_resize();
+
+    if portal_id == "tuwien.official.tuwel" {
+        webview_builder = webview_builder.initialization_script(TUWEL_SLIDE_VAULT_INTERCEPT_SCRIPT);
+    } else if portal_id == "tuwien.official.tiss" {
+        webview_builder = webview_builder.initialization_script(TISS_AUTOSYNC_SCRIPT);
+    }
 
     let pos = LogicalPosition::new(x, y);
     let size = LogicalSize::new(safe_width, safe_height);
@@ -248,6 +392,11 @@ pub async fn navigate_native_portal(app: AppHandle, portal_id: String, url: Stri
     if let Some(existing) = app.get_webview(&label) {
         let parsed_url = url.parse().map_err(|e: url::ParseError| e.to_string())?;
         let _ = existing.navigate(parsed_url);
+        if portal_id == "tuwien.official.tuwel" {
+            let _ = existing.eval(TUWEL_SLIDE_VAULT_INTERCEPT_SCRIPT);
+        } else if portal_id == "tuwien.official.tiss" {
+            let _ = existing.eval(TISS_AUTOSYNC_SCRIPT);
+        }
     }
     Ok(())
 }
@@ -324,8 +473,13 @@ pub async fn orchestrate_split_portals(
     } else {
         let default_url = crate::embedded_portals::get_default_portal_url(&portal_left);
         if let Ok(parsed_url) = default_url.parse() {
-            let builder = WebviewBuilder::new(&left_label, WebviewUrl::External(parsed_url))
+            let mut builder = WebviewBuilder::new(&left_label, WebviewUrl::External(parsed_url))
                 .auto_resize();
+            if portal_left == "tuwien.official.tuwel" {
+                builder = builder.initialization_script(TUWEL_SLIDE_VAULT_INTERCEPT_SCRIPT);
+            } else if portal_left == "tuwien.official.tiss" {
+                builder = builder.initialization_script(TISS_AUTOSYNC_SCRIPT);
+            }
             let _ = window.add_child(builder, LogicalPosition::new(total_x, total_y), LogicalSize::new(left_width, total_height));
         }
     }
@@ -337,8 +491,13 @@ pub async fn orchestrate_split_portals(
     } else {
         let default_url = crate::embedded_portals::get_default_portal_url(&portal_right);
         if let Ok(parsed_url) = default_url.parse() {
-            let builder = WebviewBuilder::new(&right_label, WebviewUrl::External(parsed_url))
+            let mut builder = WebviewBuilder::new(&right_label, WebviewUrl::External(parsed_url))
                 .auto_resize();
+            if portal_right == "tuwien.official.tuwel" {
+                builder = builder.initialization_script(TUWEL_SLIDE_VAULT_INTERCEPT_SCRIPT);
+            } else if portal_right == "tuwien.official.tiss" {
+                builder = builder.initialization_script(TISS_AUTOSYNC_SCRIPT);
+            }
             let _ = window.add_child(builder, LogicalPosition::new(right_x, total_y), LogicalSize::new(right_width, total_height));
         }
     }

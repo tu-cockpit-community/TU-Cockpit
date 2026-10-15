@@ -26,6 +26,7 @@ use native_webview::{
 use deadline_aggregator::{
     sync_tuwel_deadlines, get_student_deadlines, toggle_deadline_completed,
     add_student_deadline, export_local_ics_feed, check_deadline_notifications,
+    sync_tiss_ical,
 };
 use offline_vault::{
     cache_course_pdf, search_offline_slides, get_cached_vault_files, read_vault_pdf_bytes,
@@ -94,7 +95,8 @@ pub fn run() {
             set_slide_vault_path,
             save_slide_to_vault,
             list_slide_vault_files,
-            reveal_slide_vault_folder
+            reveal_slide_vault_folder,
+            sync_tiss_ical
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

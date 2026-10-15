@@ -149,7 +149,15 @@ pub async fn save_slide_to_vault(
     fs::write(&dest_path, &bytes)
         .map_err(|e| format!("Failed to write slide file to {}: {}", dest_path.display(), e))?;
 
-    Ok(dest_path.to_string_lossy().to_string())
+    let dest_str = dest_path.to_string_lossy().to_string();
+    use tauri::Emitter;
+    let _ = app.emit("slide-saved-to-vault", serde_json::json!({
+        "course": clean_course,
+        "filename": clean_filename,
+        "path": dest_str.clone()
+    }));
+
+    Ok(dest_str)
 }
 
 #[tauri::command]

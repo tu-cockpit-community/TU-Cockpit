@@ -200,6 +200,45 @@ pub async fn sync_tuwel_deadlines(app: AppHandle, ical_feed_url: String) -> Resu
 }
 
 #[tauri::command]
+pub async fn sync_tiss_ical(app: AppHandle, ical_content: String) -> Result<usize, String> {
+    let parsed_items = parse_ics_content(&ical_content)?;
+    let count = parsed_items.len();
+
+    let db_path = get_db_path(&app)?;
+    let conn = Connection::open(&db_path).map_err(|e| e.to_string())?;
+    init_db(&conn)?;
+
+    for item in &parsed_items {
+        conn.execute(
+            "INSERT INTO student_deadlines (id, course_id, course_name, title, due_date, url, source, completed, notified_24h, notified_2h)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)
+             ON CONFLICT(id) DO UPDATE SET
+                due_date=excluded.due_date,
+                title=excluded.title,
+                url=excluded.url;",
+            params![
+                item.id,
+                item.course_id,
+                item.course_name,
+                item.title,
+                item.due_date,
+                item.url,
+                "TISS",
+                item.completed as i32,
+                item.notified_24h as i32,
+                item.notified_2h as i32,
+            ],
+        )
+        .map_err(|e| format!("Failed to upsert TISS event: {}", e))?;
+    }
+
+    use tauri::Emitter;
+    let _ = app.emit("calendar-events-synced", &parsed_items);
+
+    Ok(count)
+}
+
+#[tauri::command]
 pub async fn get_student_deadlines(app: AppHandle) -> Result<Vec<DeadlineItem>, String> {
     let db_path = get_db_path(&app)?;
     let conn = Connection::open(&db_path).map_err(|e| e.to_string())?;
