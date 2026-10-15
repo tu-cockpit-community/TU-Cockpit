@@ -8,7 +8,7 @@ import {
 import { CommunityOrgService } from "@/services/marketplace/CommunityOrgService";
 import { OFFICIAL_PLUGINS } from "@/plugins/official/OfficialPlugins";
 import { CommunityAuthorBadge } from "./CommunityAuthorBadge";
-import { DeveloperGuideTab } from "./DeveloperGuideTab";
+import { DevStudioTab } from "./DevStudioTab";
 import {
   Download,
   Trash2,
@@ -55,7 +55,7 @@ export const PluginMarketplace: React.FC = () => {
   } = useAppStore();
 
   const [registryPlugins, setRegistryPlugins] = useState<StoreRegistryPlugin[]>([]);
-  const [activeTab, setActiveTab] = useState<"plugins" | "developers">("plugins");
+  const [activeTab, setActiveTab] = useState<"plugins" | "devstudio">("plugins");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
@@ -202,23 +202,23 @@ export const PluginMarketplace: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveTab("developers")}
+          onClick={() => setActiveTab("devstudio")}
           className={`pb-3 text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
-            activeTab === "developers"
+            activeTab === "devstudio"
               ? "border-[var(--tu-accent)] text-[var(--tu-text-primary)]"
               : "border-transparent text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)]"
           }`}
         >
-          <Code2 className="w-4 h-4" />
-          <span>Developer Guide</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-500/10 text-emerald-400 font-mono">
-            SDK v1
+          <Code2 className="w-4 h-4 text-amber-400" />
+          <span>DevStudio</span>
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-400 font-mono border border-amber-500/30">
+            Local Sandbox
           </span>
         </button>
       </div>
 
-      {activeTab === "developers" ? (
-        <DeveloperGuideTab />
+      {activeTab === "devstudio" ? (
+        <DevStudioTab />
       ) : (
         <>
           {/* GitHub Community Organization Discovery Banner */}
@@ -325,9 +325,16 @@ export const PluginMarketplace: React.FC = () => {
                       </div>
                     </div>
 
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--tu-bg-card)] border border-[var(--tu-border)] text-[var(--tu-text-muted)]">
-                      {plugin.releaseTag || `v${plugin.version}`}
-                    </span>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--tu-bg-card)] border border-[var(--tu-border)] text-[var(--tu-text-muted)]">
+                        {plugin.releaseTag || `v${plugin.version}`}
+                      </span>
+                      {installedPlugins[plugin.id]?.sourceType === "local" && (
+                        <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                          Dev Workspace 🛠️
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <p className="text-xs text-[var(--tu-text-secondary)] line-clamp-2 mb-4 leading-relaxed">
@@ -384,8 +391,16 @@ export const PluginMarketplace: React.FC = () => {
                       </button>
                       <button
                         onClick={() => uninstallPlugin(plugin.id)}
-                        className="p-1.5 rounded-[var(--tu-radius-sm)] border border-[var(--tu-danger)]/30 text-[var(--tu-danger)] hover:bg-[var(--tu-danger)]/10 transition-colors cursor-pointer"
-                        title="Uninstall plugin"
+                        className={`p-1.5 rounded-[var(--tu-radius-sm)] border transition-colors cursor-pointer ${
+                          installedPlugins[plugin.id]?.sourceType === "local"
+                            ? "border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                            : "border-[var(--tu-danger)]/30 text-[var(--tu-danger)] hover:bg-[var(--tu-danger)]/10"
+                        }`}
+                        title={
+                          installedPlugins[plugin.id]?.sourceType === "local"
+                            ? "Unlink local dev plugin (leaves disk files intact)"
+                            : "Uninstall plugin"
+                        }
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

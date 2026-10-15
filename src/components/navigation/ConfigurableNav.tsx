@@ -234,6 +234,11 @@ export const ConfigurableNav: React.FC = () => {
                             >
                               {getPluginIcon(p.manifest.id)}
                               <span className="truncate">{p.manifest.name}</span>
+                              {(p.sourceType === "local" || p.sourceType === "local_dev") && (
+                                <span className="ml-auto text-[9px] px-1 py-0.2 rounded bg-amber-500/15 text-amber-400 shrink-0 font-mono" title="Local Dev Workspace (Protected)">
+                                  dev
+                                </span>
+                              )}
                             </button>
 
                             <button
@@ -241,8 +246,16 @@ export const ConfigurableNav: React.FC = () => {
                                 e.stopPropagation();
                                 uninstallPlugin(p.manifest.id);
                               }}
-                              className="opacity-0 group-hover:opacity-100 p-1 text-[var(--tu-text-muted)] hover:text-[var(--tu-danger)] transition-all cursor-pointer"
-                              title="Uninstall plugin"
+                              className={`opacity-0 group-hover:opacity-100 p-1 transition-all cursor-pointer ${
+                                p.sourceType === "local" || p.sourceType === "local_dev"
+                                  ? "text-amber-400 hover:text-amber-300"
+                                  : "text-[var(--tu-text-muted)] hover:text-[var(--tu-danger)]"
+                              }`}
+                              title={
+                                p.sourceType === "local" || p.sourceType === "local_dev"
+                                  ? "Unlink dev plugin (leaves disk files intact)"
+                                  : "Uninstall plugin"
+                              }
                             >
                               <Trash2 className="w-3 h-3" />
                             </button>

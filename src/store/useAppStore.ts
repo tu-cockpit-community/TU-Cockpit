@@ -33,12 +33,14 @@ export interface PluginManifest {
   };
 }
 
+export type PluginSourceType = "registry" | "github_direct" | "local_dev" | "local" | "github";
+
 export interface InstalledPlugin {
   manifest: PluginManifest;
   htmlContent: string;
   enabled: boolean;
   installedAt: string;
-  sourceType?: "registry" | "github_direct" | "local_dev";
+  sourceType?: PluginSourceType;
   installDir?: string;
 }
 
@@ -77,7 +79,7 @@ export interface AppState {
   setActiveView: (view: SystemView | "plugin", pluginId?: string) => void;
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
-  installPlugin: (manifest: PluginManifest, htmlContent: string, sourceType?: "registry" | "github_direct" | "local_dev", installDir?: string) => void;
+  installPlugin: (manifest: PluginManifest, htmlContent: string, sourceType?: PluginSourceType, installDir?: string) => void;
   uninstallPlugin: (id: string) => void;
   togglePlugin: (id: string, enabled: boolean) => void;
   pinToDock: (id: string) => void;
