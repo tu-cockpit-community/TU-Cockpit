@@ -48,7 +48,7 @@ Migrated physical local repositories from community-plugins to dev-plugins, alig
 
 ---
 
-### Milestone 66 Prompt: Configurable Plugin Storage & Direct In-App Navigation `[STATUS: COMPLETED ✅ - Commit Pending]`
+### Milestone 66 Prompt: Configurable Plugin Storage & Direct In-App Navigation `[STATUS: COMPLETED ✅ - Commit 47eb4a3]`
 
 ```markdown
 You are a senior desktop systems engineer working on the TU Cockpit application.
