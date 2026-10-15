@@ -70,9 +70,11 @@ export interface AppState {
   isCategoryModalOpen: boolean;
   
   slideVaultPath: string;
+  downloadedPluginsPath: string;
   tuwelInterceptionEnabled: boolean;
   tissAutoSyncEnabled: boolean;
   setSlideVaultPath: (path: string) => void;
+  setDownloadedPluginsPath: (path: string) => void;
   setTuwelInterceptionEnabled: (enabled: boolean) => void;
   setTissAutoSyncEnabled: (enabled: boolean) => void;
 
@@ -154,12 +156,17 @@ export const useAppStore = create<AppState>((set, get) => ({
   categories: INITIAL_CATEGORIES,
   isCategoryModalOpen: false,
   slideVaultPath: localStorage.getItem("tu_setting_slide_vault_path") || "",
+  downloadedPluginsPath: localStorage.getItem("tu_setting_downloaded_plugins_path") || "",
   tuwelInterceptionEnabled: localStorage.getItem("tu_setting_tuwel_interception") !== "false",
   tissAutoSyncEnabled: localStorage.getItem("tu_setting_tiss_autosync") !== "false",
 
   setSlideVaultPath: (path: string) => {
     set({ slideVaultPath: path });
     localStorage.setItem("tu_setting_slide_vault_path", path);
+  },
+  setDownloadedPluginsPath: (path: string) => {
+    set({ downloadedPluginsPath: path });
+    localStorage.setItem("tu_setting_downloaded_plugins_path", path);
   },
   setTuwelInterceptionEnabled: (enabled: boolean) => {
     set({ tuwelInterceptionEnabled: enabled });

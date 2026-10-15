@@ -9,7 +9,10 @@ pub mod offline_vault;
 pub mod slide_vault;
 
 use plugin_gateway::execute_plugin_network_request;
-use plugin_downloader::install_plugin_from_github;
+use plugin_downloader::{
+    install_plugin_from_github, get_downloaded_plugins_path, set_downloaded_plugins_path,
+    reveal_downloaded_plugins_folder, delete_installed_plugin,
+};
 use embedded_portals::{
     get_portal_url, navigate_portal, reload_portal, inject_theme_css,
 };
@@ -97,7 +100,12 @@ pub fn run() {
             list_slide_vault_files,
             reveal_slide_vault_folder,
             open_slide_file,
-            sync_tiss_ical
+            sync_tiss_ical,
+            install_plugin_from_github,
+            get_downloaded_plugins_path,
+            set_downloaded_plugins_path,
+            reveal_downloaded_plugins_folder,
+            delete_installed_plugin
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -10,6 +10,8 @@ import {
   BookOpen,
   Calendar,
   Sparkles,
+  Boxes,
+  Package,
 } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -27,6 +29,8 @@ export const PluginsSettingsTab: React.FC = () => {
   const {
     slideVaultPath,
     setSlideVaultPath,
+    downloadedPluginsPath,
+    setDownloadedPluginsPath,
     tuwelInterceptionEnabled,
     setTuwelInterceptionEnabled,
     tissAutoSyncEnabled,
@@ -34,9 +38,11 @@ export const PluginsSettingsTab: React.FC = () => {
   } = useAppStore();
 
   const [currentPath, setCurrentPath] = useState<string>(slideVaultPath);
+  const [currentPluginsPath, setCurrentPluginsPath] = useState<string>(downloadedPluginsPath);
   const [totalFiles, setTotalFiles] = useState<number>(0);
   const [totalBytes, setTotalBytes] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
+  const [pluginsLoading, setPluginsLoading] = useState<boolean>(true);
   const [recentFiles, setRecentFiles] = useState<SlideFileRecord[]>([]);
 
   const loadVaultStats = useCallback(async () => {
@@ -64,9 +70,28 @@ export const PluginsSettingsTab: React.FC = () => {
     }
   }, [currentPath, setSlideVaultPath]);
 
+  const loadPluginsStats = useCallback(async () => {
+    try {
+      setPluginsLoading(true);
+      const path = await invoke<string>("get_downloaded_plugins_path");
+      setCurrentPluginsPath(path);
+      setDownloadedPluginsPath(path);
+    } catch (err) {
+      console.warn("Failed to query downloaded plugins path from backend:", err);
+      if (!currentPluginsPath) {
+        const fallback = "~/Documents/TU-Cockpit/Plugins";
+        setCurrentPluginsPath(fallback);
+        setDownloadedPluginsPath(fallback);
+      }
+    } finally {
+      setPluginsLoading(false);
+    }
+  }, [currentPluginsPath, setDownloadedPluginsPath]);
+
   useEffect(() => {
     loadVaultStats();
-  }, [loadVaultStats]);
+    loadPluginsStats();
+  }, [loadVaultStats, loadPluginsStats]);
 
   const handleChangeDirectory = async () => {
     try {
@@ -92,11 +117,39 @@ export const PluginsSettingsTab: React.FC = () => {
     }
   };
 
+  const handleChangePluginsDirectory = async () => {
+    try {
+      const selected = await open({
+        directory: true,
+        multiple: false,
+        title: "Select Downloaded Plugins Storage Folder",
+        defaultPath: currentPluginsPath || undefined,
+      });
+
+      if (selected && typeof selected === "string") {
+        await invoke("set_downloaded_plugins_path", { newPath: selected });
+        setCurrentPluginsPath(selected);
+        setDownloadedPluginsPath(selected);
+        await loadPluginsStats();
+      }
+    } catch (err) {
+      console.error("Failed to select plugins directory:", err);
+    }
+  };
+
   const handleRevealFolder = async () => {
     try {
       await invoke("reveal_slide_vault_folder");
     } catch (err) {
       console.error("Failed to open folder in OS file manager:", err);
+    }
+  };
+
+  const handleRevealPluginsFolder = async () => {
+    try {
+      await invoke("reveal_downloaded_plugins_folder");
+    } catch (err) {
+      console.error("Failed to open downloaded plugins folder in OS file manager:", err);
     }
   };
 
@@ -240,7 +293,63 @@ export const PluginsSettingsTab: React.FC = () => {
         )}
       </div>
 
-      {/* Section 2: University Portal Automation & Ingestion Toggles */}
+      {/* Section 2: Downloaded Community Plugins Storage Engine */}
+      <div className="bg-[var(--tu-bg-card)] border border-[var(--tu-border)] rounded-[var(--tu-radius)] p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
+              <Boxes className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-xs font-bold tracking-tight">Downloaded Community Plugins Storage</div>
+              <div className="text-[11px] text-[var(--tu-text-muted)]">
+                Local filesystem directory where verified marketplace plugins downloaded from GitHub releases are unpacked and executed.
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={loadPluginsStats}
+            disabled={pluginsLoading}
+            className="p-1.5 rounded text-[var(--tu-text-muted)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)] transition-colors cursor-pointer"
+            title="Aktualisieren"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${pluginsLoading ? "animate-spin" : ""}`} />
+          </button>
+        </div>
+
+        {/* Path Display & Action Buttons */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-[var(--tu-bg-surface)] border border-[var(--tu-border)]">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <Package className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span className="font-mono text-xs text-[var(--tu-text-primary)] truncate select-all">
+                {currentPluginsPath || "Resolving plugins folder..."}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={handleChangePluginsDirectory}
+                className="px-3 py-1.5 text-xs font-semibold rounded bg-[var(--tu-bg-elevated)] border border-[var(--tu-border)] hover:bg-[var(--tu-accent)] hover:text-white transition-all cursor-pointer shadow-xs"
+              >
+                Ordner wählen...
+              </button>
+
+              <button
+                onClick={handleRevealPluginsFolder}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-[var(--tu-accent)] text-white hover:bg-[var(--tu-accent-hover)] transition-all cursor-pointer shadow-xs"
+                title="Im Finder / Explorer anzeigen"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                Im Explorer öffnen
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Section 3: University Portal Automation & Ingestion Toggles */}
       <div className="bg-[var(--tu-bg-card)] border border-[var(--tu-border)] rounded-[var(--tu-radius)] p-5 space-y-4">
         <div>
           <div className="text-xs font-bold tracking-tight">Portal Integration & Ingestion Automation</div>

@@ -1,9 +1,12 @@
 use std::fs::{self, File};
 use std::io::{Cursor, Read};
 use std::path::{Path, PathBuf};
+use std::sync::Mutex;
 use serde::{Deserialize, Serialize};
-use tauri::Manager;
+use tauri::{AppHandle, Manager};
 use zip::ZipArchive;
+
+static CUSTOM_PLUGINS_PATH: Mutex<Option<String>> = Mutex::new(None);
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InstalledPluginMetadata {
@@ -42,8 +45,127 @@ struct PluginManifestRaw {
     pub capabilities: serde_json::Value,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct DownloadedPluginsConfig {
+    custom_path: Option<String>,
+}
+
 fn default_entrypoint() -> String {
     "index.html".to_string()
+}
+
+fn get_config_file_path(app: &AppHandle) -> Result<PathBuf, String> {
+    let app_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| format!("Failed to resolve app data dir: {}", e))?;
+    fs::create_dir_all(&app_dir).map_err(|e| format!("Failed to create app data dir: {}", e))?;
+    Ok(app_dir.join("downloaded_plugins_config.json"))
+}
+
+pub fn get_default_downloaded_plugins_path() -> PathBuf {
+    let base = dirs::document_dir().unwrap_or_else(|| PathBuf::from("."));
+    base.join("TU-Cockpit").join("Plugins")
+}
+
+pub fn get_active_downloaded_plugins_path(app: &AppHandle) -> Result<PathBuf, String> {
+    // 1. Check in-memory cache
+    if let Ok(guard) = CUSTOM_PLUGINS_PATH.lock() {
+        if let Some(ref p) = *guard {
+            let path = PathBuf::from(p);
+            let _ = fs::create_dir_all(&path);
+            return Ok(path);
+        }
+    }
+
+    // 2. Check saved config file on disk
+    if let Ok(cfg_path) = get_config_file_path(app) {
+        if cfg_path.exists() {
+            if let Ok(content) = fs::read_to_string(&cfg_path) {
+                if let Ok(cfg) = serde_json::from_str::<DownloadedPluginsConfig>(&content) {
+                    if let Some(custom) = cfg.custom_path {
+                        let path = PathBuf::from(&custom);
+                        let _ = fs::create_dir_all(&path);
+                        if let Ok(mut guard) = CUSTOM_PLUGINS_PATH.lock() {
+                            *guard = Some(custom);
+                        }
+                        return Ok(path);
+                    }
+                }
+            }
+        }
+    }
+
+    // 3. Fallback to default Documents/TU-Cockpit/Plugins
+    let default_path = get_default_downloaded_plugins_path();
+    fs::create_dir_all(&default_path)
+        .map_err(|e| format!("Failed to create default downloaded plugins directory: {}", e))?;
+    Ok(default_path)
+}
+
+#[tauri::command]
+pub async fn get_downloaded_plugins_path(app: AppHandle) -> Result<String, String> {
+    let path = get_active_downloaded_plugins_path(&app)?;
+    Ok(path.to_string_lossy().to_string())
+}
+
+#[tauri::command]
+pub async fn set_downloaded_plugins_path(app: AppHandle, new_path: String) -> Result<(), String> {
+    let trimmed = new_path.trim();
+    if trimmed.is_empty() {
+        return Err("Download directory path cannot be empty".to_string());
+    }
+
+    let p = PathBuf::from(trimmed);
+    fs::create_dir_all(&p)
+        .map_err(|e| format!("Failed to create directory at '{:?}': {}", p, e))?;
+
+    if let Ok(mut guard) = CUSTOM_PLUGINS_PATH.lock() {
+        *guard = Some(trimmed.to_string());
+    }
+
+    if let Ok(cfg_path) = get_config_file_path(&app) {
+        let cfg = DownloadedPluginsConfig {
+            custom_path: Some(trimmed.to_string()),
+        };
+        if let Ok(json) = serde_json::to_string_pretty(&cfg) {
+            let _ = fs::write(cfg_path, json);
+        }
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn reveal_downloaded_plugins_folder(app: AppHandle) -> Result<(), String> {
+    let plugins_path = get_active_downloaded_plugins_path(&app)?;
+    let path_str = plugins_path.to_string_lossy().to_string();
+
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open")
+            .arg(&path_str)
+            .spawn()
+            .map_err(|e| format!("Failed to open Finder for {}: {}", path_str, e))?;
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("explorer")
+            .arg(&path_str)
+            .spawn()
+            .map_err(|e| format!("Failed to open Explorer for {}: {}", path_str, e))?;
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        std::process::Command::new("xdg-open")
+            .arg(&path_str)
+            .spawn()
+            .map_err(|e| format!("Failed to open file manager for {}: {}", path_str, e))?;
+    }
+
+    Ok(())
 }
 
 pub fn parse_github_repo(url: &str) -> Result<(String, String), String> {
@@ -209,15 +331,9 @@ pub async fn install_plugin_from_github(
     let manifest: PluginManifestRaw = serde_json::from_str(&manifest_content)
         .map_err(|e| format!("Malformed manifest.json in '{}/{}': {}", owner, repo, e))?;
 
-    // Destination directory: $APPDATA/plugins/<plugin_id>/<version>/
-    let base_dir = app
-        .path()
-        .app_data_dir()
-        .unwrap_or_else(|_| PathBuf::from("./data"));
-    let install_dir = base_dir
-        .join("plugins")
-        .join(&manifest.id)
-        .join(&manifest.version);
+    // Destination directory: <downloaded_plugins_path>/<plugin_id>/
+    let base_dir = get_active_downloaded_plugins_path(&app)?;
+    let install_dir = base_dir.join(&manifest.id);
 
     fs::create_dir_all(&install_dir)
         .map_err(|e| format!("Failed to create plugin directory '{:?}': {}", install_dir, e))?;
@@ -260,11 +376,16 @@ pub async fn install_plugin_from_github(
                 .map_err(|e| format!("Failed to extract file {:?}: {}", target_path, e))?;
 
             // If this is the entrypoint file, read its content
-            if relative_path.to_string_lossy() == manifest.entrypoint {
+            if relative_path.to_string_lossy() == manifest.entrypoint
+                || relative_path.to_string_lossy() == "index.html"
+                || relative_path.to_string_lossy() == "dist/index.html"
+            {
                 let mut content = String::new();
-                let mut read_f = File::open(&target_path).map_err(|e| e.to_string())?;
-                read_f.read_to_string(&mut content).map_err(|e| e.to_string())?;
-                entrypoint_html = content;
+                if let Ok(mut read_f) = File::open(&target_path) {
+                    if read_f.read_to_string(&mut content).is_ok() && !content.is_empty() {
+                        entrypoint_html = content;
+                    }
+                }
             }
         }
     }
@@ -287,6 +408,49 @@ pub async fn install_plugin_from_github(
         install_dir: install_dir.to_string_lossy().to_string(),
         capabilities: manifest.capabilities,
     })
+}
+
+#[tauri::command]
+pub async fn delete_installed_plugin(app: AppHandle, plugin_id: String) -> Result<(), String> {
+    // 1. Strict ID validation: reject path traversal and illegal characters
+    let cleaned_id = plugin_id.trim();
+    if cleaned_id.is_empty()
+        || cleaned_id.contains('/')
+        || cleaned_id.contains('\\')
+        || cleaned_id.contains("..")
+    {
+        return Err(format!("Invalid plugin identifier: '{}'", plugin_id));
+    }
+
+    // 2. Resolve configured downloaded plugins directory
+    let base_dir = get_active_downloaded_plugins_path(&app)?;
+    let target_dir = base_dir.join(cleaned_id);
+
+    // 3. Security Check: Ensure canonical path is strictly inside base_dir
+    let base_canon = base_dir
+        .canonicalize()
+        .map_err(|e| format!("Failed to canonicalize base plugins dir: {}", e))?;
+
+    if target_dir.exists() {
+        let target_canon = target_dir
+            .canonicalize()
+            .map_err(|e| format!("Failed to canonicalize plugin dir: {}", e))?;
+
+        if !target_canon.starts_with(&base_canon) {
+            return Err("Security Violation: Target path is outside downloaded plugins folder.".to_string());
+        }
+
+        // Protected workspace invariant: Never touch community-plugins/ or project source
+        let target_str = target_canon.to_string_lossy();
+        if target_str.contains("community-plugins") {
+            return Err("Security Violation: Cannot delete local community dev workspaces.".to_string());
+        }
+
+        fs::remove_dir_all(&target_canon)
+            .map_err(|e| format!("Failed to delete plugin files at '{:?}': {}", target_canon, e))?;
+    }
+
+    Ok(())
 }
 
 #[cfg(test)]
@@ -346,5 +510,11 @@ mod tests {
             "https://example.com/plugin.zip"
         );
     }
-}
 
+    #[test]
+    fn test_default_downloaded_plugins_path() {
+        let default_path = get_default_downloaded_plugins_path();
+        assert!(default_path.to_string_lossy().contains("TU-Cockpit"));
+        assert!(default_path.to_string_lossy().contains("Plugins"));
+    }
+}
