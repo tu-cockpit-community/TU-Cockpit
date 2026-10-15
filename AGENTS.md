@@ -28,7 +28,8 @@ To prevent context window bloat, cognitive drift, and tool edit failures, all AI
         ├── PHASE_13.md         <-- COLD STORAGE: Completed milestones 50–52 (Phase 13)
         ├── PHASE_14.md         <-- COLD STORAGE: Completed milestones 53–55 (Phase 14)
         ├── PHASE_15.md         <-- COLD STORAGE: Completed milestones 56–58 (Phase 15)
-        └── PHASE_16.md         <-- COLD STORAGE: Completed milestones 59–64 (Phase 16)
+        ├── PHASE_16.md         <-- COLD STORAGE: Completed milestones 59–64 (Phase 16)
+        └── PHASE_17.md         <-- COLD STORAGE: Completed milestones 65–66 (Phase 17)
 ```
 
 ---

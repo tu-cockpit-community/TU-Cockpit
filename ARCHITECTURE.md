@@ -351,3 +351,35 @@ To ensure the application delivers authentic utility rather than hollow demonstr
 * **GitHub Actions Pipeline (`.github/workflows/release.yml`):**
   - Cross-compiles for macOS (Apple Silicon `aarch64` & Intel `x86_64`), Linux (`.deb`, `.AppImage`), and Windows (`.msi`).
   - Automatically signs binaries and publishes update bundles alongside releases.
+
+---
+
+## 9. Multi-Platform Build Pipeline & Distribution Matrix (Windows, macOS, Linux)
+
+### 9.1 Cross-Platform Bundling Specifications
+* **Windows (.exe & .msi):**
+  - **NSIS Standalone Installer (.exe):** Configured via `bundle.windows.nsis` in `tauri.conf.json`. Produces a single setup `.exe` (`TU-Cockpit-Setup.exe`) installing to `currentUser` (no administrator prompt required) with start menu shortcuts and uninstall support.
+  - **WiX Installer (.msi):** Configured via `bundle.windows.wix` for enterprise or policy-managed lab workstation deployments.
+  - **Dedicated Commands:**
+    - `npm run build:win` — Compiles both NSIS `.exe` and `.msi` installers.
+    - `npm run build:win:exe` — Compiles standalone NSIS `.exe` bundle only.
+* **macOS (.dmg & .app):**
+  - **Bundles:** Native `.app` bundle wrapped in compressed drag-and-drop `.dmg`.
+  - **Target Architecture:** Universal binary (`universal-apple-darwin`) or Apple Silicon native (`aarch64-apple-darwin`).
+  - **Dedicated Commands:**
+    - `npm run build:mac` — Compiles `.dmg` and `.app` bundles for active macOS host.
+    - `npm run build:mac:universal` — Compiles universal binary for both Apple Silicon and Intel Macs.
+* **Linux (.deb & .AppImage):**
+  - **Debian/Ubuntu Package (.deb):** Declares explicit system dependencies (`libwebkit2gtk-4.1-0 | libwebkit2gtk-4.0-37`, `libappindicator3-1`, `librsvg2-2`, `libssl3 | libssl1.1`) eliminating library missing errors on Ubuntu, Debian, Fedora, and Arch.
+  - **AppImage:** Single executable standalone binary with `bundleMediaFramework: true` and desktop integration.
+  - **Dedicated Commands:**
+    - `npm run build:linux` — Compiles `.deb` and `.AppImage` bundles.
+    - `npm run build:linux:deb` — Compiles standalone Debian package only.
+    - `npm run build:linux:appimage` — Compiles standalone AppImage only.
+
+### 9.2 Cross-Compilation Architecture & GitHub Actions Artifact Builder
+* **Host Limitations:** Native Tauri builds require the host OS's native toolchains (MSVC on Windows, WebKitGTK on Linux, Xcode on macOS). Local cross-compilation across platforms can be facilitated via `cargo-xwin` (for Windows targets on macOS/Linux) or containerized build runners.
+* **1-Click Multi-Platform Artifact Builder (`.github/workflows/build-artifacts.yml`):**
+  - Workflow dispatch enabling developers on any OS to generate native Windows `.exe`, Linux `.deb`/`.AppImage`, and macOS `.dmg` on clean virtual machines.
+  - Automatically zips and uploads multi-platform release artifacts without requiring local cross-compilers.
+

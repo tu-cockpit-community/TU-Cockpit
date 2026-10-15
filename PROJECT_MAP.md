@@ -35,7 +35,7 @@ Before reading or editing code, understand which document governs what:
 ├── AGENTS.md                   <-- READ FIRST: Agent swarm operating rules & verification commands
 ├── PROJECT_MAP.md              <-- YOU ARE HERE: Quick-lookup table & file index for AI agents
 ├── ARCHITECTURE.md             <-- LIVING SPECIFICATIONS: Ground truth for IPC, CSS tokens, Webviews, Security
-├── PLAN.md                     <-- ACTIVE SPRINT ONLY: Phase 17 milestones and worker prompts (< 600 lines)
+├── PLAN.md                     <-- ACTIVE SPRINT ONLY: Phase 18 milestones and worker prompts (< 600 lines)
 ├── README.md                   <-- USER DOCUMENTATION: End-user features and showcase
 └── docs/
     └── archive/
@@ -49,7 +49,8 @@ Before reading or editing code, understand which document governs what:
         ├── PHASE_13.md         <-- COLD STORAGE: Completed milestones 50–52 (Phase 13: Spotlight Integration & tu-mensa)
         ├── PHASE_14.md         <-- COLD STORAGE: Completed milestones 53–55 (Phase 14: Status Bar, ICS & tu-room-radar)
         ├── PHASE_15.md         <-- COLD STORAGE: Completed milestones 56–58 (Phase 15: Telemetry & CI Error Fixes)
-        └── PHASE_16.md         <-- COLD STORAGE: Completed milestones 59–64 (Phase 16: Slide Vault, Ingestion & Deletion)
+        ├── PHASE_16.md         <-- COLD STORAGE: Completed milestones 59–64 (Phase 16: Slide Vault, Ingestion & Deletion)
+        └── PHASE_17.md         <-- COLD STORAGE: Completed milestones 65–66 (Phase 17: Dev-Plugins & Storage Config)
 ```
 
 ### Golden Rules for AI Agents:
