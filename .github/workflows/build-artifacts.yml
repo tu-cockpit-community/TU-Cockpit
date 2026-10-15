@@ -1,0 +1,126 @@
+name: 1-Click Multi-Platform Artifact Builder
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_mode:
+        description: 'Build compilation profile'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+          - release
+          - debug
+
+jobs:
+  build-platform-artifacts:
+    name: Build ${{ matrix.os-name }} (${{ inputs.build_mode }})
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'windows-latest'
+            os-name: 'Windows x64'
+            artifact-name: 'tu-cockpit-windows-x64'
+            bundles: 'nsis,msi'
+            target: ''
+          - platform: 'ubuntu-22.04'
+            os-name: 'Linux x64'
+            artifact-name: 'tu-cockpit-linux-x64'
+            bundles: 'deb,appimage'
+            target: ''
+          - platform: 'macos-latest'
+            os-name: 'macOS Universal'
+            artifact-name: 'tu-cockpit-macos-universal'
+            bundles: 'dmg,app'
+            target: 'universal-apple-darwin'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Rust Stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: Rust Cache
+        uses: swatinem/rust-cache@v2
+        with:
+          work-dir: src-tauri
+
+      - name: Install Linux Dependencies (WebKitGTK 4.1 & AppIndicator)
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev \
+            javascriptcoregtk-4.1
+
+      - name: Install Frontend Dependencies
+        run: npm ci
+
+      - name: Compile Desktop Binary & Package Bundles
+        shell: bash
+        run: |
+          BUILD_FLAGS=""
+          if [ "${{ inputs.build_mode }}" == "debug" ]; then
+            BUILD_FLAGS="--debug"
+          fi
+          
+          if [ -n "${{ matrix.target }}" ]; then
+            BUILD_FLAGS="$BUILD_FLAGS --target ${{ matrix.target }}"
+          fi
+          
+          if [ -n "${{ matrix.bundles }}" ]; then
+            BUILD_FLAGS="$BUILD_FLAGS --bundles ${{ matrix.bundles }}"
+          fi
+          
+          echo "Executing: npx tauri build $BUILD_FLAGS"
+          npx tauri build $BUILD_FLAGS
+
+      - name: Stage Artifacts for Upload
+        shell: bash
+        run: |
+          mkdir -p staged-artifacts
+          
+          # Copy standalone installers and bundles
+          find src-tauri/target -type f \( \
+            -name "*.exe" -o \
+            -name "*.msi" -o \
+            -name "*.deb" -o \
+            -name "*.AppImage" -o \
+            -name "*.dmg" \
+          \) -exec cp {} staged-artifacts/ \;
+          
+          # For macOS .app bundles, archive into zip
+          if [ "${{ matrix.platform }}" == "macos-latest" ]; then
+            for app_dir in $(find src-tauri/target -type d -name "*.app" | grep -v "\.dSYM"); do
+              app_name=$(basename "$app_dir")
+              parent_dir=$(dirname "$app_dir")
+              echo "Zipping macOS app: $app_name from $parent_dir"
+              (cd "$parent_dir" && zip -r -y "$GITHUB_WORKSPACE/staged-artifacts/${app_name}.zip" "$app_name")
+            done
+          fi
+          
+          echo "Staged Artifact Contents:"
+          ls -lh staged-artifacts/
+
+      - name: Upload Platform Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: staged-artifacts/*
+          if-no-files-found: error
+          retention-days: 14

@@ -166,11 +166,34 @@ cd src-tauri
 cargo test
 ```
 
-### 4. Build Production Desktop Bundles
+### 4. Dedicated Multi-Platform Build Commands
+TU Cockpit provides granular, cross-platform build commands targeting specific operating systems and packaging formats:
+
 ```bash
-npm run tauri build
+# macOS Targets
+npm run build:mac            # Native .dmg and .app bundle for active host architecture
+npm run build:mac:universal  # Universal Apple Silicon (M1-M4) & Intel 64-bit binary
+
+# Windows Targets
+npm run build:win:exe        # Standalone NSIS setup .exe (currentUser, no admin prompt needed)
+npm run build:win            # Compiles both NSIS .exe and WiX .msi installers
+
+# Linux Targets
+npm run build:linux          # Compiles both .deb package and standalone .AppImage
+npm run build:linux:deb      # Standalone Debian/Ubuntu package with WebKitGTK 4.1 deps
+npm run build:linux:appimage # Standalone AppImage with media framework bundled
+
+# Build All Default Bundles
+npm run build:all
 ```
-The installer package (`.dmg`, `.deb`, `.appImage`, or `.msi`) will be generated inside `src-tauri/target/release/bundle/`.
+The compiled installer packages (`.exe`, `.msi`, `.dmg`, `.deb`, `.AppImage`) are output to `src-tauri/target/release/bundle/`.
+
+### 5. 1-Click Cloud Artifact Builder (GitHub Actions)
+Need a Windows `.exe` installer or Linux `.deb` while developing on a Mac? You don't need local cross-compilers or VMs.
+1. Navigate to the **[Actions tab](https://github.com/tu-cockpit-community/TU-Cockpit/actions)** on GitHub.
+2. Select **"1-Click Multi-Platform Artifact Builder"** from the left sidebar.
+3. Click **Run workflow**, choose your branch and compilation profile (`release` or `debug`), and click the green button.
+4. Parallel cloud runners will compile native binaries on clean Windows, Ubuntu, and macOS environments, attaching downloadable platform bundles (`tu-cockpit-windows-x64.zip`, `tu-cockpit-linux-x64.zip`, `tu-cockpit-macos-universal.zip`) directly to the workflow run summary.
 
 ---
 
