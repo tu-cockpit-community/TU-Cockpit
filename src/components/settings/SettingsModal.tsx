@@ -5,6 +5,7 @@ import { LayoutSettings } from "./LayoutSettings";
 import { AccountSettings } from "./AccountSettings";
 import { AccountAutofillSettings } from "./AccountAutofillSettings";
 import { UpdateSettings } from "./UpdateSettings";
+import { PluginsSettingsTab } from "./PluginsSettingsTab";
 import {
   X,
   Palette,
@@ -13,13 +14,14 @@ import {
   User,
   KeyRound,
   Rocket,
+  Blocks,
   Settings as SettingsIcon,
 } from "lucide-react";
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialTab?: "themes" | "sync" | "layout" | "account" | "autofill" | "updates";
+  initialTab?: "themes" | "sync" | "layout" | "account" | "autofill" | "updates" | "plugins";
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -28,7 +30,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   initialTab = "themes",
 }) => {
   const [activeTab, setActiveTab] = useState<
-    "themes" | "sync" | "layout" | "account" | "autofill" | "updates"
+    "themes" | "sync" | "layout" | "account" | "autofill" | "updates" | "plugins"
   >(initialTab);
 
   if (!isOpen) return null;
@@ -121,6 +123,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab("plugins")}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-[var(--tu-radius-sm)] transition-all cursor-pointer ${
+              activeTab === "plugins"
+                ? "bg-[var(--tu-accent)] text-[var(--tu-accent-contrast)] shadow-sm"
+                : "text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] hover:bg-[var(--tu-bg-hover)]"
+            }`}
+          >
+            <Blocks className="w-3.5 h-3.5" />
+            Plugins & Slide Vault
+          </button>
+
+          <button
             onClick={() => setActiveTab("updates")}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-[var(--tu-radius-sm)] transition-all cursor-pointer ${
               activeTab === "updates"
@@ -140,6 +154,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {activeTab === "layout" && <LayoutSettings />}
           {activeTab === "account" && <AccountSettings />}
           {activeTab === "autofill" && <AccountAutofillSettings />}
+          {activeTab === "plugins" && <PluginsSettingsTab />}
           {activeTab === "updates" && <UpdateSettings />}
         </div>
       </div>

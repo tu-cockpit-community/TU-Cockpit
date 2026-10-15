@@ -6,6 +6,7 @@ pub mod totp_vault;
 pub mod native_webview;
 pub mod deadline_aggregator;
 pub mod offline_vault;
+pub mod slide_vault;
 
 use plugin_gateway::execute_plugin_network_request;
 use plugin_downloader::install_plugin_from_github;
@@ -29,11 +30,16 @@ use deadline_aggregator::{
 use offline_vault::{
     cache_course_pdf, search_offline_slides, get_cached_vault_files, read_vault_pdf_bytes,
 };
+use slide_vault::{
+    get_slide_vault_path, set_slide_vault_path, save_slide_to_vault, list_slide_vault_files,
+    reveal_slide_vault_folder,
+};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_sql::Builder::default().build())
@@ -83,7 +89,12 @@ pub fn run() {
             cache_course_pdf,
             search_offline_slides,
             get_cached_vault_files,
-            read_vault_pdf_bytes
+            read_vault_pdf_bytes,
+            get_slide_vault_path,
+            set_slide_vault_path,
+            save_slide_to_vault,
+            list_slide_vault_files,
+            reveal_slide_vault_folder
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

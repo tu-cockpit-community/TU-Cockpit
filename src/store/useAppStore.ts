@@ -67,6 +67,13 @@ export interface AppState {
   categories: PluginCategory[];
   isCategoryModalOpen: boolean;
   
+  slideVaultPath: string;
+  tuwelInterceptionEnabled: boolean;
+  tissAutoSyncEnabled: boolean;
+  setSlideVaultPath: (path: string) => void;
+  setTuwelInterceptionEnabled: (enabled: boolean) => void;
+  setTissAutoSyncEnabled: (enabled: boolean) => void;
+
   setActiveView: (view: SystemView | "plugin", pluginId?: string) => void;
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
@@ -144,6 +151,22 @@ export const useAppStore = create<AppState>((set, get) => ({
   isSidebarCollapsed: false,
   categories: INITIAL_CATEGORIES,
   isCategoryModalOpen: false,
+  slideVaultPath: localStorage.getItem("tu_setting_slide_vault_path") || "",
+  tuwelInterceptionEnabled: localStorage.getItem("tu_setting_tuwel_interception") !== "false",
+  tissAutoSyncEnabled: localStorage.getItem("tu_setting_tiss_autosync") !== "false",
+
+  setSlideVaultPath: (path: string) => {
+    set({ slideVaultPath: path });
+    localStorage.setItem("tu_setting_slide_vault_path", path);
+  },
+  setTuwelInterceptionEnabled: (enabled: boolean) => {
+    set({ tuwelInterceptionEnabled: enabled });
+    localStorage.setItem("tu_setting_tuwel_interception", String(enabled));
+  },
+  setTissAutoSyncEnabled: (enabled: boolean) => {
+    set({ tissAutoSyncEnabled: enabled });
+    localStorage.setItem("tu_setting_tiss_autosync", String(enabled));
+  },
 
   setCommunityOrgName: (orgName) => set({ communityOrgName: orgName }),
   setNavOrientation: (orientation) => set({ navOrientation: orientation }),
