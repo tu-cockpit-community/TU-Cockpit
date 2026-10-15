@@ -16,7 +16,8 @@ import {
   Globe,
   Search,
   Star,
-  Users,
+  GitFork,
+  Clock,
   ShieldCheck,
   Loader2,
   Github,
@@ -24,6 +25,23 @@ import {
   Store,
   Code2,
 } from "lucide-react";
+
+function formatRelativeTime(dateString?: string): string {
+  if (!dateString) return "Recently";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "Recently";
+  const diffSec = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (diffSec < 60) return "Just now";
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHours = Math.floor(diffMin / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 30) return `${diffDays}d ago`;
+  const diffMonths = Math.floor(diffDays / 30);
+  if (diffMonths < 12) return `${diffMonths}mo ago`;
+  return `${Math.floor(diffDays / 365)}y ago`;
+}
 
 const CATEGORIES = ["All", "TU Essentials"] as const;
 
@@ -308,7 +326,7 @@ export const PluginMarketplace: React.FC = () => {
                     </div>
 
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--tu-bg-card)] border border-[var(--tu-border)] text-[var(--tu-text-muted)]">
-                      v{plugin.version}
+                      {plugin.releaseTag || `v${plugin.version}`}
                     </span>
                   </div>
 
@@ -316,22 +334,27 @@ export const PluginMarketplace: React.FC = () => {
                     {plugin.description}
                   </p>
 
-                  <div className="flex flex-wrap gap-2 text-[11px] text-[var(--tu-text-muted)] border-t border-[var(--tu-border-subtle)] pt-3 mb-4">
-                    <span className="flex items-center gap-1">
+                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--tu-text-muted)] border-t border-[var(--tu-border-subtle)] pt-3 mb-4">
+                    <span className="flex items-center gap-1" title={`${plugin.stars} GitHub stars`}>
                       <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-                      {plugin.rating}
+                      {plugin.stars}
                     </span>
                     <span>•</span>
-                    <span className="flex items-center gap-1">
-                      <Users className="w-3 h-3" />
-                      {plugin.downloads.toLocaleString()}
+                    <span className="flex items-center gap-1" title={`${plugin.forks} forks`}>
+                      <GitFork className="w-3 h-3 text-[var(--tu-text-muted)]" />
+                      {plugin.forks}
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1" title={`Updated ${new Date(plugin.updatedAt).toLocaleDateString()}`}>
+                      <Clock className="w-3 h-3 text-[var(--tu-text-muted)]" />
+                      {formatRelativeTime(plugin.updatedAt)}
                     </span>
                     {plugin.capabilities.network && (
                       <>
                         <span>•</span>
                         <span className="flex items-center gap-1 text-[var(--tu-text-accent)]">
                           <Globe className="w-3 h-3" />
-                          Network API
+                          Network
                         </span>
                       </>
                     )}

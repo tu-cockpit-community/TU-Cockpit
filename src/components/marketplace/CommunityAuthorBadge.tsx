@@ -6,6 +6,7 @@ export interface AuthorData {
   name: string;
   github?: string;
   url?: string;
+  avatarUrl?: string;
   matriculationNumber?: string;
 }
 
@@ -47,7 +48,15 @@ export const CommunityAuthorBadge: React.FC<CommunityAuthorBadgeProps> = ({
     <div
       className={`inline-flex items-center gap-1.5 text-[11px] text-[var(--tu-text-secondary)] ${className}`}
     >
-      <User className="w-3.5 h-3.5 text-[var(--tu-text-muted)] shrink-0" />
+      {author.avatarUrl ? (
+        <img
+          src={author.avatarUrl}
+          alt={author.name}
+          className="w-3.5 h-3.5 rounded-full object-cover shrink-0 border border-[var(--tu-border-subtle)]"
+        />
+      ) : (
+        <User className="w-3.5 h-3.5 text-[var(--tu-text-muted)] shrink-0" />
+      )}
       <span className="truncate">
         Author: {author.name}
         {author.matriculationNumber

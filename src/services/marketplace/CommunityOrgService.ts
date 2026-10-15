@@ -67,6 +67,7 @@ export class CommunityOrgService {
                       name: manifest.author?.name || repo.owner?.login || orgName,
                       github: manifest.author?.github || repo.owner?.login || orgName,
                       url: manifest.author?.url || repo.html_url,
+                      avatarUrl: repo.owner?.avatar_url,
                     },
                     description: manifest.description || repo.description || "Community Plugin",
                     category: (manifest.category as any) || defaultEntry?.category || "Productivity",
@@ -80,8 +81,11 @@ export class CommunityOrgService {
                       notifications: true,
                     },
                     verified: true,
-                    rating: defaultEntry?.rating || 4.8,
-                    downloads: repo.stargazers_count ? repo.stargazers_count * 15 + 120 : (defaultEntry?.downloads || 340),
+                    stars: repo.stargazers_count ?? defaultEntry?.stars ?? 0,
+                    forks: repo.forks_count ?? defaultEntry?.forks ?? 0,
+                    openIssues: repo.open_issues_count ?? defaultEntry?.openIssues ?? 0,
+                    updatedAt: repo.pushed_at || repo.updated_at || defaultEntry?.updatedAt || new Date().toISOString(),
+                    releaseTag: defaultEntry?.releaseTag || (manifest.version ? `v${manifest.version}` : undefined),
                     htmlContent: defaultEntry?.htmlContent,
                   };
                   return plugin;

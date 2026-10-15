@@ -15,6 +15,7 @@ export interface StoreRegistryPlugin {
     name: string;
     github?: string;
     url?: string;
+    avatarUrl?: string;
     matriculationNumber?: string;
   };
   description: string;
@@ -31,8 +32,12 @@ export interface StoreRegistryPlugin {
     systemClipboard?: boolean;
   };
   verified: boolean;
-  rating: number;
-  downloads: number;
+  // Real GitHub Telemetry
+  stars: number;
+  forks: number;
+  openIssues: number;
+  updatedAt: string;
+  releaseTag?: string;
   htmlContent?: string;
 }
 
@@ -45,7 +50,7 @@ export interface StoreRegistry {
 // Fallback embedded verified catalogue mirroring official community registry
 export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
   version: "1.0.0",
-  updatedAt: "2026-10-14T00:00:00.000Z",
+  updatedAt: "2026-10-15T00:00:00.000Z",
   plugins: [
     {
       id: "tuwien.official.tuwel",
@@ -66,8 +71,11 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
         notifications: true,
       },
       verified: true,
-      rating: 5.0,
-      downloads: 14200,
+      stars: 12,
+      forks: 3,
+      openIssues: 0,
+      updatedAt: "2026-10-14T12:00:00.000Z",
+      releaseTag: "v1.0.0",
     },
     {
       id: "tuwien.official.tiss",
@@ -88,8 +96,11 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
         notifications: true,
       },
       verified: true,
-      rating: 4.9,
-      downloads: 13900,
+      stars: 9,
+      forks: 2,
+      openIssues: 0,
+      updatedAt: "2026-10-14T12:00:00.000Z",
+      releaseTag: "v1.0.0",
     },
     {
       id: "tuwien.official.vowi",
@@ -110,8 +121,11 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
         notifications: false,
       },
       verified: true,
-      rating: 4.9,
-      downloads: 9800,
+      stars: 18,
+      forks: 5,
+      openIssues: 1,
+      updatedAt: "2026-10-14T12:00:00.000Z",
+      releaseTag: "v1.0.0",
     },
     {
       id: "tuwien.official.tumaps",
@@ -132,8 +146,11 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
         notifications: false,
       },
       verified: true,
-      rating: 4.7,
-      downloads: 7300,
+      stars: 7,
+      forks: 1,
+      openIssues: 0,
+      updatedAt: "2026-10-14T12:00:00.000Z",
+      releaseTag: "v1.0.0",
     },
     {
       id: "tuwien.community.calendar",
@@ -154,8 +171,11 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
         notifications: true,
       },
       verified: true,
-      rating: 4.9,
-      downloads: 4200,
+      stars: 4,
+      forks: 1,
+      openIssues: 0,
+      updatedAt: "2026-10-15T04:30:00.000Z",
+      releaseTag: "v1.0.0",
       htmlContent: COMMUNITY_CALENDAR_HTML,
     },
     {
@@ -177,8 +197,11 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
         notifications: true,
       },
       verified: true,
-      rating: 4.8,
-      downloads: 5100,
+      stars: 6,
+      forks: 2,
+      openIssues: 0,
+      updatedAt: "2026-10-15T04:30:00.000Z",
+      releaseTag: "v1.0.0",
       htmlContent: COMMUNITY_SLIDE_VAULT_HTML,
     },
     {
@@ -200,8 +223,11 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
         notifications: false,
       },
       verified: true,
-      rating: 4.9,
-      downloads: 3800,
+      stars: 5,
+      forks: 1,
+      openIssues: 0,
+      updatedAt: "2026-10-15T04:30:00.000Z",
+      releaseTag: "v1.0.0",
       htmlContent: COMMUNITY_MENSA_HTML,
     },
     {
@@ -223,8 +249,11 @@ export const DEFAULT_STORE_REGISTRY: StoreRegistry = {
         notifications: false,
       },
       verified: true,
-      rating: 4.9,
-      downloads: 4100,
+      stars: 8,
+      forks: 2,
+      openIssues: 0,
+      updatedAt: "2026-10-15T04:30:00.000Z",
+      releaseTag: "v1.0.0",
       htmlContent: COMMUNITY_ROOM_RADAR_HTML,
     },
   ],
