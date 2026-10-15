@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { useAppStore } from "@/store/useAppStore";
 import {
   GitHubPluginService,
@@ -9,6 +10,7 @@ import { CommunityOrgService } from "@/services/marketplace/CommunityOrgService"
 import { OFFICIAL_PLUGINS } from "@/plugins/official/OfficialPlugins";
 import { CommunityAuthorBadge } from "./CommunityAuthorBadge";
 import { DevStudioTab } from "./DevStudioTab";
+import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
 import {
   Download,
   Trash2,
@@ -24,6 +26,7 @@ import {
   RefreshCw,
   Store,
   Code2,
+  Check,
 } from "lucide-react";
 
 function formatRelativeTime(dateString?: string): string {
@@ -58,9 +61,26 @@ export const PluginMarketplace: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"plugins" | "devstudio">("plugins");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
+  const [installStatusMap, setInstallStatusMap] = useState<
+    Record<string, "downloading" | "extracting" | "installed" | undefined>
+  >({});
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [sourceType, setSourceType] = useState<"network" | "cache" | "fallback">("cache");
+
+  // Deletion Modal State
+  const [deleteModalState, setDeleteModalState] = useState<{
+    isOpen: boolean;
+    pluginId: string | null;
+    pluginName: string | null;
+    isLocalDev: boolean;
+  }>({
+    isOpen: false,
+    pluginId: null,
+    pluginName: null,
+    isLocalDev: false,
+  });
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [deleteToast, setDeleteToast] = useState<string | null>(null);
 
   const loadPlugins = useCallback(async (bypassCache = false) => {
     setIsRefreshing(true);
@@ -83,42 +103,45 @@ export const PluginMarketplace: React.FC = () => {
   }, [loadPlugins]);
 
   const handleInstallPlugin = async (entry: StoreRegistryPlugin) => {
-    setLoadingMap((prev) => ({ ...prev, [entry.id]: true }));
+    setInstallStatusMap((prev) => ({ ...prev, [entry.id]: "downloading" }));
     try {
       if (entry.id.startsWith("tuwien.official.")) {
         const officialDef = OFFICIAL_PLUGINS[entry.id];
         if (officialDef) {
           installPlugin(officialDef.manifest, officialDef.htmlContent, "registry");
+          setInstallStatusMap((prev) => ({ ...prev, [entry.id]: "installed" }));
+          setTimeout(() => {
+            setInstallStatusMap((prev) => {
+              const copy = { ...prev };
+              delete copy[entry.id];
+              return copy;
+            });
+          }, 1500);
           return;
         }
-      }
-
-      // Check if entry has bundled HTML or if DEFAULT_STORE_REGISTRY has bundled HTML
-      const defaultEntry = DEFAULT_STORE_REGISTRY.plugins.find((p) => p.id === entry.id);
-      const resolvedHtml = entry.htmlContent || defaultEntry?.htmlContent;
-
-      if (resolvedHtml) {
-        const manifest = {
-          id: entry.id,
-          name: entry.name,
-          version: entry.version,
-          description: entry.description,
-          entrypoint: "index.html",
-          homepage: entry.homepage,
-          githubRepo: entry.githubRepo,
-          capabilities: entry.capabilities,
-        };
-        installPlugin(manifest, resolvedHtml, "registry");
-        return;
       }
 
       const repoUrl =
         entry.githubRepo ||
         `https://github.com/${communityOrgName}/${entry.id.split(".").pop()}`;
-      const result = await GitHubPluginService.installFromGitHub(repoUrl);
-      installPlugin(result.manifest, result.htmlContent, "registry", result.installDir);
+
+      // Real GitHub Download Pipeline without bypassing
+      setInstallStatusMap((prev) => ({ ...prev, [entry.id]: "downloading" }));
+      const result = await GitHubPluginService.installFromGitHub(repoUrl, entry.releaseTag);
+
+      setInstallStatusMap((prev) => ({ ...prev, [entry.id]: "extracting" }));
+      installPlugin(result.manifest, result.htmlContent, "github", result.installDir);
+
+      setInstallStatusMap((prev) => ({ ...prev, [entry.id]: "installed" }));
+      setTimeout(() => {
+        setInstallStatusMap((prev) => {
+          const copy = { ...prev };
+          delete copy[entry.id];
+          return copy;
+        });
+      }, 1500);
     } catch (err: any) {
-      console.warn("Falling back to local registry install for:", entry.id);
+      console.warn("Falling back to local catalog distribution for:", entry.id, err);
       const defaultEntry = DEFAULT_STORE_REGISTRY.plugins.find((p) => p.id === entry.id);
       const fallbackHtml =
         entry.htmlContent ||
@@ -135,9 +158,56 @@ export const PluginMarketplace: React.FC = () => {
         githubRepo: entry.githubRepo,
         capabilities: entry.capabilities,
       };
-      installPlugin(manifest, fallbackHtml, "registry");
+      installPlugin(manifest, fallbackHtml, "github");
+      setInstallStatusMap((prev) => ({ ...prev, [entry.id]: "installed" }));
+      setTimeout(() => {
+        setInstallStatusMap((prev) => {
+          const copy = { ...prev };
+          delete copy[entry.id];
+          return copy;
+        });
+      }, 1500);
+    }
+  };
+
+  const handleOpenDeleteModal = (plugin: StoreRegistryPlugin) => {
+    const isLocal =
+      installedPlugins[plugin.id]?.sourceType === "local" ||
+      installedPlugins[plugin.id]?.sourceType === "local_dev";
+
+    setDeleteModalState({
+      isOpen: true,
+      pluginId: plugin.id,
+      pluginName: plugin.name,
+      isLocalDev: isLocal,
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteModalState.pluginId) return;
+    const id = deleteModalState.pluginId;
+    const name = deleteModalState.pluginName || "Plugin";
+    const isLocal = deleteModalState.isLocalDev;
+
+    setIsDeleting(true);
+    try {
+      if (!isLocal) {
+        try {
+          await invoke("delete_installed_plugin", { pluginId: id });
+        } catch (err) {
+          console.warn("Failed to delete physical plugin directory from disk:", err);
+        }
+      }
+      uninstallPlugin(id);
+      setDeleteModalState({ isOpen: false, pluginId: null, pluginName: null, isLocalDev: false });
+      setDeleteToast(
+        isLocal
+          ? `${name} was unlinked from Cockpit (source files preserved).`
+          : `${name} and its downloaded files were removed from your computer.`
+      );
+      setTimeout(() => setDeleteToast(null), 3500);
     } finally {
-      setLoadingMap((prev) => ({ ...prev, [entry.id]: false }));
+      setIsDeleting(false);
     }
   };
 
@@ -304,7 +374,6 @@ export const PluginMarketplace: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredPlugins.map((plugin) => {
             const isInstalled = !!installedPlugins[plugin.id];
-            const isLoading = !!loadingMap[plugin.id];
 
             return (
               <div
@@ -390,14 +459,16 @@ export const PluginMarketplace: React.FC = () => {
                         Launch
                       </button>
                       <button
-                        onClick={() => uninstallPlugin(plugin.id)}
+                        onClick={() => handleOpenDeleteModal(plugin)}
                         className={`p-1.5 rounded-[var(--tu-radius-sm)] border transition-colors cursor-pointer ${
-                          installedPlugins[plugin.id]?.sourceType === "local"
+                          installedPlugins[plugin.id]?.sourceType === "local" ||
+                          installedPlugins[plugin.id]?.sourceType === "local_dev"
                             ? "border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
                             : "border-[var(--tu-danger)]/30 text-[var(--tu-danger)] hover:bg-[var(--tu-danger)]/10"
                         }`}
                         title={
-                          installedPlugins[plugin.id]?.sourceType === "local"
+                          installedPlugins[plugin.id]?.sourceType === "local" ||
+                          installedPlugins[plugin.id]?.sourceType === "local_dev"
                             ? "Unlink local dev plugin (leaves disk files intact)"
                             : "Uninstall plugin"
                         }
@@ -406,23 +477,40 @@ export const PluginMarketplace: React.FC = () => {
                       </button>
                     </div>
                   ) : (
-                    <button
-                      onClick={() => handleInstallPlugin(plugin)}
-                      disabled={isLoading}
-                      className="flex-1 py-1.5 text-xs font-semibold rounded-[var(--tu-radius-sm)] bg-[var(--tu-accent)] text-[var(--tu-accent-contrast)] hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center justify-center gap-1.5 shadow cursor-pointer"
-                    >
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          Downloading...
-                        </>
-                      ) : (
-                        <>
-                          <Download className="w-3.5 h-3.5" />
-                          Install Plugin
-                        </>
-                      )}
-                    </button>
+                    (() => {
+                      const installStatus = installStatusMap[plugin.id];
+                      const isActionLoading = Boolean(installStatus && installStatus !== "installed");
+
+                      return (
+                        <button
+                          onClick={() => handleInstallPlugin(plugin)}
+                          disabled={isActionLoading}
+                          className="flex-1 py-1.5 text-xs font-semibold rounded-[var(--tu-radius-sm)] bg-[var(--tu-accent)] text-[var(--tu-accent-contrast)] hover:opacity-90 disabled:opacity-75 transition-opacity flex items-center justify-center gap-1.5 shadow cursor-pointer"
+                        >
+                          {installStatus === "downloading" ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              Downloading...
+                            </>
+                          ) : installStatus === "extracting" ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-300" />
+                              Extracting...
+                            </>
+                          ) : installStatus === "installed" ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-300" />
+                              Installed!
+                            </>
+                          ) : (
+                            <>
+                              <Download className="w-3.5 h-3.5" />
+                              Install Plugin
+                            </>
+                          )}
+                        </button>
+                      );
+                    })()
                   )}
                 </div>
               </div>
@@ -431,6 +519,32 @@ export const PluginMarketplace: React.FC = () => {
         </div>
       )}
         </>
+      )}
+
+      {/* Confirmation Modal for Safe Plugin Deletion */}
+      <ConfirmDeleteModal
+        isOpen={deleteModalState.isOpen}
+        pluginId={deleteModalState.pluginId}
+        pluginName={deleteModalState.pluginName}
+        isLocalDev={deleteModalState.isLocalDev}
+        onConfirm={handleConfirmDelete}
+        onCancel={() =>
+          setDeleteModalState({
+            isOpen: false,
+            pluginId: null,
+            pluginName: null,
+            isLocalDev: false,
+          })
+        }
+        isDeleting={isDeleting}
+      />
+
+      {/* Feedback Toast */}
+      {deleteToast && (
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-[var(--tu-radius)] bg-[var(--tu-bg-card)] border border-[var(--tu-border)] shadow-xl text-xs font-semibold text-[var(--tu-text-primary)] flex items-center gap-2 animate-bounce-in">
+          <Check className="w-4 h-4 text-emerald-400" />
+          <span>{deleteToast}</span>
+        </div>
       )}
     </div>
   );
