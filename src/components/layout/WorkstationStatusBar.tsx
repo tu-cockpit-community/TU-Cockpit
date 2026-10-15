@@ -9,6 +9,7 @@ import {
   Layers,
   Clock,
 } from "lucide-react";
+import { useNetworkStore } from "@/store/useNetworkStore";
 import {
   getCurrentSemester,
   getSemesterProgress,
@@ -75,6 +76,7 @@ export const WorkstationStatusBar: React.FC = () => {
   };
 
   const activePlugin = activePluginId ? installedPlugins[activePluginId] : null;
+  const { isOnline, isTuwienReachable } = useNetworkStore();
   const semester = getCurrentSemester();
   const progress = getSemesterProgress();
 
@@ -82,10 +84,31 @@ export const WorkstationStatusBar: React.FC = () => {
     <footer className="h-6 border-t border-[var(--tu-border)] bg-[var(--tu-bg-surface)] px-3 flex items-center justify-between text-[11px] text-[var(--tu-text-secondary)] select-none shrink-0 z-30">
       {/* Left: Reachability & Current Workstation Context */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-1.5" title="Connected to TU Wien Services (TISS, TUWEL, Shibboleth)">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        <div
+          className="flex items-center gap-1.5 cursor-help"
+          title={
+            !isOnline
+              ? "Disconnected from campus Wi-Fi / internet (Offline Mode)"
+              : !isTuwienReachable
+              ? "Internet connected, but TU Wien services degraded or slow"
+              : "Connected to TU Wien Services (TISS, TUWEL, Shibboleth)"
+          }
+        >
+          <span
+            className={`w-2 h-2 rounded-full ${
+              !isOnline
+                ? "bg-rose-500 animate-ping"
+                : !isTuwienReachable
+                ? "bg-amber-400"
+                : "bg-emerald-500 animate-pulse"
+            }`}
+          />
           <span className="font-medium text-[var(--tu-text-primary)] hidden sm:inline">
-            TU Services Online
+            {!isOnline
+              ? "Offline Mode"
+              : !isTuwienReachable
+              ? "Campus Degraded"
+              : "TU Services Online"}
           </span>
         </div>
 

@@ -19,6 +19,8 @@ import { SyncSettings } from "@/components/settings/SyncSettings";
 import { VoWiReader } from "@/components/vowi/VoWiReader";
 import { WorkstationStatusBar } from "@/components/layout/WorkstationStatusBar";
 import { KeyboardShortcutsModal } from "@/components/navigation/KeyboardShortcutsModal";
+import { OfflineNoticeBanner } from "@/components/layout/OfflineNoticeBanner";
+import { CampusNetworkSentinel } from "@/services/network/CampusNetworkSentinel";
 import { DEFAULT_STORE_REGISTRY } from "@/services/marketplace/GitHubPluginService";
 import { X, BookOpen } from "lucide-react";
 
@@ -84,6 +86,12 @@ export const App: React.FC = () => {
   useEffect(() => {
     applyToRoot();
   }, [applyToRoot]);
+
+  // Initialize Campus Network Sentinel on mount
+  useEffect(() => {
+    CampusNetworkSentinel.getInstance().init();
+    return () => CampusNetworkSentinel.getInstance().destroy();
+  }, []);
 
   // Power-User Desktop Keyboard Shortcuts Bus
   useEffect(() => {
@@ -305,6 +313,7 @@ export const App: React.FC = () => {
           <ConfigurableNav />
           <div className="flex-1 flex flex-col h-full overflow-hidden">
             <ExecutiveHeader onOpenSettings={() => openSettings("themes")} />
+            <OfflineNoticeBanner />
             {renderMainContent()}
             <WorkstationStatusBar />
           </div>
@@ -316,6 +325,7 @@ export const App: React.FC = () => {
         <div className="flex h-full w-full">
           <div className="flex-1 flex flex-col h-full overflow-hidden">
             <ExecutiveHeader onOpenSettings={() => openSettings("themes")} />
+            <OfflineNoticeBanner />
             {renderMainContent()}
             <WorkstationStatusBar />
           </div>
@@ -327,6 +337,7 @@ export const App: React.FC = () => {
       {(navOrientation === "bottom" || navOrientation === "top") && (
         <div className="flex flex-col h-full w-full">
           <ExecutiveHeader onOpenSettings={() => openSettings("themes")} />
+          <OfflineNoticeBanner />
           <ConfigurableNav />
           {renderMainContent()}
           <WorkstationStatusBar />
