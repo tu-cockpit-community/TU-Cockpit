@@ -272,7 +272,32 @@ To ensure the application delivers authentic utility rather than hollow demonstr
     - Host CSS custom property bindings (`--tu-bg-canvas`, `--tu-bg-surface`, `--tu-text-primary`, `--tu-border`, `--tu-accent`, etc.).
   - Prevents plugins like `tu-calendar` or `tu-room-radar` from rendering unstyled, raw, or broken HTML when Tailwind CSS v4 utility classes rely on external font/reset stylesheets.
 
+### 5.8 DevStudio: Local Plugin Staging & Protected Workspace Invariant
+* **Dedicated Local Staging Environment:**
+  - Integrated into the Marketplace HUB as "DevStudio" (replacing static developer guides).
+  - Displays locally installed community plugin workspaces (`community-plugins/*` or configured local directories) with `sourceType: "local"`.
+  - Empowers student developers to inspect manifests, verify permissions, preview single-file builds, and test plugins in the live sandboxed host before publishing releases to GitHub.
+* **Protected Local Workspace Invariant:**
+  - Local dev plugins are repositories with working code on the user's filesystem.
+  - They are strictly immune to physical file deletion from the TU Cockpit UI.
+  - The delete action for local plugins is either disabled or strictly designated as "Unlink from Cockpit", leaving all repository files, git history, and local modifications completely intact.
+
+### 5.9 Dedicated Downloaded Plugins Directory & Real Safe Deletion Engine
+* **Dedicated Filesystem Storage:**
+  - Downloaded marketplace plugins are extracted into a dedicated, physical folder on the user's computer:
+    - Default path: `~/Documents/TU-Cockpit/Plugins/` (or `$APPDATA/tu_cockpit/downloaded_plugins/`).
+    - Configurable in the Settings Modal under the "Plugins" tab.
+* **Authentic GitHub Download Pipeline:**
+  - When a student clicks "Install Plugin" in the Marketplace, TU Cockpit downloads the compiled release asset (`plugin.zip`) directly from GitHub Releases via `install_plugin_from_github`.
+  - Extracts assets into `<downloaded_plugins_dir>/<plugin_id>/`, validates `manifest.json`, and activates the plugin from real files on disk.
+* **Real Uninstallation with Confirmation Modal:**
+  - When uninstalling a downloaded plugin (`sourceType: "github"`), a mandatory `<ConfirmDeleteModal />` displays:
+    *"Are you sure you want to delete and uninstall '{Plugin Name}'? This will permanently remove all downloaded files for this plugin from your computer."*
+  - Upon student confirmation, Rust IPC command `delete_installed_plugin(plugin_id: String) -> Result<(), String>` physically removes the directory from disk and cleans up store state.
+  - Deletion command validates that the target path resides inside the designated downloaded plugins directory to prevent arbitrary directory removal.
+
 ---
+
 
 
 ## 6. Student Identity, Authentication & Autofill Vault

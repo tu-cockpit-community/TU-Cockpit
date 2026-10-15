@@ -19,19 +19,22 @@
 > - Milestones 56–58 (Phase 15): See [docs/archive/PHASE_15.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_15.md)  
 >
 > **Current Sprint Status:**
-> - 🟢 **PHASES 1–16 (COMPLETED & READY FOR ARCHIVE):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, Headless VoWi Reader, Autonomous Plugins (`tu-calendar`, `tu-slide-vault`, `tu-mensa`, `tu-room-radar`), Launching Reliability, Single-File Inlining, Unified Academic Spotlight, Workstation Status Bar & ICS Calendar Export, Live Functional Plugin Depth, Real GitHub Marketplace Telemetry & Workflow Error Rectification, Authentic University Workflow Ingestion: Physical Filesystem Slide Vault, Settings Modal Plugins Tab, In-Webview TUWEL Resource Interception ("Add to Slide Vault"), In-Webview TISS Timetable Auto-Sync, Zero-Mock Policy & Plugin Layout Formatting (Milestones 0–61).
->
+> - 🟢 **PHASES 1–15 (COMPLETED & ARCHIVED):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, Headless VoWi Reader, Autonomous Plugins (`tu-calendar`, `tu-slide-vault`, `tu-mensa`, `tu-room-radar`), Launching Reliability, Single-File Inlining, Unified Academic Spotlight, Workstation Status Bar & ICS Calendar Export, Live Functional Plugin Depth, Real GitHub Marketplace Telemetry & Workflow Error Rectification (Milestones 0–58).
+> - 🟡 **PHASE 16 (ACTIVE SPRINT):** Authentic University Workflow Ingestion: Physical Filesystem Slide Vault, DevStudio Local Sandbox, Real GitHub Plugin Download & Delete Engine, In-Webview TUWEL/TISS Ingestion, Zero-Mock Policy & Plugin Layout Formatting (Milestones 59–64).
+
 ---
 
 # ==============================================================================
-# 🟢 PART XVI: PHASE 16 — AUTHENTIC UNIVERSITY WORKFLOW INGESTION: PHYSICAL SLIDE VAULT, IN-WEBVIEW SYNC & ZERO-MOCK FORMATTING
+# 🟡 PART XVI: PHASE 16 — AUTHENTIC UNIVERSITY WORKFLOW INGESTION: PHYSICAL SLIDE VAULT, DEVSTUDIO, REAL GITHUB DOWNLOAD/DELETE & IN-WEBVIEW SYNC
 # ==============================================================================
 
 > **Phase 16 Summary & Objective:**  
-> 1. **Settings Modal "Plugins" Tab & Physical Slide Vault:** Add a dedicated "Plugins" configuration tab in `SettingsModal.tsx`. Connect `tu-slide-vault` to a physical filesystem folder on the computer (default `~/Documents/TU-Cockpit/Slide-Vault/`) with custom directory selection via folder picker and native "Open in Finder / File Explorer" support.
-> 2. **In-Webview TUWEL "Add to Slide Vault" Ingestion:** Inject an inline `[📥 Add to Slide Vault]` button adjacent to every lecture slide and PDF download link on `tuwel.tuwien.ac.at`. Clicking downloads the file through the authenticated session directly into `<SlideVault>/<CourseName>/<Filename>.pdf`.
-> 3. **In-Webview TISS Timetable Auto-Sync:** When navigating to `https://tiss.tuwien.ac.at`, child webview hooks detect the student's authenticated session and personal iCal export URL, automatically syncing timetable events into the local database and updating `tu-calendar` seamlessly.
-> 4. **Fix Layout Formatting & Zero-Mock Policy:** Rectify unstyled / raw rendering in `tu-calendar` and `tu-room-radar` by injecting self-contained layout baselines and CSS resets into iframes. Purge ALL fake mock data (dummy AlgoDat slides, static fake Mensa food items, dummy deadline tasks), replacing them with authentic live feeds and polished empty states.
+> 1. **Settings Modal "Plugins" Tab & Physical Slide Vault:** Implement physical filesystem storage for Slide Vault (`~/Documents/TU-Cockpit/Slide-Vault/`) with native folder picker and "Open in Finder/Explorer".
+> 2. **DevStudio (Local Plugin Staging & Pre-release Testing):** Upgrade the marketplace developer view into a dedicated DevStudio where local development plugins (`community-plugins/*`) are recognized, staged, and tested without deleting local disk repositories.
+> 3. **Dedicated Downloaded Plugins Directory & Real GitHub Installation:** Create a dedicated filesystem directory for downloaded marketplace plugins. Make "Install Plugin" actually download the release archive (`plugin.zip`) from GitHub, extract to disk, and run from real files.
+> 4. **Real Safe Deletion Engine with Confirmation Modal:** Add `<ConfirmDeleteModal />` before uninstallation, and implement Rust command `delete_installed_plugin` to purge files from disk while strictly safeguarding local DevStudio plugins.
+> 5. **In-Webview TUWEL & TISS Ingestion:** Inject `[📥 Add to Slide Vault]` next to TUWEL lecture slides to save directly to disk, and automatically sync TISS timetable on navigation.
+> 6. **Layout Formatting Fix & Zero-Mock Policy:** Eliminate raw/unformatted rendering in `tu-calendar` and `tu-room-radar`, and purge all dummy mock cards across plugins.
 
 ---
 
@@ -39,7 +42,7 @@
 
 ---
 
-### Milestone 59 Prompt: Settings Modal Plugins Tab & Physical Filesystem Slide Vault Storage Engine `[STATUS: COMPLETED ✅ - Commit b826bfa]`
+### Milestone 59 Prompt: Settings Modal Plugins Tab & Physical Filesystem Slide Vault Storage Engine `[STATUS: READY FOR EXECUTION 🟡]`
 
 ```markdown
 You are a senior full-stack desktop systems engineer specializing in Tauri v2, Rust filesystem APIs, and React 19 settings UI.
@@ -63,34 +66,30 @@ Implement a physical filesystem storage engine for the TU Slide Vault and add a 
      - Automatically create the root directory on initialization if it does not exist.
    - Implement Tauri commands:
      - `get_slide_vault_path() -> Result<String, String>`: Returns the currently configured absolute directory path.
-     - `set_slide_vault_path(new_path: String) -> Result<(), String>`: Validates and updates the active storage path, creating the directory if missing.
+     - `set_slide_vault_path(new_path: String) -> Result<(), String>`: Validates and updates active storage path.
      - `save_slide_to_vault(course_name: String, filename: String, bytes: Vec<u8>) -> Result<String, String>`:
-       - Sanitizes course name and filename (strip illegal characters `/`, `\`, `:`, `*`, `?`, `"`, `<`, `>`, `|`).
+       - Sanitizes course name and filename (strip illegal filesystem characters).
        - Creates subdirectory `<vault_path>/<sanitized_course>/`.
        - Writes `bytes` to `<vault_path>/<sanitized_course>/<sanitized_filename>`.
        - Returns the absolute destination path on success.
      - `list_slide_vault_files() -> Result<Vec<SlideFileRecord>, String>`:
-       - Recursively or hierarchically reads the slide vault folder.
-       - Returns `Vec<SlideFileRecord>` where each record contains `{ course: String, filename: String, path: String, size_bytes: u64, modified_timestamp: u64 }`.
+       - Recursively reads slide vault folder returning `{ course, filename, path, size_bytes, modified_timestamp }`.
      - `reveal_slide_vault_folder() -> Result<(), String>`:
-       - Opens the slide vault folder in the native OS file explorer (Finder on macOS via `open`, File Explorer on Windows via `explorer`, xdg-open on Linux).
+       - Opens the slide vault folder in the native OS file explorer (Finder on macOS, File Explorer on Windows, xdg-open on Linux).
    - Export commands and register them in `src-tauri/src/lib.rs` under `generate_handler![...]`.
 
 2. **Frontend Settings Tab (`src/components/settings/PluginsSettingsTab.tsx`):**
-   - Create a clean, elegant settings panel styled with TU Cockpit tokens (`--tu-bg-surface`, `--tu-border`, `--tu-text-primary`, `--tu-accent`).
    - Section 1: **TU Slide Vault Configuration**
      - Display current directory path with folder icon.
      - "Change Directory" button: Opens native directory picker via `@tauri-apps/plugin-dialog` (`open({ directory: true })`) and updates backend via `invoke('set_slide_vault_path', { newPath })`.
      - "Open in Finder / Explorer" button: Invokes `reveal_slide_vault_folder`.
-     - Display statistics: Total stored slides count and disk usage size.
    - Section 2: **Portal Integration & Automation Toggles**
-     - Toggle: "TUWEL Resource Interception (Show 'Add to Slide Vault' on course pages)" (default true).
-     - Toggle: "TISS Timetable Auto-Sync (Automatically sync calendar on portal visit)" (default true).
-   - Integrate `PluginsSettingsTab.tsx` into `SettingsModal.tsx` as a top-level tab alongside "General", "Appearance", "Accounts", and "Updates", using a `<Puzzle />` or `<Blocks />` icon.
+     - Toggle: "TUWEL Resource Interception (Show 'Add to Slide Vault' on course pages)".
+     - Toggle: "TISS Timetable Auto-Sync (Automatically sync calendar on portal visit)".
+   - Integrate `PluginsSettingsTab.tsx` into `SettingsModal.tsx` as a top-level tab using `<Puzzle />` or `<Blocks />` icon.
 
 3. **State Management (`useAppStore.ts`):**
    - Add preferences: `slideVaultPath: string`, `tuwelInterceptionEnabled: boolean`, `tissAutoSyncEnabled: boolean`.
-   - Persist changes to local storage / SQLite.
 
 ### Verification Runbook:
 1. `npm run build`
@@ -100,7 +99,158 @@ Implement a physical filesystem storage engine for the TU Slide Vault and add a 
 
 ---
 
-### Milestone 60 Prompt: In-Webview TUWEL "Add to Slide Vault" & TISS Auto-Sync Engine `[STATUS: COMPLETED ✅ - Commit fb82aa0]`
+### Milestone 60 Prompt: DevStudio (Local Plugin Development & Pre-Release Staging) `[STATUS: READY FOR EXECUTION 🟡]`
+
+```markdown
+You are a senior frontend engineer and tooling specialist working on developer experience for the TU Cockpit plugin ecosystem.
+
+### Objective:
+Upgrade the developer section of `PluginMarketplace.tsx` into **DevStudio** (replacing static guide text with an interactive local plugin development sandbox). Recognize and surface locally installed plugins (`community-plugins/*`) as local dev plugins (`sourceType: "local"`), and enforce the protected workspace invariant so local dev repositories are never deleted from disk.
+
+### Context & Files:
+- [src/components/marketplace/PluginMarketplace.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/marketplace/PluginMarketplace.tsx)
+- Create: `src/components/marketplace/DevStudioTab.tsx`
+- [src/store/useDeveloperStore.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/store/useDeveloperStore.ts)
+- [src/store/useAppStore.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/store/useAppStore.ts)
+- Specifications: [ARCHITECTURE.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/ARCHITECTURE.md) Section 5.8
+
+### Detailed Implementation Tasks:
+
+1. **DevStudio Interface (`src/components/marketplace/DevStudioTab.tsx`):**
+   - Create a sleek, modern workspace tab header: "DevStudio" with subtitle "Local Plugin Sandbox & Pre-Release Staging".
+   - Section 1: **Active Local Workspaces (`community-plugins/`)**
+     - Scans/surfaces local plugins on the student's PC:
+       - `tu-calendar` (`community-plugins/tu-calendar`)
+       - `tu-slide-vault` (`community-plugins/tu-slide-vault`)
+       - `tu-mensa` (`community-plugins/tu-mensa`)
+       - `tu-room-radar` (`community-plugins/tu-room-radar`)
+     - For each local workspace, display:
+       - Plugin Name, ID, Version, and filesystem folder path.
+       - Badges: `[Local Dev Workspace 🛠️]`, `[Protected 🔒]`, and build status indicator (`dist/index.html` compiled vs unbuilt).
+       - Action: "Test in Cockpit" (loads directly into sandbox with `sourceType: "local"`).
+       - Action: "Rebuild Bundle" / "Open Directory" (opens folder in file explorer).
+   - Section 2: **Interactive Plugin Manifest Validator & Scaffold Guide**
+     - Visual schema checker for new plugins with manifest validation.
+
+2. **Protected Local Workspace Invariant (`useAppStore.ts` & UI):**
+   - Ensure local dev plugins registered with `sourceType: "local"` are visually badged as "Dev Workspace".
+   - In UI and store, ensure that the delete button for local plugins does NOT trigger filesystem file deletion. If uninstalled from the active navigation dock, it only unlinks the view while preserving all repository files on disk.
+
+3. **Integrate into `PluginMarketplace.tsx`:**
+   - Update tabs: replace `"developers"` with `"devstudio"` labeled "DevStudio" with `<Code2 />` or `<Terminal />` icon.
+
+### Verification Runbook:
+1. `npm run build`
+2. `cargo check --manifest-path src-tauri/Cargo.toml`
+3. Git hygiene commit: `feat(marketplace): create devstudio tab and protect local dev workspaces`
+```
+
+---
+
+### Milestone 61 Prompt: Dedicated Downloaded Plugins Directory & Real GitHub Installation `[STATUS: READY FOR EXECUTION 🟡]`
+
+```markdown
+You are a senior Tauri systems and backend networking engineer specializing in GitHub releases and archive management.
+
+### Objective:
+Implement a dedicated filesystem folder for downloaded marketplace plugins (default `~/Documents/TU-Cockpit/Plugins/` or `$APPDATA/tu_cockpit/downloaded_plugins/`) and ensure the "Install Plugin" button in `PluginMarketplace.tsx` actually downloads compiled release bundles (`plugin.zip`) from GitHub, extracts them into this folder, and runs them from real files on disk.
+
+### Context & Files:
+- [src-tauri/src/plugin_downloader.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/plugin_downloader.rs)
+- [src-tauri/src/lib.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/lib.rs)
+- [src/services/marketplace/GitHubPluginService.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/marketplace/GitHubPluginService.ts)
+- [src/components/marketplace/PluginMarketplace.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/marketplace/PluginMarketplace.tsx)
+- [src/components/settings/PluginsSettingsTab.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/settings/PluginsSettingsTab.tsx)
+- Specifications: [ARCHITECTURE.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/ARCHITECTURE.md) Section 5.9
+
+### Detailed Implementation Tasks:
+
+1. **Dedicated Download Directory Management (`src-tauri/src/plugin_downloader.rs`):**
+   - Provide standard path resolution for downloaded plugins:
+     - Default path: `<Documents>/TU-Cockpit/Plugins` or `<app_data_dir>/downloaded_plugins`.
+     - Automatically create on startup.
+   - Implement Tauri commands:
+     - `get_downloaded_plugins_path() -> Result<String, String>`
+     - `set_downloaded_plugins_path(new_path: String) -> Result<(), String>`
+     - `reveal_downloaded_plugins_folder() -> Result<(), String>`
+   - Expose this path in `PluginsSettingsTab.tsx` with a directory picker and "Open in Finder/Explorer" button.
+
+2. **Real GitHub Download Pipeline (`plugin_downloader.rs` & `GitHubPluginService.ts`):**
+   - In `install_plugin_from_github`:
+     - Target directory: `<downloaded_plugins_path>/<plugin_id>/`.
+     - Query GitHub Releases API for release asset `plugin.zip`.
+     - If release asset exists, stream download bytes and unpack into `<downloaded_plugins_path>/<plugin_id>/`.
+     - If no release tag exists yet on GitHub, provide clear feedback or fall back to repository release builder.
+     - Extract `manifest.json` and entrypoint HTML. Read compiled HTML from disk into return payload.
+     - Return `{ id, name, version, install_dir, entrypoint_html, ... }`.
+
+3. **Marketplace Ingestion Update (`PluginMarketplace.tsx`):**
+   - In `handleInstallPlugin`, do NOT bypass the GitHub download when installing from the marketplace!
+   - Invoke `GitHubPluginService.installFromGitHub(repoUrl)`.
+   - Call `installPlugin(result.manifest, result.htmlContent, "github", result.installDir)`.
+   - Display real progress state (`Downloading...`, `Extracting...`, `Installed!`).
+
+### Verification Runbook:
+1. `npm run build`
+2. `cargo check --manifest-path src-tauri/Cargo.toml`
+3. Git hygiene commit: `feat(plugins): implement real github download pipeline into dedicated storage folder`
+```
+
+---
+
+### Milestone 62 Prompt: Real Plugin Deletion Engine with Confirmation Modal & Safety Safeguards `[STATUS: READY FOR EXECUTION 🟡]`
+
+```markdown
+You are a senior desktop software engineer specializing in safe filesystem manipulation and accessible confirmation dialogues.
+
+### Objective:
+Implement a real plugin deletion engine in Rust that purges downloaded marketplace plugins from disk, accompanied by a mandatory "Confirm Deletion" modal dialog in the UI. Strictly enforce safeguards preventing any filesystem deletion of local DevStudio plugins.
+
+### Context & Files:
+- [src-tauri/src/plugin_downloader.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/plugin_downloader.rs)
+- [src-tauri/src/lib.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/lib.rs)
+- Create: `src/components/marketplace/ConfirmDeleteModal.tsx`
+- [src/components/marketplace/PluginMarketplace.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/marketplace/PluginMarketplace.tsx)
+- [src/store/useAppStore.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/store/useAppStore.ts)
+- Specifications: [ARCHITECTURE.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/ARCHITECTURE.md) Section 5.9
+
+### Detailed Implementation Tasks:
+
+1. **Rust Deletion Engine (`src-tauri/src/plugin_downloader.rs`):**
+   - Implement Tauri command:
+     `delete_installed_plugin(plugin_id: String) -> Result<(), String>`
+   - Security Validation:
+     - Verify that the target plugin directory is strictly located inside the configured `<downloaded_plugins_path>`.
+     - Reject any path traversal (`..`) or paths pointing outside the downloaded plugins folder (e.g. project root, `community-plugins/`, OS system folders).
+     - Remove the directory recursively using `std::fs::remove_dir_all`.
+   - Register command in `src-tauri/src/lib.rs`.
+
+2. **Confirmation Modal (`src/components/marketplace/ConfirmDeleteModal.tsx`):**
+   - Reusable modal dialog with backdrop blur and accessible focus management:
+     - Title: "Uninstall Plugin"
+     - Warning message:
+       `"Are you sure you want to uninstall '{pluginName}'? This will permanently delete all downloaded files for this plugin from your computer."`
+     - Destructive Action Button: "Delete Plugin" (red accent with trash icon).
+     - Cancel Button: "Cancel" (neutral outline).
+
+3. **Store & UI Integration (`useAppStore.ts` & `PluginMarketplace.tsx`):**
+   - When student clicks delete icon on an installed plugin:
+     - If `plugin.sourceType === "local"`, show an informative dialog: "Local Development Plugin: This plugin is linked to a local workspace on your computer. It cannot be deleted from the filesystem. You can unlink it from the cockpit view without affecting your files."
+     - If `plugin.sourceType === "github"` (or marketplace download), open `ConfirmDeleteModal`.
+     - Upon confirmation:
+       - Call `invoke("delete_installed_plugin", { pluginId })`.
+       - Call `uninstallPlugin(pluginId)` to clean up state and navigation dock.
+       - Display a confirmation toast: `"{pluginName} was removed from your computer."`
+
+### Verification Runbook:
+1. `npm run build`
+2. `cargo check --manifest-path src-tauri/Cargo.toml`
+3. Git hygiene commit: `feat(plugins): implement safe physical plugin deletion and confirmation modal`
+```
+
+---
+
+### Milestone 63 Prompt: In-Webview TUWEL "Add to Slide Vault" & TISS Auto-Sync Engine `[STATUS: READY FOR EXECUTION 🟡]`
 
 ```markdown
 You are a senior Tauri systems engineer specializing in webview DOM bridge automation and university portal integration.
@@ -112,37 +262,21 @@ Implement automatic calendar synchronization when navigating to TISS and inject 
 - [src-tauri/src/native_webview.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/native_webview.rs)
 - [src-tauri/src/embedded_portals.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/embedded_portals.rs)
 - [src-tauri/src/slide_vault.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/slide_vault.rs)
-- [src/components/plugin-host/PluginHostManager.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/plugin-host/PluginHostManager.ts)
 - Specifications: [ARCHITECTURE.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/ARCHITECTURE.md) Sections 4.8 & 4.9
 
 ### Detailed Implementation Tasks:
 
 1. **TUWEL "Add to Slide Vault" Resource Interception (`native_webview.rs`):**
-   - In `native_webview.rs`, add an initialization script injected into `tuwien-official-tuwel` webviews on navigation:
-     - Target host: `tuwel.tuwien.ac.at`.
-     - Script detects resource links matching:
-       - `a[href*="/mod/resource/view.php"]`
-       - `a[href*="/mod/folder/"]`
-       - `a[href$=".pdf"]`, `a[href*=".pdf?"]`
-     - Inserts a compact, stylish button next to each link:
-       `[📥 Add to Slide Vault]` styled with TU Wien Blue accent, subtle rounded pill border, and hover state.
-     - When clicked by the student:
-       - Prevent default navigation.
-       - Extract Course Title from page DOM (e.g. `document.querySelector('.page-header-headings h1, .breadcrumb-item:nth-last-child(2)')?.textContent?.trim() || 'General'`).
-       - Extract Resource Filename from anchor text or URL.
-       - Fetch the PDF file data using authenticated in-webview `fetch(link.href, { credentials: 'include' })` as an `ArrayBuffer`.
-       - Send the buffer to host Rust backend via Tauri IPC (`window.__TAURI__.core.invoke('save_slide_to_vault', { courseName, filename, bytes })`).
-       - Update button UI to `[✅ Saved to Vault]` with green indicator and emit an event to notify the host shell.
+   - Inject script into `tuwien-official-tuwel` webviews targeting `tuwel.tuwien.ac.at`:
+     - Detects links matching `a[href*="/mod/resource/view.php"]`, `a[href*="/mod/folder/"]`, `a[href$=".pdf"]`.
+     - Inserts compact button: `[📥 Add to Slide Vault]`.
+     - On click: fetches PDF with session cookies as `ArrayBuffer` and invokes `save_slide_to_vault({ courseName, filename, bytes })`.
+     - Updates button UI to `[✅ Saved to Vault]` with checkmark.
 
 2. **TISS Timetable Auto-Sync Hook (`native_webview.rs`):**
-   - In `native_webview.rs`, add navigation listener for `tiss.tuwien.ac.at`:
-     - When the student visits `tiss.tuwien.ac.at`, check for authenticated state or navigation to personal timetable/cal links (`/personal/termin/ical` or overview).
-     - In-webview script triggers authenticated background fetch of the student's personal iCal schedule (`/personal/termin/ical` or fetches personal timetable token).
-     - Sends iCal string payload to host via IPC `sync_tiss_ical(ical_content: String)`.
-     - Rust parses iCal events, updates local SQLite store, and broadcasts event `calendar-events-synced` to the host shell and active `tu-calendar` instance.
-
-3. **Slide Vault Plugin Update:**
-   - Ensure `tu-slide-vault` listens for newly saved slides and displays the live list of files returned by `list_slide_vault_files`.
+   - On navigation to `tiss.tuwien.ac.at`, detect authenticated session and timetable export (`/personal/termin/ical`).
+   - Fetches personal iCal feed and invokes `sync_tiss_ical(ical_content: String)`.
+   - Parses events into local database and updates `tu-calendar`.
 
 ### Verification Runbook:
 1. `npm run build`
@@ -152,7 +286,7 @@ Implement automatic calendar synchronization when navigating to TISS and inject 
 
 ---
 
-### Milestone 61 Prompt: Fix Plugin Layout Formatting & Zero-Mock Policy Eradication `[STATUS: COMPLETED ✅ - Commit d7a8f65]`
+### Milestone 64 Prompt: Fix Plugin Layout Formatting & Zero-Mock Policy Eradication `[STATUS: READY FOR EXECUTION 🟡]`
 
 ```markdown
 You are a senior frontend engineer and CSS architecture specialist working across React 19, Tailwind CSS v4, and iframe sandboxes.
@@ -173,31 +307,17 @@ Fix unformatted / raw layout rendering in `tu-calendar` and `tu-room-radar`, and
 ### Detailed Implementation Tasks:
 
 1. **Fix In-Frame CSS & Layout Formatting (`tu-calendar` & `tu-room-radar`):**
-   - In both plugins, inspect why elements render unstyled:
-     - Ensure `box-sizing: border-box`, explicit Flexbox/Grid CSS properties, container max-widths, and padding are declared with robust inline CSS or scoped stylesheet fallbacks.
-     - Inject full CSS reset and CSS variable declarations (`--tu-bg-canvas: #0b0f17; --tu-bg-surface: #111827; --tu-text-primary: #f8fafc; --tu-border: #1e293b; --tu-accent: #006699;`) into `index.html` and `index.css`.
-     - Ensure layout flex column fill (`min-h-screen`, `h-full`, `overflow-y-auto`) allows proper scrolling and prevents unstyled wrapping.
+   - Inject self-contained CSS reset, flex column hierarchy, and `--tu-*` token fallbacks in both plugins so they format beautifully without raw HTML elements.
 
 2. **Eradicate ALL Synthetic / Dummy Mock Data (Zero-Mock Policy):**
-   - **`tu-slide-vault`:**
-     - Remove fake default slides (AlgoDat Lecture 01, DBS Normalization).
-     - Implement real empty state:
-       `"Your Slide Vault is empty. In TUWEL, click 'Add to Slide Vault' on any course page, or drop PDF files here to begin."`
-     - Integrate with physical filesystem list (`list_slide_vault_files`) or local file picker.
-   - **`tu-mensa`:**
-     - Purge static mock menu items.
-     - Implement live daily lunch menu fetch or authentic weekly cafeteria schedule for TU Wien (Mensa Freihaus, Cafeteria Freihaus, Mensa Gußhaus, Buffet Schütte-Lihotzky).
-     - When closed, display authentic operating hours ("Opens at 11:00 AM" / "Weekend - Closed").
-   - **`tu-calendar`:**
-     - Purge dummy deadlines ("AlgoDat Übung 3", "DBS Exam").
-     - Default to authentic empty state: `"No upcoming deadlines. Sync your TISS calendar by visiting TISS or import an .ics file."`
-   - **`tu-room-radar`:**
-     - Ground room list strictly in authentic TU Wien rooms (Freihaus FH Hörsäle 1–8, Hauptgebäude Kuppelsaal, Informatikhörsaal, Gußhaus EI Hörsäle) with real opening schedules.
+   - `tu-slide-vault`: Remove fake AlgoDat/DBS slides. Provide clean empty state ("No slides in vault yet...").
+   - `tu-mensa`: Remove static fake menu entries. Connect to live daily lunch menu or real campus opening schedule.
+   - `tu-calendar`: Remove dummy deadlines. Hydrate strictly from TISS auto-sync or student-created tasks.
+   - `tu-room-radar`: Ground room list in authentic TU Wien rooms with real opening hours.
 
 3. **Recompile Plugins & Update Single-File Bundles:**
-   - In `community-plugins/tu-calendar`, `community-plugins/tu-slide-vault`, `community-plugins/tu-mensa`, `community-plugins/tu-room-radar`:
-     - Run `npm run build` with `vite-plugin-singlefile`.
-   - Update `COMMUNITY_CALENDAR_HTML`, `COMMUNITY_SLIDE_VAULT_HTML`, `COMMUNITY_MENSA_HTML`, and `COMMUNITY_ROOM_RADAR_HTML` in `src/services/marketplace/CommunityPluginBundles.ts` with the compiled single-file HTML distributions.
+   - In all 4 plugins, run `npm run build` with `vite-plugin-singlefile`.
+   - Update `CommunityPluginBundles.ts` with newly compiled distributions.
 
 ### Verification Runbook:
 1. `npm run build`
