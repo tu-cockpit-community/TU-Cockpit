@@ -21,6 +21,7 @@
 | **Student Auth & MFA Vault** | [LoginModal.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/auth/LoginModal.tsx), [AccountAutofillSettings.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/settings/AccountAutofillSettings.tsx) | [useAuthStore.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/store/useAuthStore.ts), [useVaultStore.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/store/useVaultStore.ts) | [AuthService.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/auth/AuthService.ts), [AutofillDaemon.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/auth/AutofillDaemon.ts) | [totp_vault.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/totp_vault.rs), `native_webview.rs` (`inject_portal_autofill`) |
 | **Command Palette (`Cmd+K`)** | [CommandPalette.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/palette/CommandPalette.tsx) | [usePaletteStore.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/store/usePaletteStore.ts) | [FuzzySearchService.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/palette/FuzzySearchService.ts), [tu_rooms_index.json](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/data/tu_rooms_index.json) | — |
 | **Settings & Preferences** | [SettingsModal.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/settings/SettingsModal.tsx) | [useAppStore.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/store/useAppStore.ts) | — | — |
+| **Slide Vault & Plugin Settings** | [SettingsModal.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/settings/SettingsModal.tsx) (`PluginsSettingsTab.tsx`) | [useAppStore.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/store/useAppStore.ts) | — | `slide_vault.rs`, [native_webview.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/native_webview.rs) |
 | **Auto-Updater** | [UpdaterToast.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/updater/UpdaterToast.tsx), [UpdateSettings.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/settings/UpdateSettings.tsx) | [useUpdaterStore.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/store/useUpdaterStore.ts) | — | [lib.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/lib.rs) (`tauri-plugin-updater`) |
 | **E2EE State Sync** | [SyncSettings.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/settings/SyncSettings.tsx) | [useAppStore.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/store/useAppStore.ts) | [CryptoSyncEngine.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/sync/CryptoSyncEngine.ts), [GistSyncAdapter.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/sync/GistSyncAdapter.ts) | — |
 
@@ -34,7 +35,7 @@ Before reading or editing code, understand which document governs what:
 ├── AGENTS.md                   <-- READ FIRST: Agent swarm operating rules & verification commands
 ├── PROJECT_MAP.md              <-- YOU ARE HERE: Quick-lookup table & file index for AI agents
 ├── ARCHITECTURE.md             <-- LIVING SPECIFICATIONS: Ground truth for IPC, CSS tokens, Webviews, Security
-├── PLAN.md                     <-- ACTIVE SPRINT ONLY: Phase 15 milestones and worker prompts (< 600 lines)
+├── PLAN.md                     <-- ACTIVE SPRINT ONLY: Phase 16 milestones and worker prompts (< 600 lines)
 ├── README.md                   <-- USER DOCUMENTATION: End-user features and showcase
 └── docs/
     └── archive/
@@ -46,7 +47,8 @@ Before reading or editing code, understand which document governs what:
         ├── PHASE_11.md         <-- COLD STORAGE: Completed milestones 44–46 (Phase 11: Launching & Bundling Invariants)
         ├── PHASE_12.md         <-- COLD STORAGE: Completed milestones 47–49 (Phase 12: Single-File Inlining)
         ├── PHASE_13.md         <-- COLD STORAGE: Completed milestones 50–52 (Phase 13: Spotlight Integration & tu-mensa)
-        └── PHASE_14.md         <-- COLD STORAGE: Completed milestones 53–55 (Phase 14: Status Bar, ICS & tu-room-radar)
+        ├── PHASE_14.md         <-- COLD STORAGE: Completed milestones 53–55 (Phase 14: Status Bar, ICS & tu-room-radar)
+        └── PHASE_15.md         <-- COLD STORAGE: Completed milestones 56–58 (Phase 15: Telemetry & CI Error Fixes)
 ```
 
 ### Golden Rules for AI Agents:

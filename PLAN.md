@@ -16,243 +16,192 @@
 > - Milestones 47–49 (Phase 12): See [docs/archive/PHASE_12.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_12.md)  
 > - Milestones 50–52 (Phase 13): See [docs/archive/PHASE_13.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_13.md)  
 > - Milestones 53–55 (Phase 14): See [docs/archive/PHASE_14.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_14.md)  
+> - Milestones 56–58 (Phase 15): See [docs/archive/PHASE_15.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_15.md)  
 >
 > **Current Sprint Status:**
 > - 🟢 **PHASES 1–15 (COMPLETED & ARCHIVED):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, Headless VoWi Reader, Autonomous Plugins (`tu-calendar`, `tu-slide-vault`, `tu-mensa`, `tu-room-radar`), Launching Reliability, Single-File Inlining, Unified Academic Spotlight, Workstation Status Bar & ICS Calendar Export, Live Functional Plugin Depth, Real GitHub Marketplace Telemetry & Workflow Error Rectification (Milestones 0–58).
+> - 🟡 **PHASE 16 (ACTIVE SPRINT):** Authentic University Workflow Ingestion: Physical Filesystem Slide Vault, Settings Modal Plugins Tab, In-Webview TUWEL Resource Interception ("Add to Slide Vault"), In-Webview TISS Timetable Auto-Sync, Zero-Mock Policy & Plugin Layout Formatting (Milestones 59–61).
 
 ---
 
 # ==============================================================================
-# 🟢 PART XV: PHASE 15 — LIVE FUNCTIONAL PLUGIN DEPTH, REAL GITHUB MARKETPLACE TELEMETRY & WORKFLOW ERROR RECTIFICATION
+# 🟡 PART XVI: PHASE 16 — AUTHENTIC UNIVERSITY WORKFLOW INGESTION: PHYSICAL SLIDE VAULT, IN-WEBVIEW SYNC & ZERO-MOCK FORMATTING
 # ==============================================================================
 
-> **Phase 15 Summary & Objective:**  
-> 1. **Rectify Workflow & Syntax Errors:** Fix invalid YAML indentation across all community plugin release workflows (`.github/workflows/release-plugin.yml`) that produced IDE error markers.
-> 2. **Real Live GitHub Marketplace Telemetry:** Eliminate synthetic mock ratings (e.g. `4.9 stars`) and fake download numbers (`14,200 users`). Fetch authentic live statistics directly from GitHub REST APIs: real Star counts (`stargazers_count`), real Fork counts (`forks_count`), authentic release asset downloads, and actual "Last Updated" timestamps.
-> 3. **Deep Functional Autonomy for All 4 Community Plugins:** Replace static sample cards with real operational features:
->    - `tu-calendar`: Real TUWEL/TISS iCal subscriptions, local ICS file parsing, and persistent tasks checklist.
->    - `tu-slide-vault`: Real PDF lecture uploads, IndexedDB persistence, keyword search, and dark-mode viewer.
->    - `tu-mensa`: Real daily menus for TU Wien cafeterias (Freihaus, Gußhaus, Schütte-Lihotzky) with allergen indicators and student prices.
->    - `tu-room-radar`: Authentic TU Wien campus room index, real-time day/hour occupancy heuristics, and quiet study room discovery.
+> **Phase 16 Summary & Objective:**  
+> 1. **Settings Modal "Plugins" Tab & Physical Slide Vault:** Add a dedicated "Plugins" configuration tab in `SettingsModal.tsx`. Connect `tu-slide-vault` to a physical filesystem folder on the computer (default `~/Documents/TU-Cockpit/Slide-Vault/`) with custom directory selection via folder picker and native "Open in Finder / File Explorer" support.
+> 2. **In-Webview TUWEL "Add to Slide Vault" Ingestion:** Inject an inline `[📥 Add to Slide Vault]` button adjacent to every lecture slide and PDF download link on `tuwel.tuwien.ac.at`. Clicking downloads the file through the authenticated session directly into `<SlideVault>/<CourseName>/<Filename>.pdf`.
+> 3. **In-Webview TISS Timetable Auto-Sync:** When navigating to `https://tiss.tuwien.ac.at`, child webview hooks detect the student's authenticated session and personal iCal export URL, automatically syncing timetable events into the local database and updating `tu-calendar` seamlessly.
+> 4. **Fix Layout Formatting & Zero-Mock Policy:** Rectify unstyled / raw rendering in `tu-calendar` and `tu-room-radar` by injecting self-contained layout baselines and CSS resets into iframes. Purge ALL fake mock data (dummy AlgoDat slides, static fake Mensa food items, dummy deadline tasks), replacing them with authentic live feeds and polished empty states.
 
 ---
 
-## 62. Phase 15 AI Worker Agent Prompts & Step-by-Step Implementation Milestones
+## 63. Phase 16 AI Worker Agent Prompts & Step-by-Step Implementation Milestones
 
 ---
 
-### Milestone 56 Prompt: Fix Workflow Indentation Syntax Errors across Community Plugin Repositories `[STATUS: COMPLETED ✅ - Commits 94a960a, e6f35ab, 0079901, e088303]`
+### Milestone 59 Prompt: Settings Modal Plugins Tab & Physical Filesystem Slide Vault Storage Engine `[STATUS: READY FOR EXECUTION 🟡]`
 
 ```markdown
-You are a DevOps engineer and GitHub Actions specialist working on the TU Cockpit community ecosystem.
+You are a senior full-stack desktop systems engineer specializing in Tauri v2, Rust filesystem APIs, and React 19 settings UI.
 
 ### Objective:
-Fix the YAML syntax indentation errors in `.github/workflows/release-plugin.yml` across all 4 community plugins (`tu-calendar`, `tu-slide-vault`, `tu-mensa`, `tu-room-radar`), eliminating all IDE parser errors.
+Implement a physical filesystem storage engine for the TU Slide Vault and add a dedicated "Plugins" tab to `SettingsModal.tsx` allowing students to configure their storage folder, open it in the OS file manager, and manage plugin-specific settings.
 
 ### Context & Files:
-- [community-plugins/tu-calendar/.github/workflows/release-plugin.yml](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-calendar/.github/workflows/release-plugin.yml)
-- [community-plugins/tu-slide-vault/.github/workflows/release-plugin.yml](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-slide-vault/.github/workflows/release-plugin.yml)
-- [community-plugins/tu-mensa/.github/workflows/release-plugin.yml](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-mensa/.github/workflows/release-plugin.yml)
-- [community-plugins/tu-room-radar/.github/workflows/release-plugin.yml](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-room-radar/.github/workflows/release-plugin.yml)
+- [src/components/settings/SettingsModal.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/settings/SettingsModal.tsx)
+- [src/store/useAppStore.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/store/useAppStore.ts)
+- [src-tauri/src/lib.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/lib.rs)
+- Create: `src-tauri/src/slide_vault.rs`
+- Create: `src/components/settings/PluginsSettingsTab.tsx`
+- Specifications: [ARCHITECTURE.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/ARCHITECTURE.md) Section 5.5
 
-### Problem & Fix:
-In all 4 workflow files, lines 16–19 contain invalid YAML indentation where `- run:` steps were indented underneath `with:`:
-```yaml
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-        - run: npm ci          # <-- ERROR: Invalid indentation
-        - run: npm run build
-```
+### Detailed Implementation Tasks:
 
-Replace with properly formatted GitHub Actions step sequences:
-```yaml
-name: Release Plugin Bundle
+1. **Rust Filesystem Engine (`src-tauri/src/slide_vault.rs`):**
+   - Provide standard path resolution using `dirs::document_dir()` or Tauri's path resolver:
+     - Default path: `<Documents>/TU-Cockpit/Slide-Vault`.
+     - Automatically create the root directory on initialization if it does not exist.
+   - Implement Tauri commands:
+     - `get_slide_vault_path() -> Result<String, String>`: Returns the currently configured absolute directory path.
+     - `set_slide_vault_path(new_path: String) -> Result<(), String>`: Validates and updates the active storage path, creating the directory if missing.
+     - `save_slide_to_vault(course_name: String, filename: String, bytes: Vec<u8>) -> Result<String, String>`:
+       - Sanitizes course name and filename (strip illegal characters `/`, `\`, `:`, `*`, `?`, `"`, `<`, `>`, `|`).
+       - Creates subdirectory `<vault_path>/<sanitized_course>/`.
+       - Writes `bytes` to `<vault_path>/<sanitized_course>/<sanitized_filename>`.
+       - Returns the absolute destination path on success.
+     - `list_slide_vault_files() -> Result<Vec<SlideFileRecord>, String>`:
+       - Recursively or hierarchically reads the slide vault folder.
+       - Returns `Vec<SlideFileRecord>` where each record contains `{ course: String, filename: String, path: String, size_bytes: u64, modified_timestamp: u64 }`.
+     - `reveal_slide_vault_folder() -> Result<(), String>`:
+       - Opens the slide vault folder in the native OS file explorer (Finder on macOS via `open`, File Explorer on Windows via `explorer`, xdg-open on Linux).
+   - Export commands and register them in `src-tauri/src/lib.rs` under `generate_handler![...]`.
 
-on:
-  push:
-    tags:
-      - "v*"
+2. **Frontend Settings Tab (`src/components/settings/PluginsSettingsTab.tsx`):**
+   - Create a clean, elegant settings panel styled with TU Cockpit tokens (`--tu-bg-surface`, `--tu-border`, `--tu-text-primary`, `--tu-accent`).
+   - Section 1: **TU Slide Vault Configuration**
+     - Display current directory path with folder icon.
+     - "Change Directory" button: Opens native directory picker via `@tauri-apps/plugin-dialog` (`open({ directory: true })`) and updates backend via `invoke('set_slide_vault_path', { newPath })`.
+     - "Open in Finder / Explorer" button: Invokes `reveal_slide_vault_folder`.
+     - Display statistics: Total stored slides count and disk usage size.
+   - Section 2: **Portal Integration & Automation Toggles**
+     - Toggle: "TUWEL Resource Interception (Show 'Add to Slide Vault' on course pages)" (default true).
+     - Toggle: "TISS Timetable Auto-Sync (Automatically sync calendar on portal visit)" (default true).
+   - Integrate `PluginsSettingsTab.tsx` into `SettingsModal.tsx` as a top-level tab alongside "General", "Appearance", "Accounts", and "Updates", using a `<Puzzle />` or `<Blocks />` icon.
 
-jobs:
-  build-and-release:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - run: npm run build
-      - name: Package Plugin Archive
-        run: |
-          mkdir -p bundle
-          cp dist/index.html bundle/index.html
-          cp manifest.json bundle/manifest.json
-          cd bundle && zip -r ../plugin.zip *
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: plugin.zip
-          draft: false
-          prerelease: false
-```
+3. **State Management (`useAppStore.ts`):**
+   - Add preferences: `slideVaultPath: string`, `tuwelInterceptionEnabled: boolean`, `tissAutoSyncEnabled: boolean`.
+   - Persist changes to local storage / SQLite.
 
-### Tasks:
-1. Update `.github/workflows/release-plugin.yml` in:
-   - `community-plugins/tu-calendar/`
-   - `community-plugins/tu-slide-vault/`
-   - `community-plugins/tu-mensa/`
-   - `community-plugins/tu-room-radar/`
-2. Commit the fix in each respective repository:
-   `git -C community-plugins/<repo> commit -am "fix(ci): correct YAML step indentation in release workflow"`
-3. Verify zero YAML lint or syntax errors.
-
-### Verification:
-1. Run a YAML linter or verify valid YAML structure across all 4 files.
+### Verification Runbook:
+1. `npm run build`
+2. `cargo check --manifest-path src-tauri/Cargo.toml`
+3. Git hygiene commit: `feat(settings): add plugins tab and physical filesystem slide vault engine`
 ```
 
 ---
 
-### Milestone 57 Prompt: Real GitHub Marketplace Telemetry (Stars, Forks, Releases & Actual Metrics) `[STATUS: COMPLETED ✅ - Commit 7595716]`
+### Milestone 60 Prompt: In-Webview TUWEL "Add to Slide Vault" & TISS Auto-Sync Engine `[STATUS: READY FOR EXECUTION 🟡]`
 
 ```markdown
-You are a full-stack TypeScript engineer working on the TU Cockpit Community Store.
+You are a senior Tauri systems engineer specializing in webview DOM bridge automation and university portal integration.
 
 ### Objective:
-Replace synthetic mock ratings (e.g. "4.9") and fake user counts ("14,200") with real, live GitHub telemetry fetched from the GitHub REST API.
+Implement automatic calendar synchronization when navigating to TISS and inject an authentic "Add to Slide Vault" button next to all lecture slide and PDF download links inside the TUWEL child webview.
 
 ### Context & Files:
-- [src/services/marketplace/CommunityOrgService.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/marketplace/CommunityOrgService.ts)
-- [src/services/marketplace/GitHubPluginService.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/marketplace/GitHubPluginService.ts)
-- [src/components/marketplace/PluginMarketplace.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/marketplace/PluginMarketplace.tsx)
+- [src-tauri/src/native_webview.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/native_webview.rs)
+- [src-tauri/src/embedded_portals.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/embedded_portals.rs)
+- [src-tauri/src/slide_vault.rs](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src-tauri/src/slide_vault.rs)
+- [src/components/plugin-host/PluginHostManager.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/components/plugin-host/PluginHostManager.ts)
+- Specifications: [ARCHITECTURE.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/ARCHITECTURE.md) Sections 4.8 & 4.9
 
-### Tasks:
+### Detailed Implementation Tasks:
 
-#### 1. Expand `StoreRegistryPlugin` Telemetry Model
-In `GitHubPluginService.ts`:
-- Update `StoreRegistryPlugin` interface to track authentic GitHub telemetry:
-  ```typescript
-  export interface StoreRegistryPlugin {
-    id: string;
-    name: string;
-    version: string;
-    author: {
-      name: string;
-      github?: string;
-      url?: string;
-      avatarUrl?: string;
-    };
-    description: string;
-    category: string;
-    icon?: string;
-    homepage?: string;
-    githubRepo?: string;
-    downloadUrl?: string;
-    capabilities: {
-      network?: string[];
-      storage?: { quotaBytes?: number };
-      notifications?: boolean;
-      systemClipboard?: boolean;
-    };
-    verified: boolean;
-    // Real GitHub Telemetry
-    stars: number;             // Real GitHub stargazers_count
-    forks: number;             // Real GitHub forks_count
-    openIssues: number;        // Real GitHub open_issues_count
-    updatedAt: string;         // Real GitHub pushed_at or updated_at
-    releaseTag?: string;       // Latest release tag (e.g. "v1.0.0")
-    htmlContent?: string;
-  }
-  ```
+1. **TUWEL "Add to Slide Vault" Resource Interception (`native_webview.rs`):**
+   - In `native_webview.rs`, add an initialization script injected into `tuwien-official-tuwel` webviews on navigation:
+     - Target host: `tuwel.tuwien.ac.at`.
+     - Script detects resource links matching:
+       - `a[href*="/mod/resource/view.php"]`
+       - `a[href*="/mod/folder/"]`
+       - `a[href$=".pdf"]`, `a[href*=".pdf?"]`
+     - Inserts a compact, stylish button next to each link:
+       `[📥 Add to Slide Vault]` styled with TU Wien Blue accent, subtle rounded pill border, and hover state.
+     - When clicked by the student:
+       - Prevent default navigation.
+       - Extract Course Title from page DOM (e.g. `document.querySelector('.page-header-headings h1, .breadcrumb-item:nth-last-child(2)')?.textContent?.trim() || 'General'`).
+       - Extract Resource Filename from anchor text or URL.
+       - Fetch the PDF file data using authenticated in-webview `fetch(link.href, { credentials: 'include' })` as an `ArrayBuffer`.
+       - Send the buffer to host Rust backend via Tauri IPC (`window.__TAURI__.core.invoke('save_slide_to_vault', { courseName, filename, bytes })`).
+       - Update button UI to `[✅ Saved to Vault]` with green indicator and emit an event to notify the host shell.
 
-#### 2. Query Authentic GitHub Telemetry in `CommunityOrgService.ts`
-- When querying `https://api.github.com/orgs/${orgName}/repos`:
-  - Extract `repo.stargazers_count` directly into `stars`.
-  - Extract `repo.forks_count` directly into `forks`.
-  - Extract `repo.open_issues_count` directly into `openIssues`.
-  - Extract `repo.pushed_at` into `updatedAt`.
-  - Extract `repo.owner.avatar_url` into `author.avatarUrl`.
-  - Eliminate synthetic math formulas (e.g. `repo.stargazers_count * 15 + 120`).
+2. **TISS Timetable Auto-Sync Hook (`native_webview.rs`):**
+   - In `native_webview.rs`, add navigation listener for `tiss.tuwien.ac.at`:
+     - When the student visits `tiss.tuwien.ac.at`, check for authenticated state or navigation to personal timetable/cal links (`/personal/termin/ical` or overview).
+     - In-webview script triggers authenticated background fetch of the student's personal iCal schedule (`/personal/termin/ical` or fetches personal timetable token).
+     - Sends iCal string payload to host via IPC `sync_tiss_ical(ical_content: String)`.
+     - Rust parses iCal events, updates local SQLite store, and broadcasts event `calendar-events-synced` to the host shell and active `tu-calendar` instance.
 
-#### 3. Update Marketplace UI Cards in `PluginMarketplace.tsx`
-- Replace the fake rating star and fake download user count with authentic GitHub metrics:
-  - **Stars:** `<Star className="w-3 h-3 text-amber-400 fill-amber-400" /> {plugin.stars}`
-  - **Forks:** `<GitFork className="w-3 h-3 text-[var(--tu-text-muted)]" /> {plugin.forks}`
-  - **Last Updated:** `<Clock className="w-3 h-3 text-[var(--tu-text-muted)]" /> {formatRelativeTime(plugin.updatedAt)}`
-  - **Releases:** Display release tag badge (e.g. `v1.0.0`) or `Verified Community Org`.
-- Ensure fallback embedded plugins in `DEFAULT_STORE_REGISTRY` use real base counts (0 or actual GitHub counts) rather than fabricated numbers.
+3. **Slide Vault Plugin Update:**
+   - Ensure `tu-slide-vault` listens for newly saved slides and displays the live list of files returned by `list_slide_vault_files`.
 
-### Verification:
-1. `npm run build` compiles with zero TypeScript errors.
-2. The Community Store displays real GitHub Stars, Forks, and Last Updated dates.
-
-### Git Hygiene:
-Commit message in `Tuwel-Tools`:
-`feat(marketplace): integrate authentic GitHub telemetry for stars, forks, and release metrics`
+### Verification Runbook:
+1. `npm run build`
+2. `cargo check --manifest-path src-tauri/Cargo.toml`
+3. Git hygiene commit: `feat(portals): inject tuwel slide vault buttons and tiss calendar auto-sync`
 ```
 
 ---
 
-### Milestone 58 Prompt: Live Functional Depth & Real Data for All 4 Community Plugins `[STATUS: COMPLETED ✅ - Commit 9f12eed]`
+### Milestone 61 Prompt: Fix Plugin Layout Formatting & Zero-Mock Policy Eradication `[STATUS: READY FOR EXECUTION 🟡]`
 
 ```markdown
-You are a full-stack student tools developer working on the 4 autonomous TU Cockpit community plugins.
+You are a senior frontend engineer and CSS architecture specialist working across React 19, Tailwind CSS v4, and iframe sandboxes.
 
 ### Objective:
-Upgrade all 4 community plugins (`tu-calendar`, `tu-slide-vault`, `tu-mensa`, `tu-room-radar`) so they are genuinely functional and useful for TU Wien students instead of rendering static mock cards.
+Fix unformatted / raw layout rendering in `tu-calendar` and `tu-room-radar`, and eradicate ALL synthetic dummy data across all 4 community plugins, replacing fake cards with authentic empty states and live data feeds.
 
 ### Context & Files:
 - [community-plugins/tu-calendar/src/App.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-calendar/src/App.tsx)
+- [community-plugins/tu-calendar/src/index.css](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-calendar/src/index.css)
+- [community-plugins/tu-room-radar/src/App.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-room-radar/src/App.tsx)
+- [community-plugins/tu-room-radar/src/index.css](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-room-radar/src/index.css)
 - [community-plugins/tu-slide-vault/src/App.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-slide-vault/src/App.tsx)
 - [community-plugins/tu-mensa/src/App.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-mensa/src/App.tsx)
-- [community-plugins/tu-room-radar/src/App.tsx](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/community-plugins/tu-room-radar/src/App.tsx)
 - [src/services/marketplace/CommunityPluginBundles.ts](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/src/services/marketplace/CommunityPluginBundles.ts)
+- Specifications: [ARCHITECTURE.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/ARCHITECTURE.md) Sections 5.6 & 5.7
 
-### Tasks:
+### Detailed Implementation Tasks:
 
-#### 1. Live Functional Depth in `tu-calendar`
-- **Live TUWEL / TISS Calendar Sync:**
-  - Provide an intuitive input for students to paste their personal TUWEL calendar export URL (`https://tuwel.tuwien.ac.at/calendar/export_execute.php?...`) or upload `.ics` files.
-  - Automatically parse VEVENT entries into real deadline tasks and timetable lecture slots.
-  - Persist synced deadlines into `localStorage` / IndexedDB.
-  - Interactive checklist allowing students to check off completed assignments with date countdowns.
+1. **Fix In-Frame CSS & Layout Formatting (`tu-calendar` & `tu-room-radar`):**
+   - In both plugins, inspect why elements render unstyled:
+     - Ensure `box-sizing: border-box`, explicit Flexbox/Grid CSS properties, container max-widths, and padding are declared with robust inline CSS or scoped stylesheet fallbacks.
+     - Inject full CSS reset and CSS variable declarations (`--tu-bg-canvas: #0b0f17; --tu-bg-surface: #111827; --tu-text-primary: #f8fafc; --tu-border: #1e293b; --tu-accent: #006699;`) into `index.html` and `index.css`.
+     - Ensure layout flex column fill (`min-h-screen`, `h-full`, `overflow-y-auto`) allows proper scrolling and prevents unstyled wrapping.
 
-#### 2. Live Document Management in `tu-slide-vault`
-- **Real PDF Document Upload & Local Vault Storage:**
-  - Add a functional "Upload PDF Slides / Notes" file picker (`<input type="file" accept=".pdf">`).
-  - Read uploaded PDFs using `FileReader` as base64/ArrayBuffer and persist in IndexedDB (`idb-keyval` or native IndexedDB).
-  - Extract document metadata (title, file size, upload date, course tag).
-  - Real in-app Dark-Mode PDF/Canvas previewer rendering the actual student's course slides.
-  - Instant client-side search filtering across uploaded student documents.
+2. **Eradicate ALL Synthetic / Dummy Mock Data (Zero-Mock Policy):**
+   - **`tu-slide-vault`:**
+     - Remove fake default slides (AlgoDat Lecture 01, DBS Normalization).
+     - Implement real empty state:
+       `"Your Slide Vault is empty. In TUWEL, click 'Add to Slide Vault' on any course page, or drop PDF files here to begin."`
+     - Integrate with physical filesystem list (`list_slide_vault_files`) or local file picker.
+   - **`tu-mensa`:**
+     - Purge static mock menu items.
+     - Implement live daily lunch menu fetch or authentic weekly cafeteria schedule for TU Wien (Mensa Freihaus, Cafeteria Freihaus, Mensa Gußhaus, Buffet Schütte-Lihotzky).
+     - When closed, display authentic operating hours ("Opens at 11:00 AM" / "Weekend - Closed").
+   - **`tu-calendar`:**
+     - Purge dummy deadlines ("AlgoDat Übung 3", "DBS Exam").
+     - Default to authentic empty state: `"No upcoming deadlines. Sync your TISS calendar by visiting TISS or import an .ics file."`
+   - **`tu-room-radar`:**
+     - Ground room list strictly in authentic TU Wien rooms (Freihaus FH Hörsäle 1–8, Hauptgebäude Kuppelsaal, Informatikhörsaal, Gußhaus EI Hörsäle) with real opening schedules.
 
-#### 3. Real TU Wien Mensa Menus in `tu-mensa`
-- **Real Cafeteria Feeds:**
-  - Locations: *Mensa Markt Freihaus* (Wiedner Hauptstr. 8-10), *Mensa Buffet Freihaus*, *Café Schütte-Lihotzky* (Karlsplatz 13), *Mensa Gußhaus*.
-  - Pull live daily Austrian Mensen menus (or current week's authentic student menu schedules) with:
-    - Real dish descriptions (e.g. Tagesteller, Vegetarisch, Vegan, Menü Classic).
-    - Real student prices (€ 6.20 / € 7.50 / € 8.90).
-    - Real allergen indicators (A: Gluten, C: Ei, G: Milch, L: Sellerie).
-    - Operating hours (11:00 – 14:00) and open/closed status indicator based on current system time.
+3. **Recompile Plugins & Update Single-File Bundles:**
+   - In `community-plugins/tu-calendar`, `community-plugins/tu-slide-vault`, `community-plugins/tu-mensa`, `community-plugins/tu-room-radar`:
+     - Run `npm run build` with `vite-plugin-singlefile`.
+   - Update `COMMUNITY_CALENDAR_HTML`, `COMMUNITY_SLIDE_VAULT_HTML`, `COMMUNITY_MENSA_HTML`, and `COMMUNITY_ROOM_RADAR_HTML` in `src/services/marketplace/CommunityPluginBundles.ts` with the compiled single-file HTML distributions.
 
-#### 4. Grounded Campus Navigation in `tu-room-radar`
-- **Authentic TU Wien Room Index:**
-  - Build comprehensive real room indices for Freihaus (Hörsäle 1–8, FH Hörsaal 1–7), Karlsplatz (Audimax, Boecklsaal, HS 11–18), Gußhaus (EI 1–7), and Getreidemarkt (GM 1–4).
-  - Time-aware availability algorithm: Checks current hour and weekday to estimate whether a hall is currently in scheduled lecture or free for self-study.
-  - Quiet Study Zone index: TU Wien Main Library (TU Bibliothek Resselgasse floors 1–5, silent study cubicles, group study rooms) with live opening hours.
-
-#### 5. Compile & Re-Bundle into `CommunityPluginBundles.ts`
-- Run `npm run build` in each plugin directory (`vite-plugin-singlefile`).
-- Read the generated `dist/index.html` from each subfolder and update `COMMUNITY_CALENDAR_HTML`, `COMMUNITY_SLIDE_VAULT_HTML`, `COMMUNITY_MENSA_HTML`, and `COMMUNITY_ROOM_RADAR_HTML` in `CommunityPluginBundles.ts`.
-
-### Verification:
-1. `npm run build` in each `community-plugins/<repo>` succeeds with single-file HTML generation.
-2. Host `npm run build` passes with zero errors.
-3. Every plugin provides real interactive student features (real calendar sync, real PDF upload, real Mensa menus, real campus rooms).
-
-### Git Hygiene:
-Commit within each plugin repository and host repository with:
-`feat(plugins): implement live functional data and real interactive workflows for community plugins`
+### Verification Runbook:
+1. `npm run build`
+2. `cargo check --manifest-path src-tauri/Cargo.toml`
+3. Git hygiene commit: `fix(plugins): fix layout formatting and enforce zero-mock policy across community tools`
 ```

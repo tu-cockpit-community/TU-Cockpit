@@ -154,6 +154,15 @@ While a local reverse proxy (e.g. Axum stripping `X-Frame-Options` and `CSP`) so
 2. **SAML/Shibboleth SSO Redirection:** TUWEL and TISS redirect across distinct institutional domains (`tuwel.tuwien.ac.at` -> `login.tuwien.ac.at` -> `tiss.tuwien.ac.at`). A reverse proxy breaks on cross-origin redirects and relative URLs without rewriting all HTML/JS assets.
 3. **Session Integrity:** Tauri v2's native child webview (`tauri::Webview`) provides an authentic first-party browser context with persistent, isolated cookie jars and hardware acceleration, which with the Lossless Invisibility Bus gives complete modal support and rock-solid session security.
 
+### 4.8 In-Webview TUWEL Resource Interception ("Add to Slide Vault")
+* **Moodle DOM Bridge:** In `native_webview.rs`, an injection script monitors course document lists on `tuwel.tuwien.ac.at`.
+* **Inline Action Button:** Locates PDF lecture links (`a[href*="mod/resource/view.php"]`, `a[href$=".pdf"]`) and injects an authenticated `[📥 Add to Slide Vault]` button.
+* **Direct Desktop Ingestion:** Clicking triggers a native download of the lecture slide directly into the student's physical storage directory (`~/Documents/TU-Cockpit/Slide-Vault/<Course>/<Filename>.pdf`) and indexes it immediately.
+
+### 4.9 In-Webview TISS Timetable Auto-Sync Hook
+* **Session Detection:** When a student navigates to `https://tiss.tuwien.ac.at`, child webview hooks detect the active student session and personal timetable export endpoints (`/personal/termin/ical`).
+* **Lossless Automatic Ingestion:** Automatically downloads the student's live iCal schedule, parses VEVENT blocks into local SQLite (`deadline_aggregator.rs`), and broadcasts updates to `tu-calendar` without requiring the student to manually copy iCal URLs.
+
 ---
 
 ## 5. Dynamic Plugin & Community Marketplace Ecosystem
@@ -233,7 +242,38 @@ To enable AI agent swarms and human contributors to develop separate community p
 * **Auto-Discovery by `CommunityOrgService`:**
   - When a plugin repo is pushed to `tu-cockpit-community` with a valid root `manifest.json`, TU Cockpit's Community Store HUB automatically discovers it via the GitHub Organization API, merges with pre-bundled registry assets, and lists it for instant student installation.
 
+### 5.5 Physical Filesystem Slide Vault Storage & Host Configuration
+* **Authentic Local Storage:** Unlike ephemeral web cache, the TU Slide Vault is backed by an authentic, physical directory on the user's OS file system:
+  - Default location: `~/Documents/TU-Cockpit/Slide-Vault/` (resolved via `tauri::path::document_dir()`).
+  - Organized hierarchically: `~/Documents/TU-Cockpit/Slide-Vault/<CourseName>/<SlideFilename.pdf>`.
+* **Host Settings Modal ("Plugins" Tab):**
+  - In `SettingsModal.tsx`, a dedicated "Plugins" tab allows students to inspect and configure preferences for installed community plugins.
+  - **Slide Vault Path Configuration:** Students can view the active storage folder, select a custom directory via native OS folder picker (`@tauri-apps/plugin-dialog`), and click "Open in Finder / File Explorer" via native OS reveal (`reveal_in_filesystem` IPC).
+  - **Portal Interception & Auto-Sync Toggles:** Configure whether TUWEL slide link buttons (`Add to Slide Vault`) and TISS timetable auto-sync are active.
+* **Rust File System Bridge (`slide_vault.rs`):**
+  - Commands: `save_slide_to_vault(course_name: String, filename: String, bytes: Vec<u8>) -> Result<String, String>`, `get_slide_vault_path() -> Result<String, String>`, `set_slide_vault_path(new_path: String) -> Result<(), String>`, `reveal_slide_vault_folder() -> Result<(), String>`.
+  - Atomically writes incoming PDF buffers to disk, creates course folders on demand, and returns metadata to the caller.
+
+### 5.6 Zero-Mock / Zero-Placeholder Invariant
+To ensure the application delivers authentic utility rather than hollow demonstration cards:
+* **Eradication of Synthetic Data:** Dummy course entries (e.g., fake "AlgoDat - Lecture 01", "DBS - Normalization" slides), fabricated task checklists, and static fake Mensa food menus are strictly purged from both plugin source code and host fallback bundles.
+* **Authentic Empty States:** When no student data is present, plugins must display elegant, instructive empty states (e.g. "No slides in vault yet. Click 'Add to Slide Vault' next to any lecture slide in TUWEL, or drag and drop PDFs here") instead of fictitious mock cards.
+* **Grounding in Real Feeds:**
+  - `tu-mensa`: Real-time daily lunch menus sourced from TU Wien cafeterias (Freihaus, Gußhaus, Schütte-Lihotzky) via authentic live feeds or clean fallbacks with opening hours when closed.
+  - `tu-room-radar`: Grounds campus room discovery in authentic TU Wien building maps (Freihaus, Hauptgebäude, Gußhaus, Getreidemarkt) and real TISS lecture hall catalogs.
+  - `tu-calendar`: Hydrated exclusively via live TISS iCal auto-sync, TUWEL calendar sync, or user-created checklist items.
+
+### 5.7 Plugin Layout Formatting & Resilient In-Frame Styling
+* **Self-Contained Layout Baseline:**
+  - Sandboxed `srcDoc` iframes in `PluginFrame.tsx` execute without host CSS stylesheet inheritances.
+  - Plugins (`community-plugins/*/src/App.tsx` and compiled bundles) MUST declare self-contained layout baselines:
+    - CSS Box-Sizing: `*, *::before, *::after { box-sizing: border-box; }`
+    - Full-height flex column layout: `html, body, #root { height: 100%; margin: 0; padding: 0; }`
+    - Host CSS custom property bindings (`--tu-bg-canvas`, `--tu-bg-surface`, `--tu-text-primary`, `--tu-border`, `--tu-accent`, etc.).
+  - Prevents plugins like `tu-calendar` or `tu-room-radar` from rendering unstyled, raw, or broken HTML when Tailwind CSS v4 utility classes rely on external font/reset stylesheets.
+
 ---
+
 
 ## 6. Student Identity, Authentication & Autofill Vault
 
