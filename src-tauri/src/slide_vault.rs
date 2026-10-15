@@ -35,7 +35,9 @@ fn get_config_file_path(app: &AppHandle) -> Result<PathBuf, String> {
 }
 
 pub fn get_default_vault_path() -> PathBuf {
-    let base = dirs::document_dir().unwrap_or_else(|| PathBuf::from("."));
+    let base = dirs::document_dir()
+        .or_else(|| dirs::home_dir().map(|h| h.join("Documents")))
+        .unwrap_or_else(|| PathBuf::from("."));
     base.join("TU-Cockpit").join("Slide-Vault")
 }
 
@@ -367,10 +369,12 @@ pub async fn reveal_slide_vault_folder(app: AppHandle) -> Result<(), String> {
 
     #[cfg(target_os = "windows")]
     {
+        let win_path = path_str.replace('/', "\\");
+        let trimmed = win_path.trim_end_matches('\\');
         std::process::Command::new("explorer")
-            .arg(&path_str)
+            .arg(trimmed)
             .spawn()
-            .map_err(|e| format!("Failed to open Explorer for {}: {}", path_str, e))?;
+            .map_err(|e| format!("Failed to open Explorer for {}: {}", trimmed, e))?;
     }
 
     #[cfg(target_os = "linux")]
@@ -401,8 +405,10 @@ pub async fn open_slide_file(path: String) -> Result<(), String> {
 
     #[cfg(target_os = "windows")]
     {
+        // Convert forward slashes to backslashes so cmd.exe start doesn't treat /dir as a switch flag
+        let win_path = path.replace('/', "\\");
         std::process::Command::new("cmd")
-            .args(["/c", "start", "", &path])
+            .args(["/c", "start", "", &win_path])
             .spawn()
             .map_err(|e| format!("Failed to open file in system viewer: {}", e))?;
     }

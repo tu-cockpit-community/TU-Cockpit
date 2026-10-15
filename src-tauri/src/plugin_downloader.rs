@@ -80,7 +80,9 @@ fn get_dev_config_file_path(app: &AppHandle) -> Result<PathBuf, String> {
 }
 
 pub fn get_default_downloaded_plugins_path() -> PathBuf {
-    let base = dirs::document_dir().unwrap_or_else(|| PathBuf::from("."));
+    let base = dirs::document_dir()
+        .or_else(|| dirs::home_dir().map(|h| h.join("Documents")))
+        .unwrap_or_else(|| PathBuf::from("."));
     base.join("TU-Cockpit").join("Plugins")
 }
 
@@ -91,7 +93,9 @@ pub fn get_default_dev_plugins_path() -> PathBuf {
             return candidate;
         }
     }
-    let base = dirs::document_dir().unwrap_or_else(|| PathBuf::from("."));
+    let base = dirs::document_dir()
+        .or_else(|| dirs::home_dir().map(|h| h.join("Documents")))
+        .unwrap_or_else(|| PathBuf::from("."));
     base.join("TU-Cockpit").join("dev-plugins")
 }
 
@@ -245,10 +249,12 @@ pub async fn reveal_downloaded_plugins_folder(app: AppHandle) -> Result<(), Stri
 
     #[cfg(target_os = "windows")]
     {
+        let win_path = path_str.replace('/', "\\");
+        let trimmed = win_path.trim_end_matches('\\');
         std::process::Command::new("explorer")
-            .arg(&path_str)
+            .arg(trimmed)
             .spawn()
-            .map_err(|e| format!("Failed to open Explorer for {}: {}", path_str, e))?;
+            .map_err(|e| format!("Failed to open Explorer for {}: {}", trimmed, e))?;
     }
 
     #[cfg(target_os = "linux")]
@@ -277,10 +283,12 @@ pub async fn reveal_dev_plugins_folder(app: AppHandle) -> Result<(), String> {
 
     #[cfg(target_os = "windows")]
     {
+        let win_path = path_str.replace('/', "\\");
+        let trimmed = win_path.trim_end_matches('\\');
         std::process::Command::new("explorer")
-            .arg(&path_str)
+            .arg(trimmed)
             .spawn()
-            .map_err(|e| format!("Failed to open Explorer for {}: {}", path_str, e))?;
+            .map_err(|e| format!("Failed to open Explorer for {}: {}", trimmed, e))?;
     }
 
     #[cfg(target_os = "linux")]
