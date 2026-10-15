@@ -33,7 +33,7 @@ use offline_vault::{
 };
 use slide_vault::{
     get_slide_vault_path, set_slide_vault_path, save_slide_to_vault, list_slide_vault_files,
-    reveal_slide_vault_folder,
+    reveal_slide_vault_folder, open_slide_file,
 };
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -96,6 +96,7 @@ pub fn run() {
             save_slide_to_vault,
             list_slide_vault_files,
             reveal_slide_vault_folder,
+            open_slide_file,
             sync_tiss_ical
         ])
         .run(tauri::generate_context!())

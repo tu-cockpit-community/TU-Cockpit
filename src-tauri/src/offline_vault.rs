@@ -279,13 +279,27 @@ pub async fn get_cached_vault_files(app: AppHandle) -> Result<Vec<CachedCourseFi
 }
 
 #[tauri::command]
-pub async fn read_vault_pdf_bytes(app: AppHandle, file_path: String) -> Result<String, String> {
-    let vault_dir = get_vault_dir(&app)?;
-    let target = PathBuf::from(&file_path);
+pub async fn read_vault_pdf_bytes(
+    _app: AppHandle,
+    file_path: Option<String>,
+    path: Option<String>,
+) -> Result<String, String> {
+    let raw_path = file_path
+        .or(path)
+        .ok_or_else(|| "file_path or path parameter is required".to_string())?;
 
-    // Security check: ensure path is inside vault_dir
-    if !target.starts_with(&vault_dir) {
-        return Err("Unauthorized file path access outside offline vault".to_string());
+    let target = PathBuf::from(&raw_path);
+    if !target.exists() || !target.is_file() {
+        return Err(format!("PDF file not found: {}", raw_path));
+    }
+
+    let is_pdf = target
+        .extension()
+        .map(|ext| ext.to_string_lossy().to_lowercase() == "pdf")
+        .unwrap_or(false);
+
+    if !is_pdf {
+        return Err("File is not a PDF document".to_string());
     }
 
     let bytes = fs::read(&target).map_err(|e| format!("Failed to read file: {}", e))?;

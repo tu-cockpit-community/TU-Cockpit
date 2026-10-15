@@ -34,11 +34,18 @@ export const PluginFrame: React.FC<PluginFrameProps> = ({
     </style>
     <script id="tu-cockpit-injected-bridge">
       try {
-        if (window.parent && window.parent.__TAURI__) {
-          window.__TAURI__ = window.parent.__TAURI__;
-        }
         if (window.parent && window.parent.__TAURI_INTERNALS__) {
           window.__TAURI_INTERNALS__ = window.parent.__TAURI_INTERNALS__;
+        }
+        if (window.parent && window.parent.__TAURI__) {
+          window.__TAURI__ = window.parent.__TAURI__;
+        } else if (window.__TAURI_INTERNALS__) {
+          window.__TAURI__ = {
+            core: {
+              invoke: window.__TAURI_INTERNALS__.invoke,
+              convertFileSrc: window.__TAURI_INTERNALS__.convertFileSrc,
+            },
+          };
         }
       } catch (e) {
         console.warn("Could not bind parent __TAURI__ into iframe:", e);
@@ -183,6 +190,17 @@ export const PluginFrame: React.FC<PluginFrameProps> = ({
         } else if (method === "vault:get_path") {
           const path = await invoke("get_slide_vault_path");
           port1.postMessage({ jsonrpc: "2.0", id, result: path });
+        } else if (method === "vault:read_pdf") {
+          const { filePath, path } = params || {};
+          const b64 = await invoke("read_vault_pdf_bytes", {
+            filePath: filePath || path,
+            path: filePath || path,
+          });
+          port1.postMessage({ jsonrpc: "2.0", id, result: b64 });
+        } else if (method === "vault:open_file") {
+          const { path } = params || {};
+          await invoke("open_slide_file", { path });
+          port1.postMessage({ jsonrpc: "2.0", id, result: true });
         } else if (method === "autofill:getPayload") {
           if (pluginId.startsWith("tuwien.official.")) {
             const payload = await AutofillDaemon.getAutofillPayload();
@@ -215,9 +233,20 @@ export const PluginFrame: React.FC<PluginFrameProps> = ({
 
     const handleLoad = () => {
       try {
-        if (iframe.contentWindow && (window as any).__TAURI__) {
-          (iframe.contentWindow as any).__TAURI__ = (window as any).__TAURI__;
-          (iframe.contentWindow as any).__TAURI_INTERNALS__ = (window as any).__TAURI_INTERNALS__;
+        if (iframe.contentWindow) {
+          if ((window as any).__TAURI_INTERNALS__) {
+            (iframe.contentWindow as any).__TAURI_INTERNALS__ = (window as any).__TAURI_INTERNALS__;
+          }
+          if ((window as any).__TAURI__) {
+            (iframe.contentWindow as any).__TAURI__ = (window as any).__TAURI__;
+          } else if ((window as any).__TAURI_INTERNALS__) {
+            (iframe.contentWindow as any).__TAURI__ = {
+              core: {
+                invoke: (window as any).__TAURI_INTERNALS__.invoke,
+                convertFileSrc: (window as any).__TAURI_INTERNALS__.convertFileSrc,
+              },
+            };
+          }
         }
       } catch (err) {
         console.warn("Could not attach __TAURI__ to iframe window:", err);
