@@ -209,6 +209,14 @@ Every plugin must declare a standard `manifest.json`:
      To allow seamless local development within the workspace, TU Cockpit can load compiled single-file bundles directly from `community-plugins/<plugin-id>/dist/index.html` via local disk reading, bypassing remote GitHub downloads.
    - **Production Release Asset Specification (`plugin.zip`):**
      Plugin repositories run a GitHub Actions release workflow on tags (`v*`). The workflow runs `npm run build` with `vite-plugin-singlefile` and packages `dist/index.html` + `manifest.json` into a compressed release artifact `plugin.zip`. The Rust downloader (`plugin_downloader.rs`) checks for release asset `plugin.zip` to ensure only compiled artifacts are installed.
+   - **Live GitHub Telemetry Invariant:**
+     Marketplace metadata displayed in `PluginMarketplace.tsx` (stars, forks, open issues, and actual release asset downloads) is dynamically sourced via the GitHub REST API (`https://api.github.com/repos/{org}/{repo}` and `/releases`). Synthetic mock ratings and fake download numbers are strictly prohibited.
+   - **Community Plugin Functional Depth Invariant:**
+     Community plugins must execute real student workflows rather than displaying static mockup cards:
+     - `tu-calendar`: Supports live TUWEL/TISS iCal subscriptions, manual iCal file imports, and persistent checklist tasks.
+     - `tu-slide-vault`: Features actual client-side PDF document uploads, IndexedDB persistence, keyword note indexing, and full reading view.
+     - `tu-mensa`: Pulls actual daily menu feeds for TU Wien cafeterias (Freihaus, Gußhaus, Schütte-Lihotzky) with allergen indicators and student prices.
+     - `tu-room-radar`: Grounds searches in authentic campus building maps (Freihaus, Hauptgebäude, Gußhaus, Getreidemarkt) with real-time occupancy estimation and quiet study zone discovery.
    - **Sidebar Categorization Invariant:**
      All installed plugins must appear in the sidebar accordion navigation (`ConfigurableNav.tsx`).
      `INITIAL_CATEGORIES` in `useAppStore.ts` provides a pre-configured `"community"` category (`"Community Tools"`), and the `installPlugin` action guarantees that any newly installed plugin without an existing category is assigned to `"community"`.
