@@ -11,6 +11,7 @@ import {
   Github,
   User,
   Search,
+  Keyboard,
 } from "lucide-react";
 
 interface ExecutiveHeaderProps {
@@ -25,6 +26,7 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
     activePluginId,
     installedPlugins,
     setActiveView,
+    setShortcutsModalOpen,
   } = useAppStore();
   const { currentUser, setLoginModalOpen } = useAuthStore();
   const { openPalette } = usePaletteStore();
@@ -149,6 +151,15 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
           <Clock className="w-3 h-3 text-[var(--tu-text-muted)]" />
           <span>{currentTime}</span>
         </div>
+
+        {/* Keyboard Shortcuts Trigger Button */}
+        <button
+          onClick={() => setShortcutsModalOpen(true)}
+          className="p-1.5 rounded-[var(--tu-radius-sm)] bg-[var(--tu-bg-card)] border border-[var(--tu-border)] hover:bg-[var(--tu-bg-hover)] hover:border-[var(--tu-border-focus)] text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] transition-all cursor-pointer group shadow-sm hidden md:flex items-center justify-center"
+          title="Keyboard Shortcuts (? or ⌘/)"
+        >
+          <Keyboard className="w-4 h-4 transition-transform group-hover:scale-105" />
+        </button>
 
         {/* Settings Gear Cog Button */}
         <button

@@ -85,6 +85,9 @@ export interface AppState {
   openSettings: (tab?: "themes" | "sync" | "layout" | "account" | "autofill" | "updates" | "plugins") => void;
   closeSettings: () => void;
 
+  isShortcutsModalOpen: boolean;
+  setShortcutsModalOpen: (open: boolean) => void;
+
   setActiveView: (view: SystemView | "plugin", pluginId?: string) => void;
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
@@ -173,6 +176,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   openSettings: (tab = "themes") =>
     set({ isSettingsModalOpen: true, settingsInitialTab: tab }),
   closeSettings: () => set({ isSettingsModalOpen: false }),
+
+  isShortcutsModalOpen: false,
+  setShortcutsModalOpen: (open: boolean) => set({ isShortcutsModalOpen: open }),
 
   setSlideVaultPath: (path: string) => {
     set({ slideVaultPath: path });

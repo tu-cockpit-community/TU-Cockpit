@@ -69,6 +69,12 @@ export const PluginMarketplace: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [sourceType, setSourceType] = useState<"network" | "cache" | "fallback">("cache");
 
+  useEffect(() => {
+    const handleOpenDev = () => setActiveTab("devstudio");
+    window.addEventListener("open-devstudio-tab", handleOpenDev);
+    return () => window.removeEventListener("open-devstudio-tab", handleOpenDev);
+  }, []);
+
   // Deletion Modal State
   const [deleteModalState, setDeleteModalState] = useState<{
     isOpen: boolean;

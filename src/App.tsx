@@ -18,6 +18,7 @@ import { UpdaterToast } from "@/components/updater/UpdaterToast";
 import { SyncSettings } from "@/components/settings/SyncSettings";
 import { VoWiReader } from "@/components/vowi/VoWiReader";
 import { WorkstationStatusBar } from "@/components/layout/WorkstationStatusBar";
+import { KeyboardShortcutsModal } from "@/components/navigation/KeyboardShortcutsModal";
 import { DEFAULT_STORE_REGISTRY } from "@/services/marketplace/GitHubPluginService";
 import { X, BookOpen } from "lucide-react";
 
@@ -31,13 +32,17 @@ export const App: React.FC = () => {
     navOrientation,
     toggleSidebar,
     isCategoryModalOpen,
+    setCategoryModalOpen,
     isSettingsModalOpen,
     settingsInitialTab,
     openSettings,
     closeSettings,
+    isShortcutsModalOpen,
+    setShortcutsModalOpen,
+    setActiveView,
   } = useAppStore();
 
-  const { isLoginModalOpen } = useAuthStore();
+  const { isLoginModalOpen, setLoginModalOpen } = useAuthStore();
   const { openOverlay, closeOverlay } = useOverlayStore();
   const { applyToRoot } = useThemeStore();
   const [vowiMode, setVowiMode] = useState<"reader" | "live">("reader");
@@ -70,24 +75,152 @@ export const App: React.FC = () => {
     else closeOverlay("login");
   }, [isLoginModalOpen, openOverlay, closeOverlay]);
 
+  useEffect(() => {
+    if (isShortcutsModalOpen) openOverlay("shortcuts");
+    else closeOverlay("shortcuts");
+  }, [isShortcutsModalOpen, openOverlay, closeOverlay]);
+
   // Ensure DOM has CSS custom properties on mount
   useEffect(() => {
     applyToRoot();
   }, [applyToRoot]);
 
-  // Global shortcut: Cmd+B / Ctrl+B to toggle sidebar when orientation is left/right
+  // Power-User Desktop Keyboard Shortcuts Bus
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
-        if (navOrientation === "left" || navOrientation === "right") {
+      const target = e.target as HTMLElement | null;
+      const isInput =
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable);
+
+      // Escape key: dismiss topmost active modal
+      if (e.key === "Escape") {
+        if (isShortcutsModalOpen) {
+          setShortcutsModalOpen(false);
+          return;
+        }
+        if (isSettingsModalOpen) {
+          closeSettings();
+          return;
+        }
+        if (isSyncModalOpen) {
+          setSyncModalOpen(false);
+          return;
+        }
+        if (isCategoryModalOpen) {
+          setCategoryModalOpen(false);
+          return;
+        }
+        if (isLoginModalOpen) {
+          setLoginModalOpen(false);
+          return;
+        }
+      }
+
+      // '?' outside text inputs opens the Shortcuts Cheat Sheet
+      if (!isInput && e.key === "?" && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        setShortcutsModalOpen(!isShortcutsModalOpen);
+        return;
+      }
+
+      // Cmd (macOS) / Ctrl (Windows/Linux) accelerators
+      if (e.metaKey || e.ctrlKey) {
+        // Cmd+/ : Toggle Shortcuts Cheat Sheet
+        if (e.key === "/") {
           e.preventDefault();
-          toggleSidebar();
+          setShortcutsModalOpen(!isShortcutsModalOpen);
+          return;
+        }
+
+        // Cmd+, : Open Settings Modal
+        if (e.key === ",") {
+          e.preventDefault();
+          openSettings("themes");
+          return;
+        }
+
+        // Cmd+B : Toggle Sidebar
+        if (e.key.toLowerCase() === "b") {
+          if (navOrientation === "left" || navOrientation === "right") {
+            e.preventDefault();
+            toggleSidebar();
+            return;
+          }
+        }
+
+        // Cmd+1 : Official TUWEL Portal
+        if (e.key === "1") {
+          e.preventDefault();
+          setActiveView("plugin", "tuwien.official.tuwel");
+          return;
+        }
+
+        // Cmd+2 : Official TISS Organization Portal
+        if (e.key === "2") {
+          e.preventDefault();
+          setActiveView("plugin", "tuwien.official.tiss");
+          return;
+        }
+
+        // Cmd+3 : Official VoWi MediaWiki Reader
+        if (e.key === "3") {
+          e.preventDefault();
+          setActiveView("plugin", "tuwien.official.vowi");
+          return;
+        }
+
+        // Cmd+4 : Official TU Maps Campus Navigator
+        if (e.key === "4") {
+          e.preventDefault();
+          setActiveView("plugin", "tuwien.official.tumaps");
+          return;
+        }
+
+        // Cmd+5 : Community Marketplace HUB
+        if (e.key === "5") {
+          e.preventDefault();
+          setActiveView("marketplace");
+          return;
+        }
+
+        // Cmd+Shift+V : Slide Vault & Offline PDFs
+        if (e.shiftKey && e.key.toLowerCase() === "v") {
+          e.preventDefault();
+          setActiveView("plugin", "tuwien.community.slide-vault");
+          return;
+        }
+
+        // Cmd+Shift+D : DevStudio Staging Environment
+        if (e.shiftKey && e.key.toLowerCase() === "d") {
+          e.preventDefault();
+          setActiveView("marketplace");
+          window.dispatchEvent(new CustomEvent("open-devstudio-tab"));
+          return;
         }
       }
     };
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [navOrientation, toggleSidebar]);
+  }, [
+    navOrientation,
+    toggleSidebar,
+    isShortcutsModalOpen,
+    setShortcutsModalOpen,
+    isSettingsModalOpen,
+    closeSettings,
+    isSyncModalOpen,
+    setSyncModalOpen,
+    isCategoryModalOpen,
+    setCategoryModalOpen,
+    isLoginModalOpen,
+    setLoginModalOpen,
+    openSettings,
+    setActiveView,
+  ]);
 
   const activePlugin = activePluginId ? installedPlugins[activePluginId] : null;
 
@@ -205,6 +338,7 @@ export const App: React.FC = () => {
       <UpdaterToast />
       <LoginModal />
       <CategoryManagerModal />
+      <KeyboardShortcutsModal />
       <SettingsModal
         isOpen={isSettingsModalOpen}
         initialTab={settingsInitialTab}
