@@ -19,13 +19,12 @@
 > - Milestones 56–58 (Phase 15): See [docs/archive/PHASE_15.md](file:///Users/mac-chan/Documents/antigravity/Tuwel-Tools/docs/archive/PHASE_15.md)  
 >
 > **Current Sprint Status:**
-> - 🟢 **PHASES 1–15 (COMPLETED & ARCHIVED):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, Headless VoWi Reader, Autonomous Plugins (`tu-calendar`, `tu-slide-vault`, `tu-mensa`, `tu-room-radar`), Launching Reliability, Single-File Inlining, Unified Academic Spotlight, Workstation Status Bar & ICS Calendar Export, Live Functional Plugin Depth, Real GitHub Marketplace Telemetry & Workflow Error Rectification (Milestones 0–58).
-> - 🟡 **PHASE 16 (ACTIVE SPRINT):** Authentic University Workflow Ingestion: Physical Filesystem Slide Vault, Settings Modal Plugins Tab, In-Webview TUWEL Resource Interception ("Add to Slide Vault"), In-Webview TISS Timetable Auto-Sync, Zero-Mock Policy & Plugin Layout Formatting (Milestones 59–61).
-
+> - 🟢 **PHASES 1–16 (COMPLETED & READY FOR ARCHIVE):** Foundational Runtime, Portals, Org Auto-Discovery, Native Child-Webviews, Full-Bleed Canvas, In-App Updater, Workstation Streamlining, "TU Essentials", Invisibility Bus, Authentic Institutional Rendering, Direct SSO Autofill, Headless VoWi Reader, Autonomous Plugins (`tu-calendar`, `tu-slide-vault`, `tu-mensa`, `tu-room-radar`), Launching Reliability, Single-File Inlining, Unified Academic Spotlight, Workstation Status Bar & ICS Calendar Export, Live Functional Plugin Depth, Real GitHub Marketplace Telemetry & Workflow Error Rectification, Authentic University Workflow Ingestion: Physical Filesystem Slide Vault, Settings Modal Plugins Tab, In-Webview TUWEL Resource Interception ("Add to Slide Vault"), In-Webview TISS Timetable Auto-Sync, Zero-Mock Policy & Plugin Layout Formatting (Milestones 0–61).
+>
 ---
 
 # ==============================================================================
-# 🟡 PART XVI: PHASE 16 — AUTHENTIC UNIVERSITY WORKFLOW INGESTION: PHYSICAL SLIDE VAULT, IN-WEBVIEW SYNC & ZERO-MOCK FORMATTING
+# 🟢 PART XVI: PHASE 16 — AUTHENTIC UNIVERSITY WORKFLOW INGESTION: PHYSICAL SLIDE VAULT, IN-WEBVIEW SYNC & ZERO-MOCK FORMATTING
 # ==============================================================================
 
 > **Phase 16 Summary & Objective:**  
@@ -40,7 +39,7 @@
 
 ---
 
-### Milestone 59 Prompt: Settings Modal Plugins Tab & Physical Filesystem Slide Vault Storage Engine `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 59 Prompt: Settings Modal Plugins Tab & Physical Filesystem Slide Vault Storage Engine `[STATUS: COMPLETED ✅ - Commit b826bfa]`
 
 ```markdown
 You are a senior full-stack desktop systems engineer specializing in Tauri v2, Rust filesystem APIs, and React 19 settings UI.
@@ -101,7 +100,7 @@ Implement a physical filesystem storage engine for the TU Slide Vault and add a 
 
 ---
 
-### Milestone 60 Prompt: In-Webview TUWEL "Add to Slide Vault" & TISS Auto-Sync Engine `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 60 Prompt: In-Webview TUWEL "Add to Slide Vault" & TISS Auto-Sync Engine `[STATUS: COMPLETED ✅ - Commit fb82aa0]`
 
 ```markdown
 You are a senior Tauri systems engineer specializing in webview DOM bridge automation and university portal integration.
@@ -153,7 +152,7 @@ Implement automatic calendar synchronization when navigating to TISS and inject 
 
 ---
 
-### Milestone 61 Prompt: Fix Plugin Layout Formatting & Zero-Mock Policy Eradication `[STATUS: READY FOR EXECUTION 🟡]`
+### Milestone 61 Prompt: Fix Plugin Layout Formatting & Zero-Mock Policy Eradication `[STATUS: COMPLETED ✅ - Commit d7a8f65]`
 
 ```markdown
 You are a senior frontend engineer and CSS architecture specialist working across React 19, Tailwind CSS v4, and iframe sandboxes.
