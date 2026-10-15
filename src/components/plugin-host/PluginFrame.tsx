@@ -20,7 +20,7 @@ export const PluginFrame: React.FC<PluginFrameProps> = ({
   const portRef = useRef<MessagePort | null>(null);
   const { tokens, fontSans, fontMono, uiScale } = useThemeStore();
 
-  // Synthesize CSS variables into an auto-injected style tag
+  // Synthesize CSS variables into an auto-injected style tag and bridge script
   const generateThemeStyleBlock = () => `
     <style id="tu-cockpit-injected-theme">
       :root {
@@ -32,6 +32,18 @@ export const PluginFrame: React.FC<PluginFrameProps> = ({
         --tu-ui-scale: ${uiScale};
       }
     </style>
+    <script id="tu-cockpit-injected-bridge">
+      try {
+        if (window.parent && window.parent.__TAURI__) {
+          window.__TAURI__ = window.parent.__TAURI__;
+        }
+        if (window.parent && window.parent.__TAURI_INTERNALS__) {
+          window.__TAURI_INTERNALS__ = window.parent.__TAURI_INTERNALS__;
+        }
+      } catch (e) {
+        console.warn("Could not bind parent __TAURI__ into iframe:", e);
+      }
+    </script>
   `;
 
   // Prepend or inject into the head of the plugin's HTML
@@ -49,6 +61,55 @@ export const PluginFrame: React.FC<PluginFrameProps> = ({
       });
     }
   }, [tokens, fontSans, fontMono, uiScale]);
+
+  // Forward vault and filesystem events to the plugin iframe
+  useEffect(() => {
+    let unlistenVault: (() => void) | undefined;
+    let unlistenPath: (() => void) | undefined;
+
+    const setupListeners = async () => {
+      if ((window as any).__TAURI__?.event?.listen) {
+        try {
+          unlistenVault = await (window as any).__TAURI__.event.listen(
+            "slide-saved-to-vault",
+            () => {
+              iframeRef.current?.contentWindow?.postMessage({ type: "REFRESH_SLIDES" }, "*");
+            }
+          );
+          unlistenPath = await (window as any).__TAURI__.event.listen(
+            "slide-vault-path-changed",
+            (event: any) => {
+              iframeRef.current?.contentWindow?.postMessage(
+                { type: "VAULT_PATH_CHANGED", path: event.payload?.path },
+                "*"
+              );
+              iframeRef.current?.contentWindow?.postMessage({ type: "REFRESH_SLIDES" }, "*");
+            }
+          );
+        } catch (e) {
+          console.warn("Could not bind Tauri listeners in PluginFrame:", e);
+        }
+      }
+    };
+    setupListeners();
+
+    const handleGlobalMsg = (e: MessageEvent) => {
+      if (
+        e.data?.type === "SLIDE_SAVED" ||
+        e.data?.type === "REFRESH_SLIDES" ||
+        e.data?.type === "VAULT_PATH_CHANGED"
+      ) {
+        iframeRef.current?.contentWindow?.postMessage(e.data, "*");
+      }
+    };
+    window.addEventListener("message", handleGlobalMsg);
+
+    return () => {
+      window.removeEventListener("message", handleGlobalMsg);
+      if (unlistenVault) unlistenVault();
+      if (unlistenPath) unlistenPath();
+    };
+  }, []);
 
   useEffect(() => {
     const iframe = iframeRef.current;
@@ -108,6 +169,20 @@ export const PluginFrame: React.FC<PluginFrameProps> = ({
           const { key, value } = params || {};
           localStorage.setItem(`tu_plugin:${pluginId}:${key}`, value);
           port1.postMessage({ jsonrpc: "2.0", id, result: true });
+        } else if (method === "vault:list_files") {
+          const files = await invoke("list_slide_vault_files");
+          port1.postMessage({ jsonrpc: "2.0", id, result: files });
+        } else if (method === "vault:save_slide") {
+          const { courseName, filename, bytes } = params || {};
+          const dest = await invoke("save_slide_to_vault", {
+            courseName,
+            filename,
+            bytes,
+          });
+          port1.postMessage({ jsonrpc: "2.0", id, result: dest });
+        } else if (method === "vault:get_path") {
+          const path = await invoke("get_slide_vault_path");
+          port1.postMessage({ jsonrpc: "2.0", id, result: path });
         } else if (method === "autofill:getPayload") {
           if (pluginId.startsWith("tuwien.official.")) {
             const payload = await AutofillDaemon.getAutofillPayload();
@@ -139,6 +214,14 @@ export const PluginFrame: React.FC<PluginFrameProps> = ({
     };
 
     const handleLoad = () => {
+      try {
+        if (iframe.contentWindow && (window as any).__TAURI__) {
+          (iframe.contentWindow as any).__TAURI__ = (window as any).__TAURI__;
+          (iframe.contentWindow as any).__TAURI_INTERNALS__ = (window as any).__TAURI_INTERNALS__;
+        }
+      } catch (err) {
+        console.warn("Could not attach __TAURI__ to iframe window:", err);
+      }
       // Transfer port2 securely into the iframe context
       iframe.contentWindow?.postMessage({ type: "INIT_RPC_PORT" }, "*", [port2]);
     };

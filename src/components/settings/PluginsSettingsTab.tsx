@@ -82,6 +82,10 @@ export const PluginsSettingsTab: React.FC = () => {
         setCurrentPath(selected);
         setSlideVaultPath(selected);
         await loadVaultStats();
+
+        // Broadcast to all active iframes and windows
+        window.postMessage({ type: "VAULT_PATH_CHANGED", path: selected }, "*");
+        window.postMessage({ type: "REFRESH_SLIDES" }, "*");
       }
     } catch (err) {
       console.error("Failed to select slide vault folder:", err);

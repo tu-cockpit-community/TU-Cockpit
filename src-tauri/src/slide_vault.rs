@@ -14,6 +14,8 @@ pub struct SlideFileRecord {
     pub path: String,
     pub size_bytes: u64,
     pub modified_timestamp: u64,
+    #[serde(default)]
+    pub subfolder: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -94,6 +96,98 @@ pub fn sanitize_name(input: &str, is_filename: bool) -> String {
     cleaned
 }
 
+pub fn sanitize_subpath(input: &str) -> (Option<String>, String) {
+    let normalized = input.replace('\\', "/");
+    let parts: Vec<&str> = normalized
+        .split('/')
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty() && *s != "." && *s != "..")
+        .collect();
+
+    if parts.is_empty() {
+        return (None, "document.pdf".to_string());
+    }
+
+    if parts.len() == 1 {
+        let file = sanitize_name(parts[0], true);
+        return (None, file);
+    }
+
+    let dir_parts: Vec<String> = parts[..parts.len() - 1]
+        .iter()
+        .map(|p| sanitize_name(p, false))
+        .collect();
+
+    let file_part = sanitize_name(parts[parts.len() - 1], true);
+    (Some(dir_parts.join("/")), file_part)
+}
+
+fn collect_pdf_files_recursive(
+    current_dir: &std::path::Path,
+    course_name: &str,
+    course_root: &std::path::Path,
+    records: &mut Vec<SlideFileRecord>,
+) {
+    if let Ok(entries) = fs::read_dir(current_dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                collect_pdf_files_recursive(&path, course_name, course_root, records);
+            } else if path.is_file() {
+                let is_pdf = path
+                    .extension()
+                    .map(|ext| ext.to_string_lossy().to_lowercase() == "pdf")
+                    .unwrap_or(false);
+
+                if is_pdf {
+                    let filename = path
+                        .file_name()
+                        .map(|n| n.to_string_lossy().to_string())
+                        .unwrap_or_else(|| "unknown.pdf".to_string());
+
+                    if filename.starts_with('.') {
+                        continue;
+                    }
+
+                    let subfolder = if let Ok(rel) = path.parent().unwrap_or(course_root).strip_prefix(course_root) {
+                        let s = rel.to_string_lossy().replace('\\', "/");
+                        if s.is_empty() {
+                            None
+                        } else {
+                            Some(s)
+                        }
+                    } else {
+                        None
+                    };
+
+                    let (size_bytes, modified_timestamp) = match path.metadata() {
+                        Ok(meta) => {
+                            let size = meta.len();
+                            let mtime = meta
+                                .modified()
+                                .unwrap_or(SystemTime::UNIX_EPOCH)
+                                .duration_since(SystemTime::UNIX_EPOCH)
+                                .unwrap_or_default()
+                                .as_secs();
+                            (size, mtime)
+                        }
+                        Err(_) => (0, 0),
+                    };
+
+                    records.push(SlideFileRecord {
+                        course: course_name.to_string(),
+                        filename,
+                        path: path.to_string_lossy().to_string(),
+                        size_bytes,
+                        modified_timestamp,
+                        subfolder,
+                    });
+                }
+            }
+        }
+    }
+}
+
 #[tauri::command]
 pub async fn get_slide_vault_path(app: AppHandle) -> Result<String, String> {
     let path = get_active_vault_path(&app)?;
@@ -126,6 +220,10 @@ pub async fn set_slide_vault_path(app: AppHandle, new_path: String) -> Result<()
         }
     }
 
+    use tauri::Emitter;
+    let _ = app.emit("slide-vault-path-changed", serde_json::json!({ "path": trimmed }));
+    let _ = app.emit("slide-saved-to-vault", serde_json::json!({ "refresh": true, "path": trimmed }));
+
     Ok(())
 }
 
@@ -139,13 +237,19 @@ pub async fn save_slide_to_vault(
     let vault_path = get_active_vault_path(&app)?;
 
     let clean_course = sanitize_name(&course_name, false);
-    let clean_filename = sanitize_name(&filename, true);
+    let (subfolder_opt, clean_filename) = sanitize_subpath(&filename);
 
-    let course_dir = vault_path.join(&clean_course);
-    fs::create_dir_all(&course_dir)
-        .map_err(|e| format!("Failed to create course directory: {}", e))?;
+    let mut dest_dir = vault_path.join(&clean_course);
+    if let Some(ref sub) = subfolder_opt {
+        for seg in sub.split('/') {
+            dest_dir = dest_dir.join(seg);
+        }
+    }
 
-    let dest_path = course_dir.join(&clean_filename);
+    fs::create_dir_all(&dest_dir)
+        .map_err(|e| format!("Failed to create destination directory: {}", e))?;
+
+    let dest_path = dest_dir.join(&clean_filename);
     fs::write(&dest_path, &bytes)
         .map_err(|e| format!("Failed to write slide file to {}: {}", dest_path.display(), e))?;
 
@@ -154,7 +258,8 @@ pub async fn save_slide_to_vault(
     let _ = app.emit("slide-saved-to-vault", serde_json::json!({
         "course": clean_course,
         "filename": clean_filename,
-        "path": dest_str.clone()
+        "path": dest_str.clone(),
+        "subfolder": subfolder_opt
     }));
 
     Ok(dest_str)
@@ -166,6 +271,12 @@ pub async fn list_slide_vault_files(app: AppHandle) -> Result<Vec<SlideFileRecor
     if !vault_path.exists() {
         return Ok(Vec::new());
     }
+
+    let default_course = vault_path
+        .file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .filter(|n| n != "Slide-Vault" && !n.is_empty())
+        .unwrap_or_else(|| "General".to_string());
 
     let mut records: Vec<SlideFileRecord> = Vec::new();
 
@@ -180,67 +291,47 @@ pub async fn list_slide_vault_files(app: AppHandle) -> Result<Vec<SlideFileRecor
                 .map(|n| n.to_string_lossy().to_string())
                 .unwrap_or_else(|| "General".to_string());
 
-            if let Ok(sub_entries) = fs::read_dir(&path) {
-                for sub in sub_entries.flatten() {
-                    let sub_path = sub.path();
-                    if sub_path.is_file() {
-                        let filename = sub_path
-                            .file_name()
-                            .map(|n| n.to_string_lossy().to_string())
-                            .unwrap_or_else(|| "unknown.pdf".to_string());
-
-                        let (size_bytes, modified_timestamp) = match sub_path.metadata() {
-                            Ok(meta) => {
-                                let size = meta.len();
-                                let mtime = meta
-                                    .modified()
-                                    .unwrap_or(SystemTime::UNIX_EPOCH)
-                                    .duration_since(SystemTime::UNIX_EPOCH)
-                                    .unwrap_or_default()
-                                    .as_secs();
-                                (size, mtime)
-                            }
-                            Err(_) => (0, 0),
-                        };
-
-                        records.push(SlideFileRecord {
-                            course: course_name.clone(),
-                            filename,
-                            path: sub_path.to_string_lossy().to_string(),
-                            size_bytes,
-                            modified_timestamp,
-                        });
-                    }
-                }
-            }
+            collect_pdf_files_recursive(&path, &course_name, &path, &mut records);
         } else if path.is_file() {
             // Root-level file
-            let filename = path
-                .file_name()
-                .map(|n| n.to_string_lossy().to_string())
-                .unwrap_or_else(|| "unknown.pdf".to_string());
+            let is_pdf = path
+                .extension()
+                .map(|ext| ext.to_string_lossy().to_lowercase() == "pdf")
+                .unwrap_or(false);
 
-            let (size_bytes, modified_timestamp) = match path.metadata() {
-                Ok(meta) => {
-                    let size = meta.len();
-                    let mtime = meta
-                        .modified()
-                        .unwrap_or(SystemTime::UNIX_EPOCH)
-                        .duration_since(SystemTime::UNIX_EPOCH)
-                        .unwrap_or_default()
-                        .as_secs();
-                    (size, mtime)
+            if is_pdf {
+                let filename = path
+                    .file_name()
+                    .map(|n| n.to_string_lossy().to_string())
+                    .unwrap_or_else(|| "unknown.pdf".to_string());
+
+                if filename.starts_with('.') {
+                    continue;
                 }
-                Err(_) => (0, 0),
-            };
 
-            records.push(SlideFileRecord {
-                course: "General".to_string(),
-                filename,
-                path: path.to_string_lossy().to_string(),
-                size_bytes,
-                modified_timestamp,
-            });
+                let (size_bytes, modified_timestamp) = match path.metadata() {
+                    Ok(meta) => {
+                        let size = meta.len();
+                        let mtime = meta
+                            .modified()
+                            .unwrap_or(SystemTime::UNIX_EPOCH)
+                            .duration_since(SystemTime::UNIX_EPOCH)
+                            .unwrap_or_default()
+                            .as_secs();
+                        (size, mtime)
+                    }
+                    Err(_) => (0, 0),
+                };
+
+                records.push(SlideFileRecord {
+                    course: default_course.clone(),
+                    filename,
+                    path: path.to_string_lossy().to_string(),
+                    size_bytes,
+                    modified_timestamp,
+                    subfolder: None,
+                });
+            }
         }
     }
 
@@ -312,10 +403,61 @@ mod tests {
             path: "/tmp/Chapter_1.pdf".to_string(),
             size_bytes: 1024,
             modified_timestamp: 1729000000,
+            subfolder: Some("Kapitel 1/Teil A".to_string()),
         };
 
         let json = serde_json::to_string(&rec).unwrap();
         assert!(json.contains("VU AlgoDat"));
         assert!(json.contains("Chapter_1.pdf"));
+        assert!(json.contains("Kapitel 1/Teil A"));
+    }
+
+    #[test]
+    fn test_sanitize_subpath() {
+        let (sub, file) = sanitize_subpath("Chapter 1/Lecture:01.pdf");
+        assert_eq!(sub, Some("Chapter 1".to_string()));
+        assert_eq!(file, "Lecture_01.pdf");
+
+        let (sub2, file2) = sanitize_subpath("Semester 1/AlgoDat/Uebung/blatt.pdf");
+        assert_eq!(sub2, Some("Semester 1/AlgoDat/Uebung".to_string()));
+        assert_eq!(file2, "blatt.pdf");
+
+        let (sub3, file3) = sanitize_subpath("standalone.pdf");
+        assert_eq!(sub3, None);
+        assert_eq!(file3, "standalone.pdf");
+
+        // Traversal protection
+        let (sub4, file4) = sanitize_subpath("../../../etc/passwd");
+        assert_eq!(sub4, Some("etc".to_string()));
+        assert_eq!(file4, "passwd.pdf");
+    }
+
+    #[test]
+    fn test_collect_pdf_files_recursive() {
+        let temp_dir = std::env::temp_dir().join(format!("vault_test_{}", std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
+        let nested = temp_dir.join("Sub1").join("Sub2");
+        fs::create_dir_all(&nested).unwrap();
+
+        let file1 = temp_dir.join("root.pdf");
+        let file2 = nested.join("deep.pdf");
+        let txt = nested.join("ignore.txt");
+
+        fs::write(&file1, b"%PDF-1.4 root").unwrap();
+        fs::write(&file2, b"%PDF-1.4 deep").unwrap();
+        fs::write(&txt, b"not a pdf").unwrap();
+
+        let mut records = Vec::new();
+        collect_pdf_files_recursive(&temp_dir, "TestCourse", &temp_dir, &mut records);
+
+        assert_eq!(records.len(), 2);
+        let deep = records.iter().find(|r| r.filename == "deep.pdf").unwrap();
+        assert_eq!(deep.subfolder, Some("Sub1/Sub2".to_string()));
+        assert_eq!(deep.course, "TestCourse");
+
+        let root = records.iter().find(|r| r.filename == "root.pdf").unwrap();
+        assert_eq!(root.subfolder, None);
+
+        let _ = fs::remove_dir_all(&temp_dir);
     }
 }
+
