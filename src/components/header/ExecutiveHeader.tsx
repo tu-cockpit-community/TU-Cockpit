@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { usePaletteStore } from "@/store/usePaletteStore";
+import { getCurrentSemester, getSemesterProgress } from "@/services/calendar/AcademicCalendarEngine";
 import {
   GraduationCap,
   Clock,
@@ -86,10 +87,31 @@ export const ExecutiveHeader: React.FC<ExecutiveHeaderProps> = ({
           </kbd>
         </button>
 
-        <div className="hidden lg:flex items-center gap-1.5 text-xs text-[var(--tu-text-secondary)] px-3 py-1 rounded-full bg-[var(--tu-bg-card)] border border-[var(--tu-border)]">
-          <GraduationCap className="w-3.5 h-3.5 text-[var(--tu-accent)]" />
-          <span className="font-medium">WS 2026/27</span>
-        </div>
+        {(() => {
+          const semester = getCurrentSemester();
+          const progress = getSemesterProgress();
+          return (
+            <div
+              className="hidden lg:flex items-center gap-1.5 text-xs text-[var(--tu-text-secondary)] px-3 py-1 rounded-full bg-[var(--tu-bg-card)] border border-[var(--tu-border)] group relative cursor-help"
+              title={`TU Wien ${semester.label} (${semester.phaseLabel}) • ${progress}% of semester elapsed`}
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-[var(--tu-accent)]" />
+              <span className="font-medium text-[var(--tu-text-primary)]">
+                {semester.label}
+              </span>
+              <span className="text-[var(--tu-border)]">•</span>
+              <span className="text-[var(--tu-text-muted)] text-[11px]">
+                {semester.phaseLabel}
+              </span>
+              <div className="w-8 h-1.5 bg-[var(--tu-bg-surface)] rounded-full overflow-hidden border border-[var(--tu-border)] ml-0.5">
+                <div
+                  className="h-full bg-[var(--tu-accent)] rounded-full transition-all duration-500"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Right: Student Profile Pill, Live Clock & Settings Gear */}

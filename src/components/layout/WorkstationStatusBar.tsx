@@ -7,7 +7,14 @@ import {
   Download,
   Compass,
   Layers,
+  Clock,
 } from "lucide-react";
+import {
+  getCurrentSemester,
+  getSemesterProgress,
+  formatTimeRemaining,
+  getUrgencyLevel,
+} from "@/services/calendar/AcademicCalendarEngine";
 
 interface StudentDeadline {
   id: string;
@@ -23,6 +30,7 @@ interface StudentDeadline {
 export const WorkstationStatusBar: React.FC = () => {
   const { activeView, activePluginId, installedPlugins, setActiveView } = useAppStore();
   const [deadlinesCount, setDeadlinesCount] = useState<number>(0);
+  const [nextDeadline, setNextDeadline] = useState<StudentDeadline | null>(null);
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [exportSuccessPath, setExportSuccessPath] = useState<string | null>(null);
 
@@ -32,8 +40,12 @@ export const WorkstationStatusBar: React.FC = () => {
       try {
         const list = await invoke<StudentDeadline[]>("get_student_deadlines");
         if (mounted) {
-          const pending = list.filter((d) => !d.completed).length;
-          setDeadlinesCount(pending);
+          const pending = list.filter((d) => !d.completed);
+          setDeadlinesCount(pending.length);
+          const sorted = [...pending].sort(
+            (a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+          );
+          setNextDeadline(sorted[0] || null);
         }
       } catch (err) {
         console.warn("Status bar deadline fetch error:", err);
@@ -63,6 +75,8 @@ export const WorkstationStatusBar: React.FC = () => {
   };
 
   const activePlugin = activePluginId ? installedPlugins[activePluginId] : null;
+  const semester = getCurrentSemester();
+  const progress = getSemesterProgress();
 
   return (
     <footer className="h-6 border-t border-[var(--tu-border)] bg-[var(--tu-bg-surface)] px-3 flex items-center justify-between text-[11px] text-[var(--tu-text-secondary)] select-none shrink-0 z-30">
@@ -77,7 +91,7 @@ export const WorkstationStatusBar: React.FC = () => {
 
         <span className="text-[var(--tu-border)]">|</span>
 
-        <div className="flex items-center gap-1 text-[var(--tu-text-muted)] truncate max-w-[220px]">
+        <div className="flex items-center gap-1 text-[var(--tu-text-muted)] truncate max-w-[200px]">
           {activeView === "plugin" && activePlugin ? (
             <>
               <Layers className="w-3 h-3 text-[var(--tu-accent)]" />
@@ -94,8 +108,8 @@ export const WorkstationStatusBar: React.FC = () => {
         </div>
       </div>
 
-      {/* Center: Live Academic Deadlines Chip */}
-      <div className="flex items-center">
+      {/* Center: Live Academic Deadlines Chip & Imminent Next Ticker */}
+      <div className="flex items-center gap-2">
         <button
           onClick={() => setActiveView("plugin", "tuwien.community.calendar")}
           className="flex items-center gap-1.5 px-2 py-0.5 rounded hover:bg-[var(--tu-bg-card)] text-[var(--tu-text-secondary)] hover:text-[var(--tu-text-primary)] transition-colors cursor-pointer"
@@ -105,16 +119,51 @@ export const WorkstationStatusBar: React.FC = () => {
           <span>
             {deadlinesCount > 0 ? (
               <span className="font-semibold text-amber-400">
-                {deadlinesCount} {deadlinesCount === 1 ? "Deadline" : "Deadlines"} Pending
+                {deadlinesCount} {deadlinesCount === 1 ? "Deadline" : "Deadlines"}
               </span>
             ) : (
-              <span className="text-emerald-400 font-medium">All Deadlines Completed</span>
+              <span className="text-emerald-400 font-medium">No Pending Deadlines</span>
             )}
           </span>
         </button>
+
+        {nextDeadline && (() => {
+          const urgency = getUrgencyLevel(nextDeadline.due_date);
+          const timeRemaining = formatTimeRemaining(nextDeadline.due_date);
+          const urgencyBadgeClass =
+            urgency === "critical"
+              ? "text-rose-400 font-bold"
+              : urgency === "warning"
+              ? "text-amber-400 font-semibold"
+              : urgency === "overdue"
+              ? "text-red-500 font-bold"
+              : "text-[var(--tu-accent)] font-medium";
+
+          return (
+            <button
+              onClick={() => {
+                if (nextDeadline.source === "tuwel") {
+                  setActiveView("plugin", "tuwien.official.tuwel");
+                } else {
+                  setActiveView("plugin", "tuwien.community.calendar");
+                }
+              }}
+              className="hidden md:flex items-center gap-1.5 px-2 py-0.5 rounded hover:bg-[var(--tu-bg-card)] transition-colors cursor-pointer truncate max-w-[320px]"
+              title={`Next Deadline: ${nextDeadline.course_name} — ${nextDeadline.title} (Due: ${new Date(nextDeadline.due_date).toLocaleString()})`}
+            >
+              <Clock className="w-3 h-3 text-[var(--tu-text-muted)] shrink-0" />
+              <span className="truncate text-[var(--tu-text-primary)]">
+                {nextDeadline.title}
+              </span>
+              <span className={`text-[10px] shrink-0 ${urgencyBadgeClass}`}>
+                ({timeRemaining})
+              </span>
+            </button>
+          );
+        })()}
       </div>
 
-      {/* Right: 1-Click ICS Export & Academic Term */}
+      {/* Right: 1-Click ICS Export & Academic Term Progression */}
       <div className="flex items-center gap-3">
         {exportSuccessPath ? (
           <span className="flex items-center gap-1 text-emerald-400 font-medium animate-in fade-in">
@@ -135,8 +184,11 @@ export const WorkstationStatusBar: React.FC = () => {
 
         <span className="text-[var(--tu-border)] hidden sm:inline">|</span>
 
-        <span className="text-[var(--tu-text-muted)] font-mono text-[10px] hidden sm:inline">
-          WS 2026/27
+        <span
+          className="text-[var(--tu-text-muted)] font-mono text-[10px] hidden sm:inline cursor-help"
+          title={`TU Wien ${semester.label} (${semester.phaseLabel}) • Progress: ${progress}%`}
+        >
+          {semester.code} • {progress}%
         </span>
       </div>
     </footer>
