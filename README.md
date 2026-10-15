@@ -132,68 +132,183 @@ graph TD
 
 ---
 
-## 🚀 Quickstart & Development
+## 🚀 Quickstart & Development Across Platforms
 
-### Prerequisites
-- **Node.js:** v20.x or later (`node -v`)
-- **npm:** v10.x or later
-- **Rust:** 1.78+ (`rustc --version`)
-- **System Dependencies:**
-  - **macOS:** Xcode Command Line Tools (`xcode-select --install`)
-  - **Linux (Debian/Ubuntu):** `libwebkit2gtk-4.1-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev`
-  - **Windows:** WebView2 runtime and MSVC C++ Build Tools
+TU Cockpit runs natively on **macOS**, **Windows 10/11**, and modern **Linux** distributions. Follow the instructions below for your operating system.
 
-### 1. Clone & Install
+---
+
+### 🍎 1. macOS (Apple Silicon M1–M4 & Intel x86_64)
+
+#### Prerequisites & Setup
+1. **Install Xcode Command Line Tools:**
+   ```bash
+   xcode-select --install
+   ```
+2. **Install Node.js (v20+) & Rust:**
+   ```bash
+   # Via Homebrew
+   brew install node
+   # Install official Rust toolchain
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   ```
+3. **(Optional) Add Universal Apple Targets:**
+   ```bash
+   rustup target add aarch64-apple-darwin x86_64-apple-darwin
+   ```
+
+#### Run in Development Mode
 ```bash
-git clone https://github.com/tu-cockpit-community/TU-Cockpit.git
-cd TU-Cockpit
 npm install
-```
-
-### 2. Launch Local Development Server
-```bash
 npm run tauri dev
 ```
-This runs Vite on `localhost:1420` with HMR and launches the native Tauri v2 desktop shell.
+> *Vite will launch on `http://localhost:1420` with instant HMR and the native macOS window with child webviews.*
 
-### 3. Run Quality Assurance & Tests
+#### Build Production Packages
 ```bash
-# TypeScript compilation & production web bundle validation
+# Compile native .dmg and .app bundle for your active Mac:
+npm run build:mac
+
+# Compile universal binary (runs natively on both Apple Silicon and Intel Macs):
+npm run build:mac:universal
+```
+*Output Location:* `src-tauri/target/release/bundle/dmg/TU Cockpit_0.1.0_universal.dmg`  
+*To install:* Double-click the `.dmg` and drag **TU Cockpit** into your `/Applications` folder.
+
+> [!TIP]
+> **Gatekeeper Notice (Unsigned/Ad-Hoc Binaries):** If macOS displays *"TU Cockpit cannot be opened because the developer cannot be verified"*, either right-click the app in Finder and choose **Open**, or run:
+> ```bash
+> xattr -cr "/Applications/TU Cockpit.app"
+> ```
+
+---
+
+### 🪟 2. Windows (Windows 10 & 11)
+
+#### Prerequisites & Setup
+1. **Install Node.js (v20+):** Download the LTS installer from [nodejs.org](https://nodejs.org/).
+2. **Install Microsoft C++ Build Tools:**
+   - Download Visual Studio Build Tools from [visualstudio.microsoft.com](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
+   - In the Visual Studio Installer, select and install the **"Desktop development with C++"** workload.
+3. **Install Rust (MSVC):**
+   - Download and run `rustup-init.exe` from [rustup.rs](https://rustup.rs/).
+   - Choose default installation (`x86_64-pc-windows-msvc`).
+4. **WebView2 Runtime:** Pre-installed on Windows 10 (recent updates) and Windows 11. If missing, install the [Evergreen Bootstrapper](https://developer.microsoft.com/en-us/microsoft-edge/webview2/).
+
+#### Run in Development Mode
+Open **PowerShell** or **Windows Terminal**:
+```powershell
+npm install
+npm run tauri dev
+```
+
+#### Build Production Packages
+```powershell
+# Compile standalone setup .exe (NSIS currentUser - no administrator prompt required):
+npm run build:win:exe
+
+# Compile both standalone setup .exe and WiX enterprise .msi:
+npm run build:win
+```
+*Output Location:* `src-tauri/target/release/bundle/nsis/TU Cockpit_0.1.0_x64-setup.exe`  
+*To install:* Double-click `TU Cockpit_0.1.0_x64-setup.exe`. It automatically creates Start Menu shortcuts and registers clean uninstallation without requiring UAC administrator elevation.
+
+---
+
+### 🐧 3. Linux (Ubuntu, Debian, Fedora, Arch)
+
+#### Prerequisites & Setup
+
+* **Ubuntu / Debian (22.04 LTS, 24.04 LTS, Mint, Pop!_OS):**
+  ```bash
+  sudo apt update
+  sudo apt install -y build-essential curl wget file libssl-dev libgtk-3-dev \
+    libayatana-appindicator3-dev librsvg2-dev libwebkit2gtk-4.1-dev patchelf
+  ```
+* **Fedora / RHEL / CentOS Stream:**
+  ```bash
+  sudo dnf install -y gcc gcc-c++ webkit2gtk4.1-devel openssl-devel gtk3-devel \
+    libappindicator-gtk3-devel librsvg2-devel patchelf
+  ```
+* **Arch Linux / Manjaro:**
+  ```bash
+  sudo pacman -S --needed base-devel webkit2gtk-4.1 openssl gtk3 libappindicator-gtk3 librsvg patchelf
+  ```
+* **Install Node.js & Rust:**
+  ```bash
+  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - && sudo apt install -y nodejs
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+  source "$HOME/.cargo/env"
+  ```
+
+#### Run in Development Mode
+```bash
+npm install
+npm run tauri dev
+```
+
+#### Build Production Packages
+```bash
+# Compile both Debian package (.deb) and standalone AppImage:
+npm run build:linux
+
+# Compile standalone .deb only:
+npm run build:linux:deb
+
+# Compile standalone .AppImage only:
+npm run build:linux:appimage
+```
+*Output Locations:*
+- `.deb`: `src-tauri/target/release/bundle/deb/tu-cockpit_0.1.0_amd64.deb`
+- `.AppImage`: `src-tauri/target/release/bundle/appimage/tu-cockpit_0.1.0_amd64.AppImage`
+
+#### Running the Built Application on Linux
+* **Installing the `.deb` package:**
+  ```bash
+  sudo dpkg -i src-tauri/target/release/bundle/deb/*.deb || sudo apt-get install -f
+  # Or with apt directly:
+  sudo apt install ./src-tauri/target/release/bundle/deb/*.deb
+  # Launch via terminal or application launcher:
+  tu-cockpit
+  ```
+* **Running the `.AppImage` directly:**
+  ```bash
+  chmod +x src-tauri/target/release/bundle/appimage/*.AppImage
+  ./src-tauri/target/release/bundle/appimage/*.AppImage
+  ```
+
+---
+
+### ☁️ 4. 1-Click Multi-Platform Cloud Builder (No VMs Required)
+
+Because native desktop apps require their host operating system's native webview and windowing stack, you cannot easily cross-compile Windows `.exe` or Linux `.deb` from macOS locally without complex emulation.
+
+TU Cockpit solves this with a **1-Click GitHub Actions Cloud Pipeline**:
+1. Go to the **[Actions tab](https://github.com/tu-cockpit-community/TU-Cockpit/actions)** of the repository.
+2. Select **"1-Click Multi-Platform Artifact Builder"** from the left sidebar.
+3. Click **Run workflow**, pick your branch and compilation profile (`release` or `debug`), and click the green button.
+4. Clean GitHub-hosted virtual runners will build native packages in parallel:
+   - `windows-latest` -> Builds standalone NSIS `.exe` setup & `.msi`
+   - `ubuntu-22.04` -> Builds WebKitGTK 4.1 `.deb` & standalone `.AppImage`
+   - `macos-latest` -> Builds universal `.dmg` & `.app`
+5. Download `tu-cockpit-windows-x64.zip`, `tu-cockpit-linux-x64.zip`, or `tu-cockpit-macos-universal.zip` directly from the workflow summary!
+
+---
+
+### 🧪 5. Testing & Quality Assurance
+
+```bash
+# 1. Frontend TypeScript & React production compilation:
 npm run build
 
-# Rust backend unit tests
-cd src-tauri
-cargo test
+# 2. Rust backend unit tests (24+ tests across portals, vault, FTS5 & auth):
+cargo test --manifest-path src-tauri/Cargo.toml
+# Note (macOS if using beta SDKs):
+# SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk cargo test --manifest-path src-tauri/Cargo.toml
+
+# 3. Rust syntax & Tauri capability check:
+cargo check --manifest-path src-tauri/Cargo.toml
 ```
-
-### 4. Dedicated Multi-Platform Build Commands
-TU Cockpit provides granular, cross-platform build commands targeting specific operating systems and packaging formats:
-
-```bash
-# macOS Targets
-npm run build:mac            # Native .dmg and .app bundle for active host architecture
-npm run build:mac:universal  # Universal Apple Silicon (M1-M4) & Intel 64-bit binary
-
-# Windows Targets
-npm run build:win:exe        # Standalone NSIS setup .exe (currentUser, no admin prompt needed)
-npm run build:win            # Compiles both NSIS .exe and WiX .msi installers
-
-# Linux Targets
-npm run build:linux          # Compiles both .deb package and standalone .AppImage
-npm run build:linux:deb      # Standalone Debian/Ubuntu package with WebKitGTK 4.1 deps
-npm run build:linux:appimage # Standalone AppImage with media framework bundled
-
-# Build All Default Bundles
-npm run build:all
-```
-The compiled installer packages (`.exe`, `.msi`, `.dmg`, `.deb`, `.AppImage`) are output to `src-tauri/target/release/bundle/`.
-
-### 5. 1-Click Cloud Artifact Builder (GitHub Actions)
-Need a Windows `.exe` installer or Linux `.deb` while developing on a Mac? You don't need local cross-compilers or VMs.
-1. Navigate to the **[Actions tab](https://github.com/tu-cockpit-community/TU-Cockpit/actions)** on GitHub.
-2. Select **"1-Click Multi-Platform Artifact Builder"** from the left sidebar.
-3. Click **Run workflow**, choose your branch and compilation profile (`release` or `debug`), and click the green button.
-4. Parallel cloud runners will compile native binaries on clean Windows, Ubuntu, and macOS environments, attaching downloadable platform bundles (`tu-cockpit-windows-x64.zip`, `tu-cockpit-linux-x64.zip`, `tu-cockpit-macos-universal.zip`) directly to the workflow run summary.
 
 ---
 
